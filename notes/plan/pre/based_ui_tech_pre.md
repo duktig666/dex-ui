@@ -2,6 +2,32 @@
 ## plan1 - 复刻首页
 https://based.one/  用浏览器，打开这个网址，复刻所有页面元素形成一个一模一样的网页；需要做一个前端的工程，技术栈全部用当前网站的技术栈；给出实现计划，形成md文档，放在dex-api下
 
+---
+
+### 优化1
+```
+Console Error
+
+A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+See more info here: https://nextjs.org/docs/messages/react-hydration-error
+```
+1. 控制台有一项Error，进行优化
+2. Backed By 缺少图片的布局，目前是文字
+3. Trade Crypto 24/7 缺少背景图片
+4. Predictions Yes No部分缺少图片
+5. Borderless Spending 部分缺少图片
+6. Trusted by thousands of customers worldwide. 部分缺少图片
+
+
 ## plan2 - Perps和Spot的分析和复刻 - 结合调用HyperLiquid
 
 ### HyperLiquid 交易API及相关资料

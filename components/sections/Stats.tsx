@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface StatItemProps {
   label: string;
@@ -12,9 +12,18 @@ interface StatItemProps {
 }
 
 function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: number }) {
-  const [displayValue, setDisplayValue] = useState(0);
+  const [displayValue, setDisplayValue] = useState<number | null>(null);
+  const [isInView, setIsInView] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    // Initialize on client side only
+    setDisplayValue(0);
+  }, []);
+
+  useEffect(() => {
+    if (!isInView || displayValue === null) return;
+
     const duration = 2000;
     const steps = 60;
     const increment = value / steps;
@@ -31,10 +40,36 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
     }, duration / steps);
 
     return () => clearInterval(timer);
-  }, [value]);
+  }, [value, isInView, displayValue]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Show placeholder on server, actual value on client
+  if (displayValue === null) {
+    return (
+      <span ref={ref} className="font-mono tabular-nums">
+        {value.toFixed(decimals)}
+      </span>
+    );
+  }
 
   return (
-    <span className="font-mono tabular-nums">
+    <span ref={ref} className="font-mono tabular-nums">
       {displayValue.toFixed(decimals)}
     </span>
   );
@@ -42,13 +77,7 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
 
 function StatItem({ label, value, prefix = "", suffix = "", decimals = 0 }: StatItemProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="text-center"
-    >
+    <div className="text-center">
       <dt className="text-sm text-text-secondary mb-2 uppercase tracking-wider">
         {label}
       </dt>
@@ -57,7 +86,7 @@ function StatItem({ label, value, prefix = "", suffix = "", decimals = 0 }: Stat
         <AnimatedNumber value={value} decimals={decimals} />
         {suffix}
       </dd>
-    </motion.div>
+    </div>
   );
 }
 
@@ -88,4 +117,3 @@ export function Stats() {
     </section>
   );
 }
-

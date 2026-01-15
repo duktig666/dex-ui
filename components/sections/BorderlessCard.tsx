@@ -3,6 +3,44 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 
+// Credit card component
+function CreditCard({ variant = "main" }: { variant?: "main" | "blueprint" }) {
+  if (variant === "blueprint") {
+    return (
+      <div className="aspect-[1.6/1] w-full rounded-lg bg-bg-card/30 border border-dashed border-border-color/50 flex items-center justify-center">
+        <div className="w-3/4 h-1/2 border border-dashed border-border-color/30 rounded" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="aspect-[1.6/1] w-full rounded-xl bg-gradient-to-br from-gray-800 via-gray-900 to-black border border-white/10 shadow-2xl p-4 flex flex-col justify-between relative overflow-hidden">
+      {/* Holographic effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-cyan-500/10 opacity-50" />
+      
+      {/* Chip */}
+      <div className="w-10 h-7 rounded bg-gradient-to-br from-yellow-400 to-yellow-600 relative z-10" />
+      
+      {/* Card number placeholder */}
+      <div className="flex gap-3 relative z-10">
+        <span className="text-white/60 text-xs tracking-widest">••••</span>
+        <span className="text-white/60 text-xs tracking-widest">••••</span>
+        <span className="text-white/60 text-xs tracking-widest">••••</span>
+        <span className="text-white/60 text-xs tracking-widest">••••</span>
+      </div>
+      
+      {/* Brand */}
+      <div className="flex justify-between items-end relative z-10">
+        <span className="text-white/80 text-xs font-semibold tracking-wider">HERMES</span>
+        <div className="flex">
+          <div className="w-6 h-6 rounded-full bg-red-500/80 -mr-2" />
+          <div className="w-6 h-6 rounded-full bg-yellow-500/80" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function BorderlessCard() {
   return (
     <section className="py-32 bg-bg-primary relative overflow-hidden">
@@ -52,37 +90,35 @@ export function BorderlessCard() {
             transition={{ delay: 0.2 }}
             className="relative"
           >
-            {/* Card grid */}
+            {/* Card grid - 7x3 */}
             <div className="grid grid-cols-7 gap-2">
               {Array.from({ length: 21 }).map((_, i) => {
-                const isCard = i === 3 || i === 10 || i === 17;
+                // Position of main cards (center of each row)
+                const isMainCard = i === 3 || i === 10 || i === 17;
+                const row = Math.floor(i / 7);
+                
                 return (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, scale: 0.8, rotateY: -15 }}
+                    whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.02 }}
-                    className={`
-                      aspect-[3/2] rounded-lg
-                      ${isCard
-                        ? "bg-gradient-to-br from-gray-800 to-gray-900 border border-white/10 shadow-xl"
-                        : "bg-bg-card/50 border border-border-color/30"
-                      }
-                    `}
+                    transition={{ 
+                      delay: i * 0.03,
+                      duration: 0.4,
+                    }}
+                    style={{
+                      transform: isMainCard ? `translateZ(${20 - row * 5}px)` : 'none',
+                    }}
                   >
-                    {isCard && (
-                      <div className="h-full p-2 flex flex-col justify-between">
-                        <div className="w-4 h-3 bg-yellow-500/80 rounded-sm" />
-                        <div className="text-[6px] text-text-secondary font-mono">
-                          HERMES
-                        </div>
-                      </div>
-                    )}
+                    <CreditCard variant={isMainCard ? "main" : "blueprint"} />
                   </motion.div>
                 );
               })}
             </div>
+
+            {/* Floating glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent-green/10 rounded-full blur-3xl pointer-events-none" />
           </motion.div>
         </div>
 
@@ -101,4 +137,3 @@ export function BorderlessCard() {
     </section>
   );
 }
-

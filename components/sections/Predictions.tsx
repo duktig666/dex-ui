@@ -14,6 +14,90 @@ const markets = [
   { name: "25+ bps increase", volume: "$133.9M", change: 0, price: "0¢", outcome: "25-bps-increase" },
 ];
 
+// Avatar placeholder components
+function YesAvatar() {
+  return (
+    <div className="relative w-32 h-32 rounded-xl bg-gradient-to-br from-green-900/50 to-green-700/30 border border-green-500/30 overflow-hidden">
+      {/* Person silhouette */}
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
+        <circle cx="50" cy="35" r="20" fill="currentColor" className="text-green-400/50" />
+        <ellipse cx="50" cy="85" rx="30" ry="25" fill="currentColor" className="text-green-400/50" />
+      </svg>
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-t from-green-500/20 to-transparent" />
+      {/* Label */}
+      <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-green text-black text-xs font-bold rounded">
+        YES
+      </div>
+    </div>
+  );
+}
+
+function NoAvatar() {
+  return (
+    <div className="relative w-32 h-32 rounded-xl bg-gradient-to-br from-red-900/50 to-red-700/30 border border-red-500/30 overflow-hidden">
+      {/* Person silhouette */}
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
+        <circle cx="50" cy="35" r="20" fill="currentColor" className="text-red-400/50" />
+        <ellipse cx="50" cy="85" rx="30" ry="25" fill="currentColor" className="text-red-400/50" />
+      </svg>
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-t from-red-500/20 to-transparent" />
+      {/* Label */}
+      <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-red text-white text-xs font-bold rounded">
+        NO
+      </div>
+    </div>
+  );
+}
+
+// Chart component
+function PriceChart() {
+  const dataPoints = [65, 68, 72, 70, 75, 78, 80, 82, 85, 88, 90, 92, 91, 93, 95, 94];
+  
+  return (
+    <div className="h-32 bg-bg-secondary rounded-lg p-4 relative overflow-hidden">
+      {/* Y-axis labels */}
+      <div className="absolute left-2 top-0 bottom-0 flex flex-col justify-between text-xs text-text-secondary py-2">
+        <span>100¢</span>
+        <span>50¢</span>
+        <span>0¢</span>
+      </div>
+      
+      {/* Chart area */}
+      <div className="ml-10 h-full flex items-end">
+        <svg viewBox="0 0 160 100" className="w-full h-full" preserveAspectRatio="none">
+          {/* Area fill */}
+          <defs>
+            <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#00ff88" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#00ff88" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            d={`M0,${100 - dataPoints[0]} ${dataPoints.map((p, i) => `L${(i / (dataPoints.length - 1)) * 160},${100 - p}`).join(' ')} L160,100 L0,100 Z`}
+            fill="url(#chartGradient)"
+          />
+          {/* Line */}
+          <path
+            d={`M0,${100 - dataPoints[0]} ${dataPoints.map((p, i) => `L${(i / (dataPoints.length - 1)) * 160},${100 - p}`).join(' ')}`}
+            fill="none"
+            stroke="#00ff88"
+            strokeWidth="2"
+          />
+        </svg>
+      </div>
+      
+      {/* X-axis labels */}
+      <div className="absolute bottom-1 left-10 right-2 flex justify-between text-xs text-text-secondary">
+        <span>Dec 16</span>
+        <span>Jan 1</span>
+        <span>Jan 15</span>
+      </div>
+    </div>
+  );
+}
+
 export function Predictions() {
   const [selectedRange, setSelectedRange] = useState("30D");
 
@@ -67,20 +151,16 @@ export function Predictions() {
             </motion.div>
 
             {/* Prediction avatars */}
-            <div className="flex gap-4 mt-12">
-              <div className="relative w-32 h-32 rounded-xl bg-bg-card border border-border-color overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-transparent" />
-                <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-green text-black text-xs font-bold rounded">
-                  YES
-                </div>
-              </div>
-              <div className="relative w-32 h-32 rounded-xl bg-bg-card border border-border-color overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-transparent" />
-                <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-red text-white text-xs font-bold rounded">
-                  NO
-                </div>
-              </div>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="flex gap-4 mt-12"
+            >
+              <YesAvatar />
+              <NoAvatar />
+            </motion.div>
           </div>
 
           {/* Right side - Featured Market Card */}
@@ -100,7 +180,12 @@ export function Predictions() {
               <div className="flex items-center gap-2 text-sm text-text-secondary">
                 <span>Vol: $342.8M</span>
                 <span>•</span>
-                <span>Jan 28, 2026</span>
+                <span className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Jan 28, 2026
+                </span>
               </div>
             </div>
 
@@ -141,16 +226,8 @@ export function Predictions() {
                 </div>
               </div>
 
-              {/* Chart placeholder */}
-              <div className="h-32 bg-bg-secondary rounded-lg flex items-end justify-around px-4 pb-2">
-                {Array.from({ length: 16 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-2 bg-accent-green/30 rounded-t"
-                    style={{ height: `${20 + Math.random() * 60}%` }}
-                  />
-                ))}
-              </div>
+              {/* Chart */}
+              <PriceChart />
             </div>
 
             {/* Market options */}
@@ -192,4 +269,3 @@ export function Predictions() {
     </section>
   );
 }
-
