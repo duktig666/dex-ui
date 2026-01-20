@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Source_Code_Pro, Space_Grotesk } from "next/font/google";
+import { headers } from "next/headers";
+import { cookieToInitialState } from "wagmi";
+import { config } from "@/lib/wagmi/config";
+import { Web3Provider } from "@/components/providers/Web3Provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -27,15 +31,18 @@ export const metadata: Metadata = {
   keywords: ["DEX", "crypto", "trading", "perpetual", "spot", "Hermes"],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const initialState = cookieToInitialState(config, headersList.get("cookie"));
+
   return (
     <html lang="en" className={`${inter.variable} ${sourceCodePro.variable} ${spaceGrotesk.variable}`}>
       <body className="antialiased">
-        {children}
+        <Web3Provider initialState={initialState}>{children}</Web3Provider>
       </body>
     </html>
   );

@@ -1,0 +1,133 @@
+/* TradingView Chart Custom Styles - Dark Theme */
+
+/* Main chart container */
+.chart-container {
+  background-color: #0b0e11 !important;
+}
+
+/* Chart background */
+.chart-markup-table {
+  background-color: #0b0e11 !important;
+}
+
+/* Price scale */
+.price-axis {
+  background-color: #0b0e11 !important;
+}
+
+/* Time scale */
+.time-axis {
+  background-color: #0b0e11 !important;
+}
+
+/* Crosshair */
+.crosshair-cursor {
+  color: #848e9c !important;
+}
+
+/* Legend text */
+.pane-legend {
+  color: #848e9c !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1d26;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #363a45;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a4e59;
+}
+
+/* Remove chart borders */
+.chart-page {
+  border: none !important;
+}
+
+/* Header styling */
+.header-chart-panel {
+  background-color: #0b0e11 !important;
+  border-bottom: 1px solid #1a1d26 !important;
+}
+
+/* Toolbar styling */
+.chart-toolbar {
+  background-color: #0b0e11 !important;
+}
+
+/* Drawing toolbar */
+.drawing-toolbar {
+  background-color: #131722 !important;
+  border: 1px solid #1a1d26 !important;
+}
+
+/* Button hover states */
+.button:hover {
+  background-color: #1a1d26 !important;
+}
+
+/* Popup menus */
+.menu-wrap {
+  background-color: #131722 !important;
+  border: 1px solid #1a1d26 !important;
+}
+
+.menu-wrap .item:hover {
+  background-color: #1a1d26 !important;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="number"] {
+  background-color: #1a1d26 !important;
+  border: 1px solid #363a45 !important;
+  color: #eaecef !important;
+}
+
+/* Candlestick colors - green up, red down */
+.candle-up {
+  fill: #0ecb81 !important;
+  stroke: #0ecb81 !important;
+}
+
+.candle-down {
+  fill: #f6465d !important;
+  stroke: #f6465d !important;
+}
+
+/* Volume bars */
+.volume-bar-up {
+  fill: rgba(14, 203, 129, 0.5) !important;
+}
+
+.volume-bar-down {
+  fill: rgba(246, 70, 93, 0.5) !important;
+}
+
+/* Grid lines */
+.grid-line {
+  stroke: #1a1d26 !important;
+}
+
+/* Tooltip styling */
+.tooltip {
+  background-color: #131722 !important;
+  border: 1px solid #1a1d26 !important;
+  color: #eaecef !important;
+}
+
+/* Loading screen override */
+.tv-spinner {
+  border-color: #2962ff !important;
+  border-top-color: transparent !important;
+}

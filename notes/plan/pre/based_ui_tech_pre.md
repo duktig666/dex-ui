@@ -66,4 +66,9 @@ Based是HyperLiquid的第三方交易平台，使用HyperLiquid的BuildCode模�
 
 ### 需求
 https://app.based.one/BTC  https://app.based.one/HYPE/USDC 再结合这两个页面
-1. 
+1. 分析这两个页面都用到HyperLiquid哪些api，如何使用这些api
+2. 开发一个新的前端项目，如何使用HyperLiquid的这些api，实现BuildCode的功能，完成一个新的基于HyperLiquid的DEX
+3. 主要实现 ①Perps Spot 交易页相关的功能 ②My Portfolio下个人余额相关的功能 ③Vault相关功能 ④钱包相关的功能。 其他功能低优先级，可以先暂时不考虑
+
+### 结果
+先生成plan输出到 notes下，确认plan后再执行

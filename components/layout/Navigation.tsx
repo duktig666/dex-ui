@@ -13,8 +13,8 @@ const navItems = [
     label: "Trade",
     href: "#",
     dropdown: [
-      { label: "Perpetuals", href: "https://app.hermes.trade/perpetuals" },
-      { label: "Spot", href: "https://app.hermes.trade/spot" },
+      { label: "Perpetuals", href: "/trade" },
+      { label: "Spot", href: "/trade?type=spot" },
     ],
   },
   { label: "Predict", href: "/predict" },
