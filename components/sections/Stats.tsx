@@ -22,7 +22,7 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
   }, []);
 
   useEffect(() => {
-    if (!isInView || displayValue === null) return;
+    if (!isInView || displayValue === value) return;
 
     const duration = 2000;
     const steps = 60;
@@ -40,7 +40,7 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
     }, duration / steps);
 
     return () => clearInterval(timer);
-  }, [value, isInView, displayValue]);
+  }, [isInView, value]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

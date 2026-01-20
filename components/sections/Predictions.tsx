@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const timeRanges = ["24H", "7D", "30D", "ALL"];
 
@@ -17,16 +18,15 @@ const markets = [
 // Avatar placeholder components
 function YesAvatar() {
   return (
-    <div className="relative w-32 h-32 rounded-xl bg-gradient-to-br from-green-900/50 to-green-700/30 border border-green-500/30 overflow-hidden">
-      {/* Person silhouette */}
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
-        <circle cx="50" cy="35" r="20" fill="currentColor" className="text-green-400/50" />
-        <ellipse cx="50" cy="85" rx="30" ry="25" fill="currentColor" className="text-green-400/50" />
-      </svg>
-      {/* Glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-t from-green-500/20 to-transparent" />
+    <div className="relative w-32 h-32 rounded-xl border-2 border-accent-green overflow-hidden shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+      <Image
+        src="/images/predictions/trump.png"
+        alt="Yes Option"
+        fill
+        className="object-cover"
+      />
       {/* Label */}
-      <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-green text-black text-xs font-bold rounded">
+      <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-green text-black text-xs font-bold rounded z-10">
         YES
       </div>
     </div>
@@ -35,16 +35,15 @@ function YesAvatar() {
 
 function NoAvatar() {
   return (
-    <div className="relative w-32 h-32 rounded-xl bg-gradient-to-br from-red-900/50 to-red-700/30 border border-red-500/30 overflow-hidden">
-      {/* Person silhouette */}
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
-        <circle cx="50" cy="35" r="20" fill="currentColor" className="text-red-400/50" />
-        <ellipse cx="50" cy="85" rx="30" ry="25" fill="currentColor" className="text-red-400/50" />
-      </svg>
-      {/* Glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-t from-red-500/20 to-transparent" />
+    <div className="relative w-32 h-32 rounded-xl border-2 border-accent-red overflow-hidden shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+      <Image
+        src="/images/predictions/powell.png"
+        alt="No Option"
+        fill
+        className="object-cover"
+      />
       {/* Label */}
-      <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-red text-white text-xs font-bold rounded">
+      <div className="absolute bottom-2 left-2 px-2 py-1 bg-accent-red text-white text-xs font-bold rounded z-10">
         NO
       </div>
     </div>

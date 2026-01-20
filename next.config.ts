@@ -2,9 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['based.one'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'based.one',
+        pathname: '/**',
+      },
+    ],
+    // Allow local images
+    unoptimized: false,
   },
 };
 
 export default nextConfig;
-

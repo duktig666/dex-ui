@@ -2,42 +2,18 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 // Trading interface mockup
 function TradingMockup() {
   return (
-    <div className="bg-bg-secondary rounded-xl p-4 h-64">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-            <span className="text-orange-400 text-sm font-bold">₿</span>
-          </div>
-          <span className="text-white font-medium">BTC-PERP</span>
-        </div>
-        <span className="text-accent-green text-sm font-mono">$97,432.50</span>
-      </div>
-      
-      {/* Chart area */}
-      <div className="h-32 flex items-end gap-1 mb-4">
-        {[30, 45, 35, 50, 40, 60, 55, 70, 65, 80, 75, 85].map((h, i) => (
-          <div
-            key={i}
-            className="flex-1 bg-accent-green/30 rounded-t"
-            style={{ height: `${h}%` }}
-          />
-        ))}
-      </div>
-      
-      {/* Bottom actions */}
-      <div className="flex gap-2">
-        <button className="flex-1 py-2 bg-accent-green/20 text-accent-green text-sm font-medium rounded-lg">
-          Long
-        </button>
-        <button className="flex-1 py-2 bg-accent-red/20 text-accent-red text-sm font-medium rounded-lg">
-          Short
-        </button>
-      </div>
+    <div className="bg-bg-secondary rounded-xl p-4 h-64 overflow-hidden relative">
+      <Image
+        src="/images/features/trade-screen.png"
+        alt="Trading Interface"
+        fill
+        className="object-cover object-top"
+      />
     </div>
   );
 }
@@ -71,19 +47,15 @@ function WalletIcons() {
 // Device mockup
 function DeviceMockup() {
   return (
-    <div className="flex gap-6 items-end justify-center mt-6">
-      {/* Desktop */}
-      <div className="w-40 h-28 bg-bg-secondary rounded-lg border border-border-color p-2">
-        <div className="w-full h-full rounded bg-bg-card flex items-center justify-center">
-          <div className="w-3/4 h-1/2 bg-accent-green/20 rounded" />
-        </div>
-      </div>
-      {/* Mobile */}
-      <div className="w-16 h-28 bg-bg-secondary rounded-xl border border-border-color p-1.5">
-        <div className="w-full h-full rounded-lg bg-bg-card flex items-center justify-center">
-          <div className="w-3/4 h-1/4 bg-accent-green/20 rounded" />
-        </div>
-      </div>
+    <div className="flex items-center justify-center mt-6 h-48 relative">
+       <div className="relative w-full h-full max-w-[300px]">
+         <Image
+           src="/images/features/mobile-screen.png"
+           alt="Mobile App"
+           fill
+           className="object-contain"
+         />
+       </div>
     </div>
   );
 }

@@ -27,6 +27,9 @@ See more info here: https://nextjs.org/docs/messages/react-hydration-error
 5. Borderless Spending 部分缺少图片
 6. Trusted by thousands of customers worldwide. 部分缺少图片
 
+### 优化2
+https://based.one/网站中，上述提到的问题中，图片缺失问题仍然没有解决，可以将图片抓到public/images下，然后指定位置显示出来，再进行完善网站复刻。
+
 
 ## plan2 - Perps和Spot的分析和复刻 - 结合调用HyperLiquid
 

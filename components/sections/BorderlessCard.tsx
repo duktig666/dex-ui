@@ -2,41 +2,18 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
+import Image from "next/image";
 
 // Credit card component
-function CreditCard({ variant = "main" }: { variant?: "main" | "blueprint" }) {
-  if (variant === "blueprint") {
-    return (
-      <div className="aspect-[1.6/1] w-full rounded-lg bg-bg-card/30 border border-dashed border-border-color/50 flex items-center justify-center">
-        <div className="w-3/4 h-1/2 border border-dashed border-border-color/30 rounded" />
-      </div>
-    );
-  }
-
+function CreditCard({ image, isBlueprint = false }: { image: string, isBlueprint?: boolean }) {
   return (
-    <div className="aspect-[1.6/1] w-full rounded-xl bg-gradient-to-br from-gray-800 via-gray-900 to-black border border-white/10 shadow-2xl p-4 flex flex-col justify-between relative overflow-hidden">
-      {/* Holographic effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-cyan-500/10 opacity-50" />
-      
-      {/* Chip */}
-      <div className="w-10 h-7 rounded bg-gradient-to-br from-yellow-400 to-yellow-600 relative z-10" />
-      
-      {/* Card number placeholder */}
-      <div className="flex gap-3 relative z-10">
-        <span className="text-white/60 text-xs tracking-widest">••••</span>
-        <span className="text-white/60 text-xs tracking-widest">••••</span>
-        <span className="text-white/60 text-xs tracking-widest">••••</span>
-        <span className="text-white/60 text-xs tracking-widest">••••</span>
-      </div>
-      
-      {/* Brand */}
-      <div className="flex justify-between items-end relative z-10">
-        <span className="text-white/80 text-xs font-semibold tracking-wider">HERMES</span>
-        <div className="flex">
-          <div className="w-6 h-6 rounded-full bg-red-500/80 -mr-2" />
-          <div className="w-6 h-6 rounded-full bg-yellow-500/80" />
-        </div>
-      </div>
+    <div className={`aspect-[1.6/1] w-full rounded-xl relative overflow-hidden ${isBlueprint ? 'opacity-60' : 'shadow-2xl'}`}>
+      <Image
+        src={image}
+        alt="Credit Card"
+        fill
+        className="object-contain"
+      />
     </div>
   );
 }
@@ -97,6 +74,11 @@ export function BorderlessCard() {
                 const isMainCard = i === 3 || i === 10 || i === 17;
                 const row = Math.floor(i / 7);
                 
+                let imageSrc = "/images/cards/hype-blueprint-2.svg";
+                if (i === 3) imageSrc = "/images/cards/teal-card.svg";
+                if (i === 10) imageSrc = "/images/cards/based-card.svg";
+                if (i === 17) imageSrc = "/images/cards/orange-card.png";
+
                 return (
                   <motion.div
                     key={i}
@@ -109,9 +91,10 @@ export function BorderlessCard() {
                     }}
                     style={{
                       transform: isMainCard ? `translateZ(${20 - row * 5}px)` : 'none',
+                      zIndex: isMainCard ? 10 : 0
                     }}
                   >
-                    <CreditCard variant={isMainCard ? "main" : "blueprint"} />
+                    <CreditCard image={imageSrc} isBlueprint={!isMainCard} />
                   </motion.div>
                 );
               })}

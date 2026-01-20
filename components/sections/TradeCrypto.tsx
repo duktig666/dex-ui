@@ -2,112 +2,26 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
+import Image from "next/image";
 
 // Mock trading interface component
 function TradingInterface() {
   return (
     <div className="relative w-full max-w-lg">
-      {/* Trading card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.3 }}
-        className="bg-bg-card border border-border-color rounded-2xl p-6 shadow-2xl"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-              <span className="text-orange-500 font-bold">₿</span>
-            </div>
-            <div>
-              <p className="font-semibold text-white">BTC-PERP</p>
-              <p className="text-sm text-accent-green">+2.34%</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="font-mono text-xl font-bold text-white">$97,432.50</p>
-            <p className="text-sm text-text-secondary">24h Vol: $1.2B</p>
-          </div>
-        </div>
-
-        {/* Mini chart */}
-        <div className="h-32 mb-6 bg-bg-secondary rounded-xl p-4 flex items-end justify-around gap-1">
-          {[40, 55, 45, 60, 50, 70, 65, 80, 75, 90, 85, 95, 88, 92, 98].map((height, i) => (
-            <motion.div
-              key={i}
-              initial={{ height: 0 }}
-              whileInView={{ height: `${height}%` }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5 + i * 0.05, duration: 0.3 }}
-              className="w-2 bg-gradient-to-t from-accent-green/50 to-accent-green rounded-t"
-            />
-          ))}
-        </div>
-
-        {/* Order buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          <button className="py-3 px-4 bg-accent-green/20 text-accent-green font-semibold rounded-xl hover:bg-accent-green/30 transition-colors">
-            Long
-          </button>
-          <button className="py-3 px-4 bg-accent-red/20 text-accent-red font-semibold rounded-xl hover:bg-accent-red/30 transition-colors">
-            Short
-          </button>
-        </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border-color">
-          <div className="text-center">
-            <p className="text-xs text-text-secondary">24h High</p>
-            <p className="font-mono text-sm text-white">$98,200</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-text-secondary">24h Low</p>
-            <p className="font-mono text-sm text-white">$95,100</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-text-secondary">Open Interest</p>
-            <p className="font-mono text-sm text-white">$4.2B</p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Floating elements */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.6 }}
-        className="absolute -left-16 top-1/4 bg-bg-card/80 backdrop-blur border border-border-color rounded-xl p-3 shadow-xl"
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-            <span className="text-purple-400 text-sm font-bold">Ξ</span>
-          </div>
-          <div>
-            <p className="text-xs text-text-secondary">ETH</p>
-            <p className="text-sm font-mono text-accent-green">+1.8%</p>
-          </div>
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.7 }}
-        className="absolute -right-12 bottom-1/4 bg-bg-card/80 backdrop-blur border border-border-color rounded-xl p-3 shadow-xl"
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-            <span className="text-blue-400 text-sm font-bold">◎</span>
-          </div>
-          <div>
-            <p className="text-xs text-text-secondary">SOL</p>
-            <p className="text-sm font-mono text-accent-green">+5.2%</p>
-          </div>
-        </div>
+        <Image
+          src="/images/trading/trading-app.png"
+          alt="Trading Interface"
+          width={600}
+          height={400}
+          className="w-full h-auto rounded-xl shadow-2xl border border-border-color"
+          priority
+        />
       </motion.div>
     </div>
   );
