@@ -205,6 +205,13 @@ export interface OrderStatus {
   status?: 'open' | 'filled' | 'canceled' | 'triggered' | 'rejected' | 'marginCanceled';
 }
 
+// 历史订单（包含订单和状态）
+export interface HistoricalOrder {
+  order: Order;
+  status: 'open' | 'filled' | 'canceled' | 'triggered' | 'rejected' | 'marginCanceled';
+  statusTimestamp: number;
+}
+
 // ==================== 成交记录 ====================
 
 export interface UserFill {
@@ -416,13 +423,13 @@ export interface WsTradeData {
   tid: number;
 }
 
-export interface WsCandleData extends Candle {}
+export type WsCandleData = Candle;
 
 export interface WsAllMidsData {
   mids: Record<string, string>;
 }
 
-export interface WsUserFillData extends UserFill {}
+export type WsUserFillData = UserFill;
 
 export interface WsOrderUpdateData {
   order: Order;
@@ -493,4 +500,116 @@ export interface FormattedOrder {
   status: string;
   triggerPrice?: number;
   tpsl?: 'tp' | 'sl';
+}
+
+// ==================== TWAP 订单 ====================
+
+export interface TwapOrderParams {
+  coin: string;
+  isBuy: boolean;
+  sz: string;            // 总数量
+  reduceOnly: boolean;
+  minutes: number;       // 执行时长（分钟）
+  randomize: boolean;    // 是否随机化执行间隔
+}
+
+export interface TwapOrderWire {
+  a: number;              // asset index
+  b: boolean;             // true = buy, false = sell
+  s: string;              // size
+  r: boolean;             // reduce only
+  m: number;              // duration in minutes
+  t: boolean;             // randomize (true = randomize intervals)
+}
+
+export interface PlaceTwapOrderAction {
+  type: 'twapOrder';
+  twap: TwapOrderWire;
+  [key: string]: unknown;
+}
+
+export interface CancelTwapOrderAction {
+  type: 'twapCancel';
+  a: number;              // asset index
+  t: number;              // twap id
+  [key: string]: unknown;
+}
+
+export interface TwapOrder {
+  twapId: number;
+  coin: string;
+  side: Side;
+  sz: string;
+  filledSz: string;
+  minutes: number;
+  randomize: boolean;
+  reduceOnly: boolean;
+  startTime: number;
+  state: {
+    running?: {
+      twapId: number;
+    };
+    terminated?: {
+      reason: string;
+    };
+  };
+}
+
+export interface TwapOrderResponse {
+  status: 'ok' | 'err';
+  response?: {
+    type: 'twapOrder';
+    data: {
+      status: {
+        running?: {
+          twapId: number;
+        };
+        error?: string;
+      };
+    };
+  };
+}
+
+export interface TwapCancelResponse {
+  status: 'ok' | 'err';
+  response?: {
+    type: 'twapCancel';
+    data: {
+      status: 'success' | string;
+    };
+  };
+}
+
+export interface FormattedTwapOrder {
+  twapId: number;
+  coin: string;
+  side: OrderSide;
+  totalSize: number;
+  filledSize: number;
+  remainingSize: number;
+  progress: number;       // 0-100 百分比
+  durationMinutes: number;
+  randomize: boolean;
+  reduceOnly: boolean;
+  startTime: number;
+  estimatedEndTime: number;
+  status: 'running' | 'terminated' | 'completed';
+  terminationReason?: string;
+}
+
+// ==================== Trailing Stop 订单 (前端管理) ====================
+
+export interface TrailingStopOrder {
+  id: string;                    // 唯一标识
+  coin: string;
+  side: OrderSide;               // 触发方向: buy (做多止损/做空止盈), sell (做多止盈/做空止损)
+  size: string;                  // 数量
+  trailValue: string;            // 回撤值 (可以是百分比或固定价差)
+  trailType: 'percent' | 'price'; // 回撤类型
+  triggerPrice: string | null;   // 当前触发价格 (动态更新)
+  highestPrice: string | null;   // 追踪的最高价 (sell方向)
+  lowestPrice: string | null;    // 追踪的最低价 (buy方向)
+  createdAt: number;
+  status: 'active' | 'triggered' | 'cancelled';
+  reduceOnly: boolean;
 }

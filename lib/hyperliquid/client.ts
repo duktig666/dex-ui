@@ -14,6 +14,7 @@ import type {
   OpenOrders,
   UserFill,
   FundingHistory,
+  HistoricalOrder,
   PlaceOrderAction,
   CancelOrderAction,
   CancelByCloidAction,
@@ -27,6 +28,12 @@ import type {
   TIF,
   MaxBuilderFee,
   SpotMeta,
+  PlaceTwapOrderAction,
+  CancelTwapOrderAction,
+  TwapOrderWire,
+  TwapOrder,
+  TwapOrderResponse,
+  TwapCancelResponse,
 } from './types';
 import { floatToWire, normalizeAddress, generateNonce } from './utils';
 import { signL1Action, signUserSignedAction } from './signing';
@@ -243,8 +250,8 @@ export class HyperliquidInfoClient {
   /**
    * 获取用户历史订单
    */
-  async getOrderHistory(user: string): Promise<Order[]> {
-    return this.post<Order[]>({
+  async getOrderHistory(user: string): Promise<HistoricalOrder[]> {
+    return this.post<HistoricalOrder[]>({
       type: 'historicalOrders',
       user: normalizeAddress(user),
     });
@@ -297,6 +304,24 @@ export class HyperliquidInfoClient {
       startTime,
       endTime,
     });
+  }
+
+  /**
+   * 获取用户 TWAP 订单状态
+   */
+  async getTwapHistory(user: string): Promise<TwapOrder[]> {
+    return this.post<TwapOrder[]>({
+      type: 'twapHistory',
+      user: normalizeAddress(user),
+    });
+  }
+
+  /**
+   * 获取用户当前活跃的 TWAP 订单
+   */
+  async getActiveTwapOrders(user: string): Promise<TwapOrder[]> {
+    const history = await this.getTwapHistory(user);
+    return history.filter((order) => order.state.running);
   }
 }
 
@@ -677,6 +702,76 @@ export class HyperliquidExchangeClient {
     const signature = await signL1Action(action, nonce, signTypedData, null, IS_TESTNET);
 
     return this.postSigned(action, signature, nonce);
+  }
+
+  /**
+   * 下 TWAP 订单
+   * @param params TWAP 订单参数
+   * @param assetId 资产 ID
+   * @param signTypedData 签名函数
+   */
+  async placeTwapOrder(
+    params: {
+      assetId: number;
+      isBuy: boolean;
+      sz: string;
+      reduceOnly: boolean;
+      minutes: number;
+      randomize: boolean;
+    },
+    signTypedData: (params: {
+      domain: Record<string, unknown>;
+      types: Record<string, unknown>;
+      primaryType: string;
+      message: Record<string, unknown>;
+    }) => Promise<string>
+  ): Promise<TwapOrderResponse> {
+    const twapWire: TwapOrderWire = {
+      a: params.assetId,
+      b: params.isBuy,
+      s: params.sz,
+      r: params.reduceOnly,
+      m: params.minutes,
+      t: params.randomize,
+    };
+
+    const action: PlaceTwapOrderAction = {
+      type: 'twapOrder',
+      twap: twapWire,
+    };
+
+    const nonce = generateNonce();
+    const signature = await signL1Action(action, nonce, signTypedData, null, IS_TESTNET);
+
+    return this.postSigned(action, signature, nonce) as Promise<TwapOrderResponse>;
+  }
+
+  /**
+   * 取消 TWAP 订单
+   * @param assetId 资产 ID
+   * @param twapId TWAP 订单 ID
+   * @param signTypedData 签名函数
+   */
+  async cancelTwapOrder(
+    assetId: number,
+    twapId: number,
+    signTypedData: (params: {
+      domain: Record<string, unknown>;
+      types: Record<string, unknown>;
+      primaryType: string;
+      message: Record<string, unknown>;
+    }) => Promise<string>
+  ): Promise<TwapCancelResponse> {
+    const action: CancelTwapOrderAction = {
+      type: 'twapCancel',
+      a: assetId,
+      t: twapId,
+    };
+
+    const nonce = generateNonce();
+    const signature = await signL1Action(action, nonce, signTypedData, null, IS_TESTNET);
+
+    return this.postSigned(action, signature, nonce) as Promise<TwapCancelResponse>;
   }
 }
 

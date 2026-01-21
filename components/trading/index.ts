@@ -1,9 +1,12 @@
 export { TradeHeader } from "./TradeHeader";
 export { PriceBar } from "./PriceBar";
-export { TradingViewChart } from "./TradingViewChart";
+export { default as TradingViewChart } from "./TradingViewChart";
 export { OrderBook } from "./OrderBook";
 export { TradeForm } from "./TradeForm";
 export { AccountPanel } from "./AccountPanel";
 export { AccountSidebar } from "./AccountSidebar";
 export { StatusBar } from "./StatusBar";
 export { TokenSelector } from "./TokenSelector";
+export { TwapOrderForm } from "./TwapOrderForm";
+export { TrailingStopForm } from "./TrailingStopForm";
+export { LeverageModal, useLeverageModal } from "./LeverageModal";

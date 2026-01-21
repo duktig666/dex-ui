@@ -6,11 +6,11 @@ import { useAccountState } from "@/hooks/useAccountState";
 import { formatPrice, formatPercent } from "@/lib/hyperliquid/utils";
 
 export function AccountSidebar() {
-  const { clearinghouseState, accountValue, availableBalance, totalUnrealizedPnl } = useAccountState();
+  const { marginSummary, accountValue, availableBalance, totalUnrealizedPnl, totalMarginUsed } = useAccountState();
 
   // 计算账户数据
   const accountData = useMemo(() => {
-    if (!clearinghouseState) {
+    if (!marginSummary) {
       return {
         spotEquity: 0,
         perpsEquity: 0,
@@ -22,14 +22,12 @@ export function AccountSidebar() {
       };
     }
 
-    const { crossMarginSummary, marginSummary } = clearinghouseState;
-    const perpsEquity = parseFloat(crossMarginSummary?.accountValue || "0");
-    const balance = parseFloat(marginSummary?.accountValue || "0");
-    const totalMaintMargin = parseFloat(crossMarginSummary?.totalMntcMargin || "0");
-    const totalNotional = parseFloat(crossMarginSummary?.totalNtlPos || "0");
+    const perpsEquity = accountValue;
+    const balance = accountValue;
+    const totalNotional = parseFloat(marginSummary.totalNtlPos || "0");
     
     // 保证金率 = 账户价值 / 维持保证金
-    const crossMarginRatio = totalMaintMargin > 0 ? (perpsEquity / totalMaintMargin) * 100 : 0;
+    const crossMarginRatio = totalMarginUsed > 0 ? (perpsEquity / totalMarginUsed) * 100 : 0;
     
     // 账户杠杆 = 总名义价值 / 账户价值
     const crossAccountLeverage = perpsEquity > 0 ? totalNotional / perpsEquity : 0;
@@ -40,10 +38,10 @@ export function AccountSidebar() {
       balance,
       unrealizedPnl: totalUnrealizedPnl,
       crossMarginRatio,
-      maintenanceMargin: totalMaintMargin,
+      maintenanceMargin: totalMarginUsed,
       crossAccountLeverage,
     };
-  }, [clearinghouseState, totalUnrealizedPnl]);
+  }, [marginSummary, accountValue, totalUnrealizedPnl, totalMarginUsed]);
 
   return (
     <div className="p-4 bg-[#0b0e11]">

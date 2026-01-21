@@ -9,6 +9,7 @@ import { useAssetPrice } from "@/hooks/useMarketData";
 import { useBestPrices } from "@/hooks/useOrderBook";
 import { formatPrice, formatSize, calcNotionalValue, calcRequiredMargin } from "@/lib/hyperliquid/utils";
 import type { TIF } from "@/lib/hyperliquid/types";
+import { LeverageModal, useLeverageModal } from "./LeverageModal";
 
 interface TradeFormProps {
   symbol: string;
@@ -35,6 +36,9 @@ export function TradeForm({ symbol }: TradeFormProps) {
 
   const coin = symbol.split("-")[0] || "BTC";
   const quote = "USDC";
+
+  // Leverage Modal
+  const { isOpen: isLeverageModalOpen, openModal: openLeverageModal, closeModal: closeLeverageModal } = useLeverageModal();
 
   // Hooks
   const { placeOrder, updateLeverage, isSubmitting, lastError, builderFeeApproved } = useTrading();
@@ -185,60 +189,43 @@ export function TradeForm({ symbol }: TradeFormProps) {
   }, [isConnected, isSubmitting, builderFeeApproved, side]);
 
   return (
-    <div className="flex flex-col h-full p-4 bg-[#0b0e11]">
-      {/* Margin Mode & Leverage */}
-      <div className="flex items-center gap-2 mb-4">
-        <button
-          className={cn(
-            "px-3 py-1.5 text-sm font-medium rounded transition-colors",
-            marginMode === "cross"
-              ? "bg-[#1a1d26] text-white"
-              : "text-[#848e9c] hover:text-white"
-          )}
-          onClick={() => setMarginMode("cross")}
-        >
-          Cross
-        </button>
-        <button
-          className={cn(
-            "px-3 py-1.5 text-sm font-medium rounded transition-colors",
-            marginMode === "isolated"
-              ? "bg-[#1a1d26] text-white"
-              : "text-[#848e9c] hover:text-white"
-          )}
-          onClick={() => setMarginMode("isolated")}
-        >
-          Isolated
-        </button>
-        <div className="relative group">
-          <button className="px-3 py-1.5 text-sm font-medium bg-[#1a1d26] text-white rounded">
-            {leverageValue}x
+    <div className="flex flex-col h-full bg-[#0b0e11]">
+      {/* Margin Mode & Leverage - Compact Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1a1d26]">
+        <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
+          <button
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium transition-colors",
+              marginMode === "cross"
+                ? "bg-[#2a2d36] text-white"
+                : "text-[#848e9c] hover:text-white"
+            )}
+            onClick={() => setMarginMode("cross")}
+          >
+            Cross
           </button>
-          <div className="absolute hidden group-hover:block top-full mt-1 left-0 z-50 bg-[#1a1d26] rounded p-2 min-w-[200px]">
-            <input
-              type="range"
-              min="1"
-              max="50"
-              value={leverageValue}
-              onChange={(e) => handleLeverageChange(Number(e.target.value))}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-[#848e9c] mt-1">
-              <span>1x</span>
-              <span>{leverageValue}x</span>
-              <span>50x</span>
-            </div>
-          </div>
+          <button
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium transition-colors",
+              marginMode === "isolated"
+                ? "bg-[#2a2d36] text-white"
+                : "text-[#848e9c] hover:text-white"
+            )}
+            onClick={() => setMarginMode("isolated")}
+          >
+            Isolated
+          </button>
         </div>
-      </div>
-
-      {/* Order Type */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-sm text-[#848e9c]">Type</span>
+        <button 
+          onClick={() => openLeverageModal(coin)}
+          className="px-3 py-1.5 text-xs font-medium bg-[#1a1d26] text-[#f0b90b] rounded hover:bg-[#2a2d36] transition-colors"
+        >
+          {leverageValue}x
+        </button>
         <select
           value={orderType}
           onChange={(e) => setOrderType(e.target.value as OrderType)}
-          className="flex-1 px-3 py-1.5 text-sm bg-[#1a1d26] text-white rounded border-none outline-none cursor-pointer"
+          className="ml-auto px-2 py-1.5 text-xs bg-[#1a1d26] text-white rounded border-none outline-none cursor-pointer"
         >
           <option value="limit">Limit</option>
           <option value="market">Market</option>
@@ -246,127 +233,142 @@ export function TradeForm({ symbol }: TradeFormProps) {
         </select>
       </div>
 
-      {/* Buy/Sell Toggle */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setSide("buy")}
-          className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded transition-colors",
-            side === "buy"
-              ? "bg-[#0ecb81] text-white"
-              : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+      {/* Main Form Content */}
+      <div className="flex-1 px-4 py-3 space-y-3">
+        {/* Buy/Sell Toggle - Full Width */}
+        <div className="flex gap-1">
+          <button
+            onClick={() => setSide("buy")}
+            className={cn(
+              "flex-1 py-2.5 text-sm font-semibold rounded-l transition-colors",
+              side === "buy"
+                ? "bg-[#0ecb81] text-white"
+                : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+            )}
+          >
+            Buy / Long
+          </button>
+          <button
+            onClick={() => setSide("sell")}
+            className={cn(
+              "flex-1 py-2.5 text-sm font-semibold rounded-r transition-colors",
+              side === "sell"
+                ? "bg-[#f6465d] text-white"
+                : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+            )}
+          >
+            Sell / Short
+          </button>
+        </div>
+
+        {/* Account Info Row */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-3">
+            <span className="text-[#848e9c]">Available:</span>
+            <span className="text-white font-mono">{formatPrice(availableBalance, 2)} {quote}</span>
+          </div>
+          {position && (
+            <div className="flex items-center gap-2">
+              <span className="text-[#848e9c]">Position:</span>
+              <span className={cn("font-mono", position.size > 0 ? "text-[#0ecb81]" : "text-[#f6465d]")}>
+                {formatSize(position.size, 4)} {coin}
+              </span>
+            </div>
           )}
-        >
-          Buy / Long
-        </button>
-        <button
-          onClick={() => setSide("sell")}
-          className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded transition-colors",
-            side === "sell"
-              ? "bg-[#f6465d] text-white"
-              : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
-          )}
-        >
-          Sell / Short
-        </button>
-      </div>
+        </div>
 
-      {/* Available Funds */}
-      <div className="flex items-center justify-between text-xs mb-2">
-        <span className="text-[#848e9c]">Available Funds</span>
-        <span className="text-white font-mono">
-          {formatPrice(availableBalance, 2)} <span className="text-[#848e9c]">{quote}</span>
-        </span>
-      </div>
-
-      {/* Current Position */}
-      <div className="flex items-center justify-between text-xs mb-4">
-        <span className="text-[#848e9c]">Current Position</span>
-        <span className={cn("font-mono", position ? (position.szi > 0 ? "text-[#0ecb81]" : "text-[#f6465d]") : "text-white")}>
-          {position ? formatSize(position.szi, 5) : "0.00000"} <span className="text-[#848e9c]">{coin}</span>
-        </span>
-      </div>
-
-      {/* Price Input */}
-      <div className="mb-3">
-        <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-[#848e9c]">Price</span>
-          <div className="flex items-center gap-1">
-            <button onClick={handleSetBid} className="text-[#848e9c] hover:text-white text-xs">Bid</button>
-            <span className="text-[#848e9c]">|</span>
-            <button onClick={handleSetAsk} className="text-[#848e9c] hover:text-white text-xs">Ask</button>
+        {/* Price Input */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[#848e9c]">Price</span>
+            <div className="flex items-center gap-2">
+              <button onClick={handleSetBid} className="text-[#848e9c] hover:text-[#0ecb81] transition-colors">Bid</button>
+              <span className="text-[#2a2d36]">|</span>
+              <button onClick={handleSetAsk} className="text-[#848e9c] hover:text-[#f6465d] transition-colors">Ask</button>
+            </div>
+          </div>
+          <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
+            <input
+              type="text"
+              value={orderType === "market" ? "Market Price" : price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono"
+              placeholder="0.00"
+              disabled={orderType === "market"}
+            />
+            <span className="px-3 text-xs text-[#848e9c] font-medium">{quote}</span>
           </div>
         </div>
-        <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
-          <input
-            type="text"
-            value={orderType === "market" ? "Market" : price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="flex-1 px-3 py-2 text-sm bg-transparent text-white outline-none font-mono"
-            placeholder="0"
-            disabled={orderType === "market"}
-          />
-          <span className="px-3 text-sm text-[#848e9c]">{quote}</span>
-        </div>
-      </div>
 
-      {/* Amount Input */}
-      <div className="mb-3">
-        <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
-          <input
-            type="text"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="flex-1 px-3 py-2 text-sm bg-transparent text-white outline-none font-mono"
-            placeholder="0"
-          />
-          <span className="px-3 text-sm text-[#848e9c]">{coin}</span>
+        {/* Size Inputs - Side by Side */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <span className="text-xs text-[#848e9c]">Amount</span>
+            <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
+              <input
+                type="text"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono min-w-0"
+                placeholder="0.00"
+              />
+              <span className="px-2 text-xs text-[#848e9c] font-medium">{coin}</span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs text-[#848e9c]">Total</span>
+            <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
+              <input
+                type="text"
+                value={total}
+                onChange={(e) => setTotal(e.target.value)}
+                className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono min-w-0"
+                placeholder="0.00"
+              />
+              <span className="px-2 text-xs text-[#848e9c] font-medium">{quote}</span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Total Input */}
-      <div className="mb-3">
-        <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
-          <input
-            type="text"
-            value={total}
-            onChange={(e) => setTotal(e.target.value)}
-            className="flex-1 px-3 py-2 text-sm bg-transparent text-white outline-none font-mono"
-            placeholder="0"
-          />
-          <span className="px-3 text-sm text-[#848e9c]">{quote}</span>
-        </div>
-      </div>
-
-      {/* Percentage Slider */}
-      <div className="mb-4">
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={percentage}
-          onChange={(e) => handlePercentageClick(Number(e.target.value))}
-          className="w-full h-1 bg-[#1a1d26] rounded appearance-none cursor-pointer"
-        />
-        <div className="flex items-center gap-2 mt-2">
-          <input
-            type="number"
-            value={percentage}
-            onChange={(e) => handlePercentageClick(Number(e.target.value))}
-            className="w-12 px-2 py-1 text-xs bg-[#1a1d26] text-white rounded outline-none font-mono"
-          />
-          <span className="text-xs text-[#848e9c]">%</span>
-          <div className="flex gap-1 ml-auto">
-            {[25, 50, 75, 100].map((pct) => (
+        {/* Percentage Slider with Markers */}
+        <div className="space-y-2">
+          <div className="relative">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={percentage}
+              onChange={(e) => handlePercentageClick(Number(e.target.value))}
+              className="w-full h-1.5 bg-[#1a1d26] rounded-full appearance-none cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-3
+                [&::-webkit-slider-thumb]:h-3
+                [&::-webkit-slider-thumb]:bg-[#f0b90b]
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+            {/* Slider Markers */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 pointer-events-none">
+              {[0, 25, 50, 75, 100].map((mark) => (
+                <div
+                  key={mark}
+                  className={cn(
+                    "absolute w-1.5 h-1.5 rounded-full -translate-x-1/2 top-0",
+                    percentage >= mark ? "bg-[#f0b90b]" : "bg-[#2a2d36]"
+                  )}
+                  style={{ left: `${mark}%` }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-between">
+            {[0, 25, 50, 75, 100].map((pct) => (
               <button
                 key={pct}
                 onClick={() => handlePercentageClick(pct)}
                 className={cn(
-                  "px-2 py-1 text-xs rounded transition-colors",
-                  percentage === pct
-                    ? "bg-[#2a2d36] text-white"
-                    : "text-[#848e9c] bg-[#1a1d26] hover:text-white"
+                  "text-xs transition-colors",
+                  percentage === pct ? "text-[#f0b90b]" : "text-[#848e9c] hover:text-white"
                 )}
               >
                 {pct}%
@@ -374,77 +376,88 @@ export function TradeForm({ symbol }: TradeFormProps) {
             ))}
           </div>
         </div>
+
+        {/* Options Row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={reduceOnly}
+                onChange={(e) => setReduceOnly(e.target.checked)}
+                className="w-3.5 h-3.5 rounded accent-[#f0b90b]"
+              />
+              <span className="text-xs text-[#848e9c]">Reduce Only</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={tpsl}
+                onChange={(e) => setTpsl(e.target.checked)}
+                className="w-3.5 h-3.5 rounded accent-[#f0b90b]"
+              />
+              <span className="text-xs text-[#848e9c]">TP/SL</span>
+            </label>
+          </div>
+          <select
+            value={timeInForce}
+            onChange={(e) => setTimeInForce(e.target.value as TimeInForce)}
+            className="px-2 py-1 text-xs bg-[#1a1d26] text-[#848e9c] rounded border-none outline-none cursor-pointer"
+          >
+            <option value="gtc">GTC</option>
+            <option value="ioc">IOC</option>
+            <option value="alo">Post Only</option>
+          </select>
+        </div>
       </div>
 
-      {/* Options */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={reduceOnly}
-              onChange={(e) => setReduceOnly(e.target.checked)}
-              className="w-4 h-4 rounded bg-[#1a1d26] border-none"
-            />
-            <span className="text-xs text-[#848e9c]">Reduce</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={tpsl}
-              onChange={(e) => setTpsl(e.target.checked)}
-              className="w-4 h-4 rounded bg-[#1a1d26] border-none"
-            />
-            <span className="text-xs text-[#848e9c]">TP/SL</span>
-          </label>
+      {/* Submit Section - Fixed at Bottom */}
+      <div className="px-4 py-3 border-t border-[#1a1d26] space-y-3">
+        {/* Order Summary */}
+        <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="text-center p-2 bg-[#1a1d26] rounded">
+            <div className="text-[#848e9c] mb-0.5">Order Value</div>
+            <div className="text-white font-mono">${formatPrice(orderValue, 2)}</div>
+          </div>
+          <div className="text-center p-2 bg-[#1a1d26] rounded">
+            <div className="text-[#848e9c] mb-0.5">Margin</div>
+            <div className="text-white font-mono">${formatPrice(marginRequired, 2)}</div>
+          </div>
+          <div className="text-center p-2 bg-[#1a1d26] rounded">
+            <div className="text-[#848e9c] mb-0.5">Est. Liq</div>
+            <div className="text-[#f6465d] font-mono">${formatPrice(estLiqPrice, 2)}</div>
+          </div>
         </div>
-        <select
-          value={timeInForce}
-          onChange={(e) => setTimeInForce(e.target.value as TimeInForce)}
-          className="px-2 py-1 text-xs bg-[#1a1d26] text-white rounded border-none outline-none cursor-pointer"
+
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || (!isConnected ? false : !amount)}
+          className={cn(
+            "w-full py-3.5 text-sm font-semibold rounded transition-colors disabled:opacity-50",
+            side === "buy"
+              ? "bg-[#0ecb81] hover:bg-[#0ecb81]/90 text-white"
+              : "bg-[#f6465d] hover:bg-[#f6465d]/90 text-white"
+          )}
         >
-          <option value="gtc">GTC</option>
-          <option value="ioc">IOC</option>
-          <option value="alo">ALO</option>
-        </select>
-      </div>
+          {buttonText}
+        </button>
 
-      {/* Submit Button */}
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting || (!isConnected ? false : !amount)}
-        className={cn(
-          "w-full py-3 text-sm font-semibold rounded transition-colors disabled:opacity-50",
-          side === "buy"
-            ? "bg-[#0ecb81] hover:bg-[#0ecb81]/90 text-white"
-            : "bg-[#f6465d] hover:bg-[#f6465d]/90 text-white"
+        {/* Error display */}
+        {lastError && (
+          <div className="p-2 bg-[#f6465d]/20 text-[#f6465d] text-xs rounded text-center">
+            {lastError}
+          </div>
         )}
-      >
-        {buttonText}
-      </button>
-
-      {/* Order Info */}
-      <div className="mt-4 space-y-2 text-xs">
-        <div className="flex items-center justify-between">
-          <span className="text-[#848e9c]">Est Liq:</span>
-          <span className="text-white font-mono">${formatPrice(estLiqPrice, priceDecimals)}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-[#848e9c]">Order Val:</span>
-          <span className="text-white font-mono">${formatPrice(orderValue, 2)}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-[#848e9c]">Margin Req:</span>
-          <span className="text-white font-mono">${formatPrice(marginRequired, 2)}</span>
-        </div>
       </div>
 
-      {/* Error display */}
-      {lastError && (
-        <div className="mt-2 p-2 bg-[#f6465d]/20 text-[#f6465d] text-xs rounded">
-          {lastError}
-        </div>
-      )}
+      {/* Leverage Modal */}
+      <LeverageModal
+        coin={coin}
+        isOpen={isLeverageModalOpen}
+        onClose={closeLeverageModal}
+        maxLeverage={50}
+      />
     </div>
   );
 }
