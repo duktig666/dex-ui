@@ -17199,7 +17199,7 @@ export interface OverlayIndicatorOverrides {
 	 */
 	allowExtendTimeScale: boolean;
 	/**
-	 * [`minTick`](../../api/interfaces/Charting_Library.ChartPropertiesOverrides.md#mainseriespropertiesmintick)
+	 * [`minTick`](../../hyperliquid/interfaces/Charting_Library.ChartPropertiesOverrides.md#mainseriespropertiesmintick)
 	 * Default value: `default`
 	 */
 	minTick: string;
@@ -30086,7 +30086,7 @@ export type TradingTerminalFeatureset = ChartingLibraryFeatureset |
  */
 "prefer_symbol_name_over_fullname" | 
 /**
- * Displays the {@link DatafeedQuoteValues.short_name} value as a symbol name in the [Watchlist](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/Watch-List) and [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details). If disabled, the [`ticker`](@api/interfaces/Charting_Library.LibrarySymbolInfo.md#ticker) value will be used instead.
+ * Displays the {@link DatafeedQuoteValues.short_name} value as a symbol name in the [Watchlist](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/Watch-List) and [Details](https://www.tradingview.com/charting-library-docs/latest/trading_terminal/#details). If disabled, the [`ticker`](@hyperliquid/interfaces/Charting_Library.LibrarySymbolInfo.md#ticker) value will be used instead.
  * @default true
  */
 "prefer_quote_short_name" | 
