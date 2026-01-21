@@ -1,13 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import {
-  generateMockOrderBook,
-  generateMockTrades,
-  type OrderBookEntry,
-  type Trade,
-} from "@/lib/tradingview/mockData";
+import { useOrderBook, type OrderBookLevel } from "@/hooks/useOrderBook";
+import { useRecentTrades, type FormattedTrade } from "@/hooks/useRecentTrades";
+import { formatPrice, formatSize } from "@/lib/hyperliquid/utils";
 
 interface OrderBookProps {
   symbol: string;
@@ -16,15 +13,16 @@ interface OrderBookProps {
 type TabType = "orderbook" | "trades";
 
 function OrderBookRow({
-  entry,
+  level,
   side,
-  maxTotal,
+  priceDecimals,
+  sizeDecimals,
 }: {
-  entry: OrderBookEntry;
+  level: OrderBookLevel;
   side: "bid" | "ask";
-  maxTotal: number;
+  priceDecimals: number;
+  sizeDecimals: number;
 }) {
-  const percentage = (entry.total / maxTotal) * 100;
   const bgColor = side === "bid" ? "rgba(14, 203, 129, 0.15)" : "rgba(246, 70, 93, 0.15)";
 
   return (
@@ -34,7 +32,7 @@ function OrderBookRow({
         className="absolute inset-0"
         style={{
           background: bgColor,
-          width: `${percentage}%`,
+          width: `${Math.min(level.percent, 100)}%`,
           right: side === "ask" ? 0 : "auto",
           left: side === "bid" ? "auto" : 0,
         }}
@@ -43,56 +41,75 @@ function OrderBookRow({
       {/* Content */}
       <div className="relative flex items-center justify-between w-full">
         <span className={cn("font-mono w-20", side === "bid" ? "text-[#0ecb81]" : "text-[#f6465d]")}>
-          {entry.price.toLocaleString()}
+          {formatPrice(level.price, priceDecimals)}
         </span>
-        <span className="font-mono text-[#eaecef] w-24 text-right">{entry.amount.toFixed(5)}</span>
-        <span className="font-mono text-[#848e9c] w-24 text-right">{entry.total.toFixed(5)}</span>
+        <span className="font-mono text-[#eaecef] w-24 text-right">
+          {formatSize(level.size, sizeDecimals)}
+        </span>
+        <span className="font-mono text-[#848e9c] w-24 text-right">
+          {formatSize(level.total, sizeDecimals)}
+        </span>
       </div>
     </div>
   );
 }
 
-function TradeRow({ trade }: { trade: Trade }) {
+function TradeRow({ 
+  trade,
+  priceDecimals,
+  sizeDecimals,
+}: { 
+  trade: FormattedTrade;
+  priceDecimals: number;
+  sizeDecimals: number;
+}) {
   return (
     <div className="flex items-center text-xs h-6 px-2 hover:bg-[#1a1d26]/50">
       <span className={cn("font-mono w-20", trade.side === "buy" ? "text-[#0ecb81]" : "text-[#f6465d]")}>
-        {trade.price.toLocaleString()}
+        {formatPrice(trade.price, priceDecimals)}
       </span>
-      <span className="font-mono text-[#eaecef] w-24 text-right">{trade.amount.toFixed(5)}</span>
+      <span className="font-mono text-[#eaecef] w-24 text-right">
+        {formatSize(trade.size, sizeDecimals)}
+      </span>
       <span className="font-mono text-[#848e9c] w-24 text-right">
-        {new Date(trade.time).toLocaleTimeString()}
+        {trade.timeStr}
       </span>
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="flex flex-col gap-1 p-2">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div key={i} className="h-6 bg-[#1a1d26] rounded animate-pulse" />
+      ))}
     </div>
   );
 }
 
 export function OrderBook({ symbol }: OrderBookProps) {
   const [activeTab, setActiveTab] = useState<TabType>("orderbook");
-  const [orderBook, setOrderBook] = useState<{ bids: OrderBookEntry[]; asks: OrderBookEntry[] }>({
-    bids: [],
-    asks: [],
-  });
-  const [trades, setTrades] = useState<Trade[]>([]);
+  
+  // 从 symbol 提取 coin (如 "BTC-USDC" -> "BTC")
+  const coin = symbol.split("-")[0] || symbol;
+  
+  // 使用真实数据 hooks
+  const { data: orderBookData, isLoading: orderBookLoading } = useOrderBook(coin, 15);
+  const { trades, isLoading: tradesLoading } = useRecentTrades(coin, 50);
 
-  useEffect(() => {
-    setOrderBook(generateMockOrderBook(symbol, 20));
-    setTrades(generateMockTrades(symbol, 50));
-  }, [symbol]);
+  // 根据价格动态计算精度
+  const priceDecimals = useMemo(() => {
+    if (!orderBookData?.midPrice) return 2;
+    const price = orderBookData.midPrice;
+    if (price >= 10000) return 1;
+    if (price >= 1000) return 2;
+    if (price >= 100) return 3;
+    if (price >= 10) return 4;
+    return 5;
+  }, [orderBookData?.midPrice]);
 
-  const maxTotal = useMemo(() => {
-    const maxBid = orderBook.bids[orderBook.bids.length - 1]?.total || 0;
-    const maxAsk = orderBook.asks[orderBook.asks.length - 1]?.total || 0;
-    return Math.max(maxBid, maxAsk);
-  }, [orderBook]);
-
-  const spread = useMemo(() => {
-    if (orderBook.asks.length > 0 && orderBook.bids.length > 0) {
-      const spreadValue = orderBook.asks[0].price - orderBook.bids[0].price;
-      const spreadPercent = (spreadValue / orderBook.asks[0].price) * 100;
-      return { value: spreadValue, percent: spreadPercent };
-    }
-    return { value: 0, percent: 0 };
-  }, [orderBook]);
+  const sizeDecimals = 4;
 
   return (
     <div className="flex flex-col h-full bg-[#0b0e11]">
@@ -127,34 +144,54 @@ export function OrderBook({ symbol }: OrderBookProps) {
           {/* Header */}
           <div className="flex items-center text-xs text-[#848e9c] px-2 py-1 border-b border-[#1a1d26]">
             <span className="w-20">Price</span>
-            <span className="w-24 text-right">Amount ({symbol.split("-")[0]})</span>
-            <span className="w-24 text-right">Total ({symbol.split("-")[0]})</span>
+            <span className="w-24 text-right">Amount ({coin})</span>
+            <span className="w-24 text-right">Total ({coin})</span>
           </div>
 
-          {/* Asks (reversed so lowest ask is at bottom) */}
-          <div className="flex-1 overflow-y-auto flex flex-col-reverse">
-            {orderBook.asks.slice().reverse().map((ask, i) => (
-              <OrderBookRow key={`ask-${i}`} entry={ask} side="ask" maxTotal={maxTotal} />
-            ))}
-          </div>
+          {orderBookLoading || !orderBookData ? (
+            <LoadingSkeleton />
+          ) : (
+            <>
+              {/* Asks (reversed so lowest ask is at bottom) */}
+              <div className="flex-1 overflow-y-auto flex flex-col-reverse">
+                {orderBookData.asks.map((ask, i) => (
+                  <OrderBookRow 
+                    key={`ask-${i}`} 
+                    level={ask} 
+                    side="ask" 
+                    priceDecimals={priceDecimals}
+                    sizeDecimals={sizeDecimals}
+                  />
+                ))}
+              </div>
 
-          {/* Spread */}
-          <div className="flex items-center justify-center gap-2 py-2 border-y border-[#1a1d26] bg-[#0b0e11]">
-            <span className="text-white font-mono text-sm">
-              {orderBook.bids[0]?.price.toLocaleString() || "—"}
-            </span>
-            <span className="text-xs text-[#848e9c]">Spread</span>
-            <span className="text-[#848e9c] font-mono text-xs">
-              {spread.value.toFixed(0)} ({spread.percent.toFixed(2)}%)
-            </span>
-          </div>
+              {/* Spread */}
+              <div className="flex items-center justify-center gap-2 py-2 border-y border-[#1a1d26] bg-[#0b0e11]">
+                <span className="text-white font-mono text-sm">
+                  {orderBookData.bids[0]
+                    ? formatPrice(orderBookData.bids[0].price, priceDecimals)
+                    : "—"}
+                </span>
+                <span className="text-xs text-[#848e9c]">Spread</span>
+                <span className="text-[#848e9c] font-mono text-xs">
+                  {formatPrice(orderBookData.spread, priceDecimals)} ({orderBookData.spreadPercent.toFixed(3)}%)
+                </span>
+              </div>
 
-          {/* Bids */}
-          <div className="flex-1 overflow-y-auto">
-            {orderBook.bids.map((bid, i) => (
-              <OrderBookRow key={`bid-${i}`} entry={bid} side="bid" maxTotal={maxTotal} />
-            ))}
-          </div>
+              {/* Bids */}
+              <div className="flex-1 overflow-y-auto">
+                {orderBookData.bids.map((bid, i) => (
+                  <OrderBookRow 
+                    key={`bid-${i}`} 
+                    level={bid} 
+                    side="bid" 
+                    priceDecimals={priceDecimals}
+                    sizeDecimals={sizeDecimals}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </>
       ) : (
         <>
@@ -167,9 +204,18 @@ export function OrderBook({ symbol }: OrderBookProps) {
 
           {/* Trades List */}
           <div className="flex-1 overflow-y-auto">
-            {trades.map((trade) => (
-              <TradeRow key={trade.id} trade={trade} />
-            ))}
+            {tradesLoading ? (
+              <LoadingSkeleton />
+            ) : (
+              trades.map((trade) => (
+                <TradeRow 
+                  key={trade.id} 
+                  trade={trade}
+                  priceDecimals={priceDecimals}
+                  sizeDecimals={sizeDecimals}
+                />
+              ))
+            )}
           </div>
         </>
       )}

@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
-import { createMockDatafeed } from '@/lib/tradingview/datafeed';
+import { createHyperliquidDatafeed } from '@/lib/tradingview/hyperliquidDatafeed';
 import {
   ENABLED_FEATURES,
   DISABLED_FEATURES,
   CHART_OVERRIDES,
-  CHART_STUDIES_OVERRIDES,
+  STUDIES_OVERRIDES,
 } from '@/lib/tradingview/config';
 
 declare global {
@@ -20,7 +20,7 @@ declare global {
 
 interface TradingViewWidgetConfig {
   container: HTMLElement;
-  datafeed: ReturnType<typeof createMockDatafeed>;
+  datafeed: ReturnType<typeof createHyperliquidDatafeed>;
   symbol: string;
   interval: string;
   library_path: string;
@@ -75,7 +75,7 @@ export default function TradingViewChart({
       widgetRef.current = null;
     }
 
-    const datafeed = createMockDatafeed();
+    const datafeed = createHyperliquidDatafeed();
 
     const widgetConfig: TradingViewWidgetConfig = {
       container: chartContainerRef.current,
@@ -92,7 +92,7 @@ export default function TradingViewChart({
       enabled_features: ENABLED_FEATURES,
       disabled_features: DISABLED_FEATURES,
       overrides: CHART_OVERRIDES,
-      studies_overrides: CHART_STUDIES_OVERRIDES,
+      studies_overrides: STUDIES_OVERRIDES,
       custom_css_url: '/tradingview-chart.css',
       loading_screen: {
         backgroundColor: '#0b0e11',
