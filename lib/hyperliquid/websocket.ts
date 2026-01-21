@@ -4,7 +4,7 @@
  */
 
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { WS_URL, WS_PING_INTERVAL } from './constants';
+import { WS_URL, WS_PING_INTERVAL, CURRENT_NETWORK } from './constants';
 import type {
   WsSubscription,
   WsL2BookSubscription,

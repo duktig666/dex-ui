@@ -3,7 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useAssetPrice, useAssetList } from "@/hooks/useMarketData";
-import { formatPrice, formatCompact, formatPercent } from "@/lib/hyperliquid/utils";
+import { useHyperliquid } from "@/components/providers/HyperliquidProvider";
+import { formatPrice, formatCompact } from "@/lib/hyperliquid/utils";
+import { TokenSelector } from "./TokenSelector";
 
 interface PriceTickerProps {
   coin: string;
@@ -13,30 +15,50 @@ interface PriceTickerProps {
   onClick?: () => void;
 }
 
+// 主流代币涨跌幅组件 - 参照 based.one 风格
 function PriceTicker({ coin, price, change, active, onClick }: PriceTickerProps) {
   const isPositive = change >= 0;
+  const priceDecimals = price >= 10000 ? 1 : price >= 1000 ? 1 : price >= 100 ? 2 : price >= 10 ? 4 : 6;
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-3 py-1 rounded transition-colors",
-        active ? "bg-[#1a1d26]" : "hover:bg-[#1a1d26]/50"
+        "flex items-center gap-1.5 px-3 py-1.5 transition-colors cursor-pointer",
+        "hover:bg-[#1a1d26]/70",
+        active ? "bg-[#1a1d26]" : "bg-transparent"
       )}
     >
-      <span className={cn("text-xs font-medium", isPositive ? "text-[#0ecb81]" : "text-[#f6465d]")}>
+      {/* 涨跌幅 */}
+      <span className={cn(
+        "text-xs font-medium min-w-[52px]",
+        isPositive ? "text-[#0ecb81]" : "text-[#f6465d]"
+      )}>
         {isPositive ? "+" : ""}{change.toFixed(2)}%
       </span>
+      {/* 代币名称 */}
       <span className="text-white font-medium text-sm">{coin}</span>
       <span className="text-[#848e9c] text-sm">-USDC</span>
-      <span className="text-white font-mono text-sm">{formatPrice(price, price >= 1000 ? 1 : 2)}</span>
+      {/* 价格 */}
+      <span className="text-white font-mono text-sm ml-1">{formatPrice(price, priceDecimals)}</span>
     </button>
+  );
+}
+
+// 骨架屏组件
+function PriceTickerSkeleton() {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 animate-pulse">
+      <div className="w-12 h-4 bg-[#1a1d26] rounded" />
+      <div className="w-16 h-4 bg-[#1a1d26] rounded" />
+      <div className="w-16 h-4 bg-[#1a1d26] rounded" />
+    </div>
   );
 }
 
 // 倒计时 Hook
 function useFundingCountdown() {
-  const [countdown, setCountdown] = useState("00:00:00");
+  const [countdown, setCountdown] = useState("00:00");
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -48,9 +70,12 @@ function useFundingCountdown() {
       const minutesLeft = 59 - now.getUTCMinutes();
       const secondsLeft = 59 - now.getUTCSeconds();
       
-      setCountdown(
-        `${String(hoursLeft).padStart(2, '0')}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`
-      );
+      // 简化显示格式
+      if (hoursLeft > 0) {
+        setCountdown(`${hoursLeft}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`);
+      } else {
+        setCountdown(`${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`);
+      }
     };
 
     updateCountdown();
@@ -66,9 +91,18 @@ interface PriceBarProps {
   onSymbolChange?: (symbol: string) => void;
 }
 
-export function PriceBar({ symbol = "BTC-USDC", onSymbolChange }: PriceBarProps) {
-  const coin = symbol.split("-")[0] || "BTC";
+export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
+  // 使用 HyperliquidContext 管理当前币种
+  const { currentCoin, setCoin } = useHyperliquid();
+  const coin = symbol?.split("-")[0] || currentCoin || "BTC";
   
+  // 处理币种切换
+  const handleSymbolChange = (newSymbol: string) => {
+    const newCoin = newSymbol.split("-")[0];
+    setCoin(newCoin);
+    onSymbolChange?.(newSymbol);
+  };
+
   // 获取当前交易对数据
   const {
     midPrice,
@@ -80,45 +114,63 @@ export function PriceBar({ symbol = "BTC-USDC", onSymbolChange }: PriceBarProps)
     dayVolume,
   } = useAssetPrice(coin);
 
-  // 获取热门交易对列表
+  // 获取热门交易对列表 - 按交易量排序取前3个
   const assets = useAssetList();
   const topAssets = useMemo(() => {
-    // 取交易量最大的几个
-    return assets
-      .filter(a => ['BTC', 'ETH', 'HYPE', 'SOL', 'DOGE'].includes(a.name))
-      .slice(0, 5);
+    if (!assets || assets.length === 0) return [];
+    // 按24h交易量排序，取前3个（参照 based.one 风格）
+    return [...assets]
+      .sort((a, b) => (b.volume || 0) - (a.volume || 0))
+      .slice(0, 3);
   }, [assets]);
 
   const fundingCountdown = useFundingCountdown();
+  const isLoading = assets.length === 0;
 
   // 计算24h变化金额
   const change24h = midPrice * (priceChangePercent / 100);
 
   // 价格精度
-  const priceDecimals = midPrice >= 1000 ? 1 : midPrice >= 100 ? 2 : midPrice >= 10 ? 3 : 4;
+  const priceDecimals = midPrice >= 10000 ? 0 : midPrice >= 1000 ? 1 : midPrice >= 100 ? 2 : midPrice >= 10 ? 3 : 4;
 
   return (
-    <div className="h-10 flex items-center justify-between px-4 bg-[#0b0e11] border-b border-[#1a1d26]">
-      {/* Left: Price Tickers */}
-      <div className="flex items-center gap-1">
-        {topAssets.map((asset) => (
-          <PriceTicker
-            key={asset.name}
-            coin={asset.name}
-            price={asset.price}
-            change={asset.priceChange * 100}
-            active={asset.name === coin}
-            onClick={() => onSymbolChange?.(`${asset.name}-USDC`)}
-          />
-        ))}
+    <div className="flex flex-col bg-[#0b0e11] border-b border-[#1a1d26]">
+      {/* 第一行: 主流代币涨跌幅 + 代币选择器 */}
+      <div className="h-10 flex items-center justify-between px-4">
+        {/* Left: 主流代币涨跌幅 */}
+        <div className="flex items-center">
+          {isLoading ? (
+            <>
+              <PriceTickerSkeleton />
+              <PriceTickerSkeleton />
+              <PriceTickerSkeleton />
+            </>
+          ) : (
+            topAssets.map((asset) => (
+              <PriceTicker
+                key={asset.name}
+                coin={asset.name}
+                price={asset.price}
+                change={asset.priceChange * 100}
+                active={asset.name === coin}
+                onClick={() => handleSymbolChange(`${asset.name}-USDC`)}
+              />
+            ))
+          )}
+        </div>
+
+        {/* Right: 代币选择器 */}
+        <TokenSelector />
       </div>
 
-      {/* Right: Symbol Info */}
-      <div className="flex items-center gap-6 text-xs">
-        {/* Symbol Selector */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1d26] rounded cursor-pointer">
-          <span className="text-white font-medium">{coin}-USD</span>
-          <span className="text-[#848e9c]">{coin}-USDC</span>
+      {/* 第二行: 当前交易对详情 */}
+      <div className="h-12 flex items-center px-4 gap-8 border-t border-[#1a1d26]/50">
+        {/* 当前交易对名称和图标 */}
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#f7931a] to-[#f7931a]/60 flex items-center justify-center text-white text-xs font-bold">
+            {coin.slice(0, 1)}
+          </div>
+          <span className="text-white font-semibold text-lg">{coin}/USDC</span>
           <svg className="w-4 h-4 text-[#848e9c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -126,44 +178,44 @@ export function PriceBar({ symbol = "BTC-USDC", onSymbolChange }: PriceBarProps)
 
         {/* Mark Price */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c]">Mark</span>
-          <span className="text-white font-mono">{formatPrice(markPrice, priceDecimals)}</span>
-        </div>
-
-        {/* Oracle Price */}
-        <div className="flex flex-col">
-          <span className="text-[#848e9c]">Oracle</span>
-          <span className="text-white font-mono">{formatPrice(oraclePrice, priceDecimals)}</span>
+          <span className="text-[#848e9c] text-xs">Mark</span>
+          <span className="text-white font-mono text-sm">{formatPrice(markPrice, priceDecimals)}</span>
         </div>
 
         {/* 24h Change */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c]">24h Change</span>
+          <span className="text-[#848e9c] text-xs">24h Change</span>
           <span className={cn(
-            "font-mono",
+            "font-mono text-sm",
             priceChangePercent >= 0 ? "text-[#0ecb81]" : "text-[#f6465d]"
           )}>
-            {formatPrice(change24h, priceDecimals)} / {priceChangePercent >= 0 ? '+' : ''}{priceChangePercent.toFixed(2)}%
+            {change24h >= 0 ? '+' : ''}{formatPrice(Math.abs(change24h), priceDecimals)} / {priceChangePercent >= 0 ? '+' : ''}{priceChangePercent.toFixed(2)}%
           </span>
         </div>
 
         {/* 24h Volume */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c]">24h Vol</span>
-          <span className="text-white font-mono">${formatCompact(dayVolume)}</span>
+          <span className="text-[#848e9c] text-xs">24h Vol</span>
+          <span className="text-white font-mono text-sm">${formatCompact(dayVolume)}</span>
         </div>
 
         {/* Open Interest */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c]">Open Interest</span>
-          <span className="text-white font-mono">${formatCompact(openInterest)}</span>
+          <span className="text-[#848e9c] text-xs">Open Interest</span>
+          <span className="text-white font-mono text-sm">${formatCompact(openInterest)}</span>
         </div>
 
-        {/* Funding */}
+        {/* Oracle Price */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c]">Funding / Countdown</span>
+          <span className="text-[#848e9c] text-xs">Oracle</span>
+          <span className="text-white font-mono text-sm">{formatPrice(oraclePrice, priceDecimals)}</span>
+        </div>
+
+        {/* Funding / Countdown */}
+        <div className="flex flex-col">
+          <span className="text-[#848e9c] text-xs">Funding / Countdown</span>
           <span className={cn(
-            "font-mono",
+            "font-mono text-sm",
             fundingPercent >= 0 ? "text-[#0ecb81]" : "text-[#f6465d]"
           )}>
             {fundingPercent >= 0 ? '+' : ''}{fundingPercent.toFixed(4)}% / {fundingCountdown}

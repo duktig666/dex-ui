@@ -6,3 +6,4 @@ export { TradeForm } from "./TradeForm";
 export { AccountPanel } from "./AccountPanel";
 export { AccountSidebar } from "./AccountSidebar";
 export { StatusBar } from "./StatusBar";
+export { TokenSelector } from "./TokenSelector";

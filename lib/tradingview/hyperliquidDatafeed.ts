@@ -3,7 +3,7 @@
  * 接入 HyperLiquid API 的真实数据
  */
 
-import { infoClient, hyperliquidWs, TV_TO_HL_INTERVAL, INTERVAL_TO_MS } from '@/lib/hyperliquid';
+import { infoClient, hyperliquidWs, TV_TO_HL_INTERVAL, INTERVAL_TO_MS, CURRENT_NETWORK } from '@/lib/hyperliquid';
 import type { Candle, WsCandleData } from '@/lib/hyperliquid/types';
 import type {
   IBasicDataFeed,
@@ -27,7 +27,7 @@ const configurationData: DatafeedConfiguration = {
     {
       value: 'HYPERLIQUID',
       name: 'HyperLiquid',
-      desc: 'HyperLiquid DEX',
+      desc: `HyperLiquid DEX (${CURRENT_NETWORK.displayName})`,
     },
   ],
   symbols_types: [
@@ -78,12 +78,24 @@ function candleToBar(candle: Candle): Bar {
 
 /**
  * 从交易对名称提取 coin
- * 例如: "BTC-USDC" -> "BTC", "ETH" -> "ETH"
+ * 支持多种格式: "BTC-USDC" -> "BTC", "BTCUSD" -> "BTC", "ETH" -> "ETH", "BTC/USDC" -> "BTC"
  */
 function extractCoin(symbolName: string): string {
   // 处理 "BTC-USDC", "ETH-USDC" 等格式
-  const parts = symbolName.split('-');
-  return parts[0];
+  if (symbolName.includes('-')) {
+    return symbolName.split('-')[0];
+  }
+  // 处理 "BTC/USDC" 格式
+  if (symbolName.includes('/')) {
+    return symbolName.split('/')[0];
+  }
+  // 处理 "BTCUSD", "BTCUSDC", "ETHUSDT" 等格式
+  const match = symbolName.match(/^([A-Z0-9]+?)(?:USD[CT]?|PERP)?$/i);
+  if (match) {
+    return match[1].toUpperCase();
+  }
+  // 默认返回原名称
+  return symbolName.toUpperCase();
 }
 
 /**

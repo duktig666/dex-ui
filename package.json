@@ -4,7 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:testnet": "NEXT_PUBLIC_NETWORK=testnet next dev",
+    "dev:mainnet": "NEXT_PUBLIC_NETWORK=mainnet next dev",
     "build": "next build",
+    "build:testnet": "NEXT_PUBLIC_NETWORK=testnet next build",
+    "build:mainnet": "NEXT_PUBLIC_NETWORK=mainnet next build",
     "start": "next start",
     "lint": "next lint"
   },

@@ -2,7 +2,7 @@
  * HyperLiquid REST API 客户端
  */
 
-import { API_URL, BUILDER_ADDRESS, BUILDER_FEE_PERP, IS_TESTNET } from './constants';
+import { API_URL, CURRENT_NETWORK, BUILDER_ADDRESS, BUILDER_FEE_PERP, IS_TESTNET } from './constants';
 import type {
   MetaAndAssetCtxs,
   ClearinghouseState,
@@ -371,14 +371,14 @@ export class HyperliquidExchangeClient {
     const nonce = generateNonce();
     const action: ApproveBuilderFeeAction = {
       type: 'approveBuilderFee',
-      hyperliquidChain: IS_TESTNET ? 'Testnet' : 'Mainnet',
-      signatureChainId: IS_TESTNET ? '0x66eee' : '0xa4b1',
+      hyperliquidChain: CURRENT_NETWORK.isTestnet ? 'Testnet' : 'Mainnet',
+      signatureChainId: CURRENT_NETWORK.signatureChainId,
       maxFeeRate: `${requiredFee / 10000}%`,
       builder: BUILDER_ADDRESS,
       nonce,
     };
 
-    const signature = await signUserSignedAction(action, signTypedData, IS_TESTNET);
+    const signature = await signUserSignedAction(action, signTypedData, CURRENT_NETWORK.isTestnet);
     const response = await this.postSigned(action, signature, nonce);
 
     return response.status === 'ok';

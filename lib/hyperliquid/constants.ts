@@ -1,24 +1,57 @@
 /**
  * HyperLiquid API 常量配置
+ * 网络配置通过环境变量 NEXT_PUBLIC_NETWORK 控制
+ * 支持域名隔离部署：mainnet 和 testnet 分别部署
  */
 
-// API 端点
-export const HYPERLIQUID_MAINNET_API = 'https://api.hyperliquid.xyz';
-export const HYPERLIQUID_TESTNET_API = 'https://api.hyperliquid-testnet.xyz';
+// 网络配置
+export const NETWORKS = {
+  mainnet: {
+    name: 'mainnet' as const,
+    displayName: 'Mainnet',
+    restUrl: 'https://api.hyperliquid.xyz',
+    wsUrl: 'wss://api.hyperliquid.xyz/ws',
+    chainId: 42161, // Arbitrum One
+    signatureChainId: '0xa4b1',
+    isTestnet: false,
+  },
+  testnet: {
+    name: 'testnet' as const,
+    displayName: 'Testnet',
+    restUrl: 'https://api.hyperliquid-testnet.xyz',
+    wsUrl: 'wss://api.hyperliquid-testnet.xyz/ws',
+    chainId: 421614, // Arbitrum Sepolia
+    signatureChainId: '0x66eee',
+    isTestnet: true,
+    faucetUrl: 'https://app.hyperliquid-testnet.xyz/drip',
+  },
+} as const;
 
-export const HYPERLIQUID_MAINNET_WS = 'wss://api.hyperliquid.xyz/ws';
-export const HYPERLIQUID_TESTNET_WS = 'wss://api.hyperliquid-testnet.xyz/ws';
+export type NetworkType = keyof typeof NETWORKS;
+export type NetworkConfig = typeof NETWORKS[NetworkType];
 
-// 当前使用测试网
-export const IS_TESTNET = true;
-export const API_URL = IS_TESTNET ? HYPERLIQUID_TESTNET_API : HYPERLIQUID_MAINNET_API;
-export const WS_URL = IS_TESTNET ? HYPERLIQUID_TESTNET_WS : HYPERLIQUID_MAINNET_WS;
+// 根据环境变量获取当前网络配置
+const networkEnv = process.env.NEXT_PUBLIC_NETWORK as NetworkType | undefined;
+export const CURRENT_NETWORK: NetworkConfig = networkEnv === 'mainnet' 
+  ? NETWORKS.mainnet 
+  : NETWORKS.testnet;
+
+// 向后兼容的导出
+export const IS_TESTNET = CURRENT_NETWORK.isTestnet;
+export const API_URL = CURRENT_NETWORK.restUrl;
+export const WS_URL = CURRENT_NETWORK.wsUrl;
+
+// 旧的端点变量（向后兼容）
+export const HYPERLIQUID_MAINNET_API = NETWORKS.mainnet.restUrl;
+export const HYPERLIQUID_TESTNET_API = NETWORKS.testnet.restUrl;
+export const HYPERLIQUID_MAINNET_WS = NETWORKS.mainnet.wsUrl;
+export const HYPERLIQUID_TESTNET_WS = NETWORKS.testnet.wsUrl;
 
 // EIP-712 签名相关
 export const EIP712_DOMAIN = {
   name: 'HyperliquidSignTransaction',
   version: '1',
-  chainId: IS_TESTNET ? 421614 : 42161, // Arbitrum Sepolia / Arbitrum One
+  chainId: CURRENT_NETWORK.chainId,
   verifyingContract: '0x0000000000000000000000000000000000000000' as const,
 };
 

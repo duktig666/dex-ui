@@ -119,6 +119,7 @@ export function useAssetPrice(coin: string) {
 
 /**
  * 获取所有交易对列表
+ * 返回完整的资产信息，包括价格、24h变化、资金费率、交易量、持仓量等
  */
 export function useAssetList() {
   const perpMetas = useMarketStore((state) => state.perpMetas);
@@ -141,6 +142,12 @@ export function useAssetList() {
       price: parseFloat(midPrice),
       priceChange,
       volume: info ? parseFloat(info.dayNtlVlm) : 0,
+      // 添加资金费率和持仓量
+      funding: info ? parseFloat(info.funding) : 0,
+      openInterest: info ? parseFloat(info.openInterest) : 0,
+      // 添加更多市场数据
+      markPrice: info ? parseFloat(info.markPx) : parseFloat(midPrice),
+      oraclePrice: info ? parseFloat(info.oraclePx) : parseFloat(midPrice),
     };
   });
 
