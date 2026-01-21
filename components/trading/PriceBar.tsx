@@ -135,9 +135,9 @@ export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
 
   return (
     <div className="flex flex-col bg-[#0b0e11] border-b border-[#1a1d26]">
-      {/* 第一行: 主流代币涨跌幅 + 代币选择器 */}
-      <div className="h-10 flex items-center justify-between px-4">
-        {/* Left: 主流代币涨跌幅 */}
+      {/* 第一行: 主流代币涨跌幅 */}
+      <div className="h-10 flex items-center px-4">
+        {/* 主流代币涨跌幅 */}
         <div className="flex items-center">
           {isLoading ? (
             <>
@@ -158,23 +158,12 @@ export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
             ))
           )}
         </div>
-
-        {/* Right: 代币选择器 */}
-        <TokenSelector />
       </div>
 
-      {/* 第二行: 当前交易对详情 */}
+      {/* 第二行: TokenSelector（左） + 当前交易对详情（右） */}
       <div className="h-12 flex items-center px-4 gap-8 border-t border-[#1a1d26]/50">
-        {/* 当前交易对名称和图标 */}
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#f7931a] to-[#f7931a]/60 flex items-center justify-center text-white text-xs font-bold">
-            {coin.slice(0, 1)}
-          </div>
-          <span className="text-white font-semibold text-lg">{coin}/USDC</span>
-          <svg className="w-4 h-4 text-[#848e9c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
+        {/* Left: TokenSelector 代币选择器 */}
+        <TokenSelector />
 
         {/* Mark Price */}
         <div className="flex flex-col">

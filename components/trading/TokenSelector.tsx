@@ -243,19 +243,37 @@ export function TokenSelector() {
   const priceDecimals = midPrice >= 1000 ? 1 : midPrice >= 100 ? 2 : midPrice >= 10 ? 3 : 4;
   const isPositive = priceChangePercent >= 0;
 
+  // 币种颜色映射
+  const coinColors: Record<string, string> = {
+    BTC: "#f7931a",
+    ETH: "#627eea",
+    SOL: "#00d18c",
+    HYPE: "#a855f7",
+    DOGE: "#c2a633",
+    PEPE: "#4caf50",
+    ARB: "#28a0f0",
+    OP: "#ff0420",
+  };
+  const coinColor = coinColors[currentCoin] || "#848e9c";
+
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Trigger Button */}
+      {/* Trigger Button - 参照 based.one 风格 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer transition-colors",
-          "bg-[#1a1d26] hover:bg-[#252833]",
-          isOpen ? "bg-[#252833]" : ""
+          "flex items-center gap-2 cursor-pointer transition-colors",
+          "hover:opacity-80"
         )}
       >
-        <span className="text-white font-medium">{currentCoin}-USD</span>
-        <span className="text-[#848e9c]">{currentCoin}-USDC</span>
+        {/* 币种图标 */}
+        <div 
+          className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+          style={{ backgroundColor: coinColor }}
+        >
+          {currentCoin.slice(0, 1)}
+        </div>
+        <span className="text-white font-semibold text-lg">{currentCoin}/USDC</span>
         <svg 
           className={cn("w-4 h-4 text-[#848e9c] transition-transform", isOpen ? "rotate-180" : "")} 
           fill="none" 

@@ -58,11 +58,19 @@ export default function TradingViewChart({
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<TradingViewWidget | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  // 检查脚本是否已经加载（可能是之前的组件实例加载的）
+  const [scriptLoaded, setScriptLoaded] = useState(() => typeof window !== 'undefined' && !!window.TradingView);
+  const prevSymbolRef = useRef(symbol);
 
   useEffect(() => {
     if (!scriptLoaded || !chartContainerRef.current || !window.TradingView) {
       return;
+    }
+
+    // 如果 symbol 发生变化，显示加载状态
+    if (prevSymbolRef.current !== symbol) {
+      setIsLoading(true);
+      prevSymbolRef.current = symbol;
     }
 
     // 如果已经有 widget，先移除
@@ -75,6 +83,7 @@ export default function TradingViewChart({
       widgetRef.current = null;
     }
 
+    // 每次创建新的 datafeed 实例
     const datafeed = createHyperliquidDatafeed();
 
     const widgetConfig: TradingViewWidgetConfig = {

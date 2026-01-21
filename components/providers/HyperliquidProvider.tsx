@@ -47,12 +47,13 @@ export function HyperliquidProvider({
   const setCurrentCoin = useMarketStore((state) => state.setCurrentCoin);
   const setUserAddress = useUserStore((state) => state.setAddress);
 
-  // 设置初始币种
+  // 设置初始币种 - 只在组件挂载时运行一次
   useEffect(() => {
-    if (initialCoin && currentCoin !== initialCoin) {
+    if (initialCoin) {
       setCurrentCoin(initialCoin);
     }
-  }, [initialCoin, currentCoin, setCurrentCoin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 移除依赖，只在挂载时运行
 
   // 同步钱包地址到 user store
   useEffect(() => {

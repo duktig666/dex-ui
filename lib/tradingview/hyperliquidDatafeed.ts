@@ -149,6 +149,15 @@ async function loadSymbols(): Promise<void> {
  * 创建 HyperLiquid Datafeed
  */
 export function createHyperliquidDatafeed(): IBasicDataFeed {
+  // 清理旧的订阅（当创建新的 datafeed 实例时）
+  subscriptions.forEach((sub) => {
+    if (sub.unsubscribe) {
+      sub.unsubscribe();
+    }
+  });
+  subscriptions.clear();
+  console.log('[HLDatafeed] Cleared old subscriptions, creating new datafeed');
+
   return {
     onReady: (callback: OnReadyCallback) => {
       console.log('[HLDatafeed] onReady called');

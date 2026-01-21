@@ -31,7 +31,8 @@ function TradePageContent() {
         <div className="flex-1 flex flex-col min-w-0">
           {/* Chart Area */}
           <div className="flex-1 min-h-[400px]">
-            <TradingViewChart symbol={`${currentCoin}USD`} />
+            {/* 使用 key 强制在币种变化时重新挂载组件 */}
+            <TradingViewChart key={currentCoin} symbol={`${currentCoin}USD`} />
           </div>
           
           {/* Bottom: Account Panel */}
