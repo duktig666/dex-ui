@@ -1,3 +1,4 @@
+# HyperLiquid Query API 梳理
 
 ```
 ### 查看商户信息
@@ -31,5 +32,26 @@ Cookie: SESSION={{SESSION}}
 
 根据生成的文件清单、http文件、page字段映射文件，以及notes下对前端开发或使用api有帮助的文件 写一个总览，推荐阅读和参看的指南 放到notes下
 
+# HyperLiquid Exchange API 梳理
+
+当前已完成HyperLiquid查询API的梳理。
+dex-ui/notes/hyperliquid/http/hyperliquid-query.http 以http的方式梳理了API，并解释了参数和字段的含义。
+dex-ui/notes/hyperliquid/api-page-mapping.md 做了字段和页面元素的映射
+现在想要梳理HyperLiquid关于合约和现货 下单、撤单、平仓、开仓等等写接口的功能，需要有文档可以参看方便开发，
+但是下单需要钱包签名，直接http的请求并不合适，怎么方式比较推荐和整理
+最终的需求是复刻based对接Hyperliquid使用buildcode实现dex平台，所以需要全面梳理写接口
+
+先写计划再整理
+
 ---
+
+md文档需要梳理，可以再在hyperliquid-exchange.http整理写的接口，签名参数可以保留                                                                                                               
+，并且需要解释参数和返回值，格式参看hyperliquid-query.http。再确认下dex-ui/src/                                                                                                               
+types/hyperliquid对写接口的类型定义是否完全。
+梳理完成后整理 dex-ui/notes/README.md
+
+
+
+
+
 

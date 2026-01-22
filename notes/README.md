@@ -12,6 +12,7 @@
 |------|------------|
 | **新人入门** | PRD → 实现计划 → API 技术方案 |
 | **前端开发** | 类型定义 → HTTP 测试 → 页面映射 → 签名格式 |
+| **交易功能开发** | Exchange API 指南 → 交易 HTTP 参考 → exchange.ts 类型 |
 | **API 调试** | HTTP 测试文件 → 测试网指南 → 签名格式 |
 | **产品理解** | PRD → Based 调研 → 技术栈分析 |
 
@@ -24,7 +25,9 @@
 | 文档 | 路径 | 说明 |
 |------|------|------|
 | **TypeScript 类型定义** | `src/types/hyperliquid/` | 所有 API 请求/响应的 TypeScript 类型，含 JSDoc 注释 |
-| **HTTP 测试文件** | `hyperliquid/http/hyperliquid-query.http` | 可执行的 API 测试，每个接口都有详细字段注释 |
+| **查询 API 测试** | `hyperliquid/http/hyperliquid-query.http` | ⭐ /info 查询接口测试（可直接执行） |
+| **交易 API 参考** | `hyperliquid/http/hyperliquid-exchange.http` | ⭐ /exchange 写操作格式参考（需签名） |
+| **Exchange API 指南** | `hyperliquid/exchange-api-guide.md` | ⭐ 交易 API 开发指南（签名、下单、撤单等） |
 | **页面-字段映射** | `hyperliquid/api-page-mapping.md` | UI 组件与 API 字段的对应关系表 |
 | **API 技术方案** | `hyperliquid/based-hyperliquid-api-tech-claude.md` | 完整的 API 实现方案（2000+ 行） |
 
@@ -54,6 +57,7 @@ notes/
 ├── README.md                     # 本文件 - 阅读指南
 │
 ├── hyperliquid/                  # HyperLiquid API 相关
+│   ├── exchange-api-guide.md     # ⭐ Exchange API 开发指南（签名、下单）
 │   ├── api-page-mapping.md       # ⭐ 页面-字段映射表
 │   ├── based-hyperliquid-api-tech-claude.md  # ⭐ API 实现方案（详细）
 │   ├── based-hyperliquid-api-tech-gpt.md     # API 实现方案（备用）
@@ -63,7 +67,8 @@ notes/
 │   ├── api-signature-format.md   # 签名格式说明
 │   ├── hyperliquid-testnet-guide.md  # 测试网使用指南
 │   └── http/
-│       ├── hyperliquid-query.http     # ⭐ API 测试文件（带注释）
+│       ├── hyperliquid-query.http     # ⭐ 查询 API 测试（/info）
+│       ├── hyperliquid-exchange.http  # ⭐ 交易 API 参考（/exchange）
 │       ├── hyperliquid-query-backup.http  # 备份
 │       └── http-client.env.json       # 环境配置
 │
@@ -149,6 +154,22 @@ src/types/hyperliquid/            # TypeScript 类型定义
    └─ 签名格式问题排查
 ```
 
+### 路线 D: 交易功能开发 (下单/撤单/平仓)
+
+```
+1. hyperliquid/exchange-api-guide.md
+   └─ 完整的 Exchange API 开发指南
+
+2. hyperliquid/http/hyperliquid-exchange.http
+   └─ 交易 API 请求格式参考
+
+3. src/types/hyperliquid/exchange.ts
+   └─ 交易相关 TypeScript 类型
+
+4. hyperliquid/api-signature-format.md
+   └─ EIP-712 签名实现和常见错误
+```
+
 ---
 
 ## 关键 API 速查
@@ -165,6 +186,22 @@ src/types/hyperliquid/            # TypeScript 类型定义
 | `spotClearinghouseState` | 现货账户状态 | HTTP:7.3, Types:SpotClearinghouseStateRequest |
 | `frontendOpenOrders` | 挂单详情 | HTTP:6.5, Types:FrontendOpenOrdersRequest |
 | `userFills` | 成交记录 | HTTP:8.2, Types:UserFillsRequest |
+
+### 交易 API (`/exchange`)
+
+| 类型 | 用途 | 文档位置 |
+|------|------|---------|
+| `order` | 下单（永续/现货） | Guide:3.1, HTTP:1.1, Types:OrderAction |
+| `cancel` | 撤单（按订单ID） | Guide:3.2, HTTP:1.2, Types:CancelAction |
+| `cancelByCloid` | 撤单（按客户端ID） | Guide:3.2, HTTP:1.3, Types:CancelByCloidAction |
+| `modify` | 修改订单 | Guide:3.3, HTTP:1.4, Types:ModifyAction |
+| `updateLeverage` | 更新杠杆 | Guide:4.1, HTTP:2.1, Types:UpdateLeverageAction |
+| `updateIsolatedMargin` | 更新逐仓保证金 | Guide:4.2, HTTP:2.2, Types:UpdateIsolatedMarginAction |
+| `usdSend` | USDC 转账 | Guide:5.1, HTTP:3.1, Types:UsdSendAction |
+| `withdraw3` | 提现到 L1 | Guide:5.2, HTTP:3.2, Types:Withdraw3Action |
+| `usdClassTransfer` | 永续↔现货互转 | Guide:5.3, HTTP:3.4, Types:UsdClassTransferAction |
+| `approveBuilderFee` | 授权 Builder 费率 | Guide:7.2, HTTP:5.1, Types:ApproveBuilderFeeAction |
+| `approveAgent` | 授权 API 钱包 | Guide:8.1, HTTP:6.1, Types:ApproveAgentAction |
 
 ### WebSocket 订阅
 
@@ -259,5 +296,6 @@ import { getPerpAssetId, getSpotAssetId, isSpotAsset } from '@/types/hyperliquid
 
 | 日期 | 更新内容 |
 |------|---------|
+| 2026-01-22 | 新增 Exchange API 开发指南、交易 API HTTP 参考文件、更新 Withdraw3 类型 |
 | 2026-01-22 | 创建 TypeScript 类型定义、增强 HTTP 测试文件、创建页面映射文档 |
 | - | 初始化项目文档结构 |

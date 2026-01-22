@@ -161,9 +161,23 @@ export interface UsdSendAction {
   time: number;
 }
 
-/** 提现动作 - Withdraw2 (提现到 L1) */
+/**
+ * 提现动作 - Withdraw2 (提现到 L1)
+ * @deprecated 请使用 Withdraw3Action
+ */
 export interface Withdraw2Action {
   type: 'withdraw2';
+  /** 接收地址 */
+  destination: string;
+  /** 提现金额 */
+  amount: string;
+  /** 发送时间 */
+  time: number;
+}
+
+/** 提现动作 - Withdraw3 (提现到 L1) - 推荐使用 */
+export interface Withdraw3Action {
+  type: 'withdraw3';
   /** 接收地址 */
   destination: string;
   /** 提现金额 */
@@ -280,6 +294,7 @@ export type ExchangeAction =
   | UpdateIsolatedMarginAction
   | UsdSendAction
   | Withdraw2Action
+  | Withdraw3Action
   | SpotSendAction
   | UsdClassTransferAction
   | SubAccountTransferAction
