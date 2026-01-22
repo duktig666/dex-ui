@@ -36,7 +36,7 @@ import type {
   TwapCancelResponse,
 } from './types';
 import { floatToWire, normalizeAddress, generateNonce } from './utils';
-import { signL1Action, signUserSignedAction } from './signing';
+import { signL1Action, signUserSignedAction, parseSignature } from './signing';
 
 /**
  * HyperLiquid Info API 客户端
@@ -373,6 +373,40 @@ export class HyperliquidExchangeClient {
   }
 
   /**
+   * 发送用户签名操作到 /exchange 端点
+   * 使用 {r, s, v} 格式的签名 (approveBuilderFee 等)
+   */
+  private async postUserSignedAction<T extends object>(
+    action: T,
+    signature: string,
+    nonce: number
+  ): Promise<ExchangeResponse> {
+    const parsedSig = parseSignature(signature);
+    
+    const body = {
+      action: action as Record<string, unknown>,
+      nonce,
+      signature: parsedSig,
+    };
+
+    const response = await fetch(`${this.baseUrl}/exchange`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[postUserSignedAction] Error response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
    * 检查并授权 Builder Fee
    */
   async checkAndApproveBuilderFee(
@@ -399,12 +433,13 @@ export class HyperliquidExchangeClient {
       hyperliquidChain: CURRENT_NETWORK.isTestnet ? 'Testnet' : 'Mainnet',
       signatureChainId: CURRENT_NETWORK.signatureChainId,
       maxFeeRate: `${requiredFee / 10000}%`,
-      builder: BUILDER_ADDRESS,
+      builder: BUILDER_ADDRESS.toLowerCase(), // Builder 地址必须小写
       nonce,
     };
 
     const signature = await signUserSignedAction(action, signTypedData, CURRENT_NETWORK.isTestnet);
-    const response = await this.postSigned(action, signature, nonce);
+    // approveBuilderFee 使用 {r, s, v} 格式的签名
+    const response = await this.postUserSignedAction(action, signature, nonce);
 
     return response.status === 'ok';
   }

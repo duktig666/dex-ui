@@ -4,6 +4,27 @@
 
 import { L1_ACTION_DOMAIN, EIP712_DOMAIN, IS_TESTNET } from './constants';
 
+export interface ParsedSignature {
+  r: string;
+  s: string;
+  v: number;
+}
+
+/**
+ * 解析签名字符串为 r, s, v 格式
+ * Hyperliquid API 需要这种格式
+ */
+export function parseSignature(signature: string): ParsedSignature {
+  // 移除 0x 前缀（如果有）
+  const sig = signature.startsWith('0x') ? signature.slice(2) : signature;
+  
+  const r = '0x' + sig.slice(0, 64);
+  const s = '0x' + sig.slice(64, 128);
+  const v = parseInt(sig.slice(128, 130), 16);
+
+  return { r, s, v };
+}
+
 // 定义签名函数类型
 type SignTypedDataFn = (params: {
   domain: Record<string, unknown>;
@@ -128,7 +149,7 @@ function buildUserSignedActionTypedData(
       message: {
         hyperliquidChain: action.hyperliquidChain,
         maxFeeRate: action.maxFeeRate,
-        builder: action.builder,
+        builder: (action.builder as string).toLowerCase(), // 必须小写
         nonce: action.nonce,
       },
     };

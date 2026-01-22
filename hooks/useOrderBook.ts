@@ -130,7 +130,7 @@ export function useOrderBook(coin: string, maxLevels: number = 20) {
 
     return {
       bids: processedBids,
-      asks: processedAsks.reverse(), // UI 通常显示 asks 从低到高
+      asks: processedAsks, // asks 保持 API 返回的降序（高价在上）
       spread,
       spreadPercent,
       midPrice,

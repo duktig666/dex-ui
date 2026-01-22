@@ -18,4 +18,5 @@ export { infoClient, exchangeClient, HyperliquidInfoClient, HyperliquidExchangeC
 export { hyperliquidWs, HyperliquidWebSocket } from './websocket';
 
 // 签名
-export { signL1Action, signUserSignedAction, signUsdTransfer, signWithdraw } from './signing';
+export { signL1Action, signUserSignedAction, signUsdTransfer, signWithdraw, parseSignature } from './signing';
+export type { ParsedSignature } from './signing';
