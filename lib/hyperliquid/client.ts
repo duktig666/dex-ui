@@ -428,11 +428,14 @@ export class HyperliquidExchangeClient {
 
     // 需要授权
     const nonce = generateNonce();
+    // BUILDER_FEE_PERP 单位是 basis point (bp)，1 bp = 0.01%
+    // 例如: requiredFee = 1 -> maxFeeRate = "0.01%"
+    const feePercent = requiredFee * 0.01;
     const action: ApproveBuilderFeeAction = {
       type: 'approveBuilderFee',
       hyperliquidChain: CURRENT_NETWORK.isTestnet ? 'Testnet' : 'Mainnet',
       signatureChainId: CURRENT_NETWORK.signatureChainId,
-      maxFeeRate: `${requiredFee / 10000}%`,
+      maxFeeRate: `${feePercent}%`,
       builder: BUILDER_ADDRESS.toLowerCase(), // Builder 地址必须小写
       nonce,
     };
