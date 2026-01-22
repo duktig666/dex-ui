@@ -340,6 +340,7 @@ export class HyperliquidExchangeClient {
 
   /**
    * 发送签名请求到 /exchange 端点
+   * 所有 Exchange API 都需要 {r, s, v} 格式的签名
    */
   private async postSigned<T extends object>(
     action: T,
@@ -347,15 +348,20 @@ export class HyperliquidExchangeClient {
     nonce: number,
     vaultAddress?: string
   ): Promise<ExchangeResponse> {
+    // 解析签名为 {r, s, v} 格式
+    const parsedSig = parseSignature(signature);
+    
     const body: Record<string, unknown> = {
       action: action as Record<string, unknown>,
       nonce,
-      signature,
+      signature: parsedSig,
     };
 
     if (vaultAddress) {
       body.vaultAddress = vaultAddress;
     }
+
+    console.log('[postSigned] Request:', JSON.stringify(body, null, 2));
 
     const response = await fetch(`${this.baseUrl}/exchange`, {
       method: 'POST',
@@ -366,7 +372,9 @@ export class HyperliquidExchangeClient {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('[postSigned] Error response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
     }
 
     return response.json();
