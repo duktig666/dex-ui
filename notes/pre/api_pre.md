@@ -21,3 +21,15 @@ Cookie: SESSION={{SESSION}}
 
 ---
 
+现在Hyperliquid的查询API已经梳理到 dex-ui/notes/hyperliquid/based-hyperliquid-api-tech-claude.md 和 dex-ui/notes/hyperliquid/http/hyperliquid-query.http，但是其响应的结构比较复杂。
+最终的需求是复刻based对接Hyperliquid使用buildcode实现dex平台，我需要理解每个接口参数字段和返回值字段的含义，并且可以对应到页面上的展示，并有文档可以输出对应。
+怎样的形式比较好解决这些需求和问题？
+
+参看 [api-plan.md](../plan/api-plan.md)
+
+---
+
+根据生成的文件清单、http文件、page字段映射文件，以及notes下对前端开发或使用api有帮助的文件 写一个总览，推荐阅读和参看的指南 放到notes下
+
+---
+
