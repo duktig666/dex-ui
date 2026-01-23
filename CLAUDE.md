@@ -4,103 +4,148 @@
 
 ## 项目概述
 
-本项目用于**调研和分析 DEX API**，核心目标是基于 **HyperLiquid + BuildCode** 模式实现一套新的 DEX 前端。
+基于 **HyperLiquid + BuildCode** 模式的第三方 DEX 前端，通过 BuildCode 机制获取用户交易手续费分成。
 
-### 核心目标
-1. 分析 HyperLiquid 交易 API（REST + WebSocket）
-2. 研究 Based.one 的实现方式
-3. 基于 BuildCode 机制开发新的 DEX 前端
+### 商业模式
+- **收益来源**：BuildCode 机制获取交易手续费分成
+- **费率上限**：永续合约 0.1%，现货交易 1%
+- **前置条件**：Builder 地址需存入 100+ USDC
 
 ### 参考项目
-- **HyperLiquid**: 高性能去中心化衍生品交易所
-- **Based.one**: 基于 HyperLiquid BuildCode 的第三方交易平台
+- **HyperLiquid**: 底层交易协议
+- **Based.one**: 同类 BuildCode 产品
 
 ## 语言规则
 
-- **代码**: 使用英文（变量名、函数名）注释使用中文
-- **文档**: 使用中文（分析报告、设计文档、README）
-- **回答**: 使用中文
+- **代码**: 英文（变量名、函数名），中文注释
+- **文档**: 中文
+- **回答**: 中文
+
+## 前端技术栈
+
+| 类别 | 技术选型 | 说明 |
+|------|----------|------|
+| 核心框架 | React + Next.js App Router | UI + 文件路由 |
+| 状态管理 | Zustand | 轻量级状态管理 |
+| 样式 | Tailwind CSS + Stitches | 原子化 CSS + CSS-in-JS |
+| UI 组件 | shadcn/ui | 基于 Radix UI |
+| K线图表 | TradingView | 专业金融图表 |
+| 钱包连接 | Reown AppKit + wagmi | Web3 钱包集成 |
+| 代码规范 | ESLint + Prettier | 语法检查 + 格式化 |
 
 ## 目录结构
 
 ```
-dex-api/
+dex-ui/
 ├── notes/
-│   ├── pre/                # 前期调研材料
-│   │   └── based-hyperliquid-pre.md
-│   └── plan/               # 实现计划
-│       └── hyperliquid-dex-plan.md
-└── src/                    # 源代码（待开发）
+│   ├── hyperliquid/
+│   │   ├── http/                    # HTTP 调试文件
+│   │   │   ├── hyperliquid-query.http     # Info API 调试
+│   │   │   ├── hyperliquid-exchange.http  # Exchange API 调试
+│   │   │   └── http-client.env.json       # 环境配置
+│   │   ├── exchange-api-guide.md    # Exchange API 开发指南
+│   │   └── prd.md                   # 产品需求文档
+│   ├── pre/                         # 前期调研材料
+│   └── plan/                        # 实现计划
+└── src/                             # 源代码
 ```
-## HyperLiquid API 概览
 
-### REST API
-- **主网**: `https://api.hyperliquid.xyz`
-- **测试网**: `https://api.hyperliquid-testnet.xyz`
+## HyperLiquid API
 
-### WebSocket
-- **地址**: `wss://api.hyperliquid.xyz/ws`
+### API 端点
+
+| 环境 | REST API | WebSocket |
+|------|----------|-----------|
+| 主网 | `https://api.hyperliquid.xyz` | `wss://api.hyperliquid.xyz/ws` |
+| 测试网 | `https://api.hyperliquid-testnet.xyz` | `wss://api.hyperliquid-testnet.xyz/ws` |
 
 ### 主要端点
-| 端点 | 用途 |
-|------|------|
-| POST /info | 查询数据（元数据、订单簿、持仓等） |
-| POST /exchange | 交易操作（下单、取消、修改等） |
 
-## BuildCode 机制
+| 端点 | 用途 | 签名 |
+|------|------|------|
+| POST /info | 查询数据（元数据、订单簿、持仓等） | 无需 |
+| POST /exchange | 交易操作（下单、取消、修改等） | 需要 EIP-712 |
 
-BuildCode 允许第三方平台通过代发交易获取部分手续费：
+### HTTP 调试
 
-1. **前置条件**: Builder 地址需存入 100+ USDC
-2. **费率限制**: 永续最高 0.1%，现货最高 1%
-3. **用户授权**: 首次交易需签署 `ApproveBuilderFee`
-4. **订单附加**: 每笔订单携带 `builder` 参数
+使用 IDE（如 IntelliJ/VS Code）执行 `.http` 文件进行 API 调试：
 
-## 核心功能模块
+```
+notes/hyperliquid/http/
+├── hyperliquid-query.http      # Info API（无需签名）
+├── hyperliquid-exchange.http   # Exchange API（需签名，仅格式参考）
+└── http-client.env.json        # 环境配置（mainnet/testnet）
+```
 
-1. **交易页面**: 永续合约 (`/BTC`) + 现货 (`/HYPE/USDC`)
-2. **投资组合**: 余额、持仓、订单历史
-3. **Vault**: 存入、取出、收益查看
-4. **钱包**: 连接、签名、API 钱包管理
+**环境选择**：`mainnet` / `mainnet-demo` / `testnet` / `testnet-demo`
+
+### Info API 常用查询
+
+| type | 用途 | 返回 |
+|------|------|------|
+| `meta` | 永续合约列表 | 交易对、精度、杠杆上限 |
+| `metaAndAssetCtxs` | 永续 + 实时数据 | 资金费率、成交量、价格 |
+| `spotMeta` | 现货代币/交易对 | 代币列表、精度 |
+| `spotMetaAndAssetCtxs` | 现货 + 实时数据 | 价格、成交量 |
+| `l2Book` | 订单簿 | 买卖盘深度 |
+| `candleSnapshot` | K线数据 | OHLCV |
+| `clearinghouseState` | 永续账户状态 | 余额、持仓、保证金 |
+| `spotClearinghouseState` | 现货余额 | 代币余额 |
+| `frontendOpenOrders` | 当前挂单 | 订单详情 |
+| `maxBuilderFee` | Builder 授权状态 | 已授权费率 |
+
+### Exchange API 操作类型
+
+| type | 用途 | 签名方法 |
+|------|------|----------|
+| `order` | 下单 | signL1Action |
+| `cancel` | 撤单 | signL1Action |
+| `modify` | 修改订单 | signL1Action |
+| `updateLeverage` | 更新杠杆 | signL1Action |
+| `approveBuilderFee` | 授权 Builder 费率 | signUserSignedAction |
+| `usdSend` | USDC 转账 | signUserSignedAction |
+| `withdraw3` | 提现到 L1 | signUserSignedAction |
+| `vaultDeposit` | 存入 Vault | signL1Action |
+| `vaultWithdraw` | 取出 Vault | signL1Action |
+
+> 详细参数见 `notes/hyperliquid/exchange-api-guide.md`
+
+## BuildCode 集成流程
+
+```
+1. 用户连接钱包
+   ↓
+2. 查询 maxBuilderFee 检查授权状态
+   ↓
+3. 未授权 → 弹窗引导签名 approveBuilderFee
+   ↓
+4. 下单时附加 builder 参数: { b: "地址", f: 10 }
+   ↓
+5. 每笔成交自动收取费用
+```
 
 ## 关键文档
 
-- 实现计划: `notes/plan/hyperliquid-dex-plan.md`
-
-## HyperLiquid API 参考文档
-
-### 核心交易 API
 | 文档 | 说明 |
 |------|------|
-| [Builder Codes](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/builder-codes) | 第三方通过 BuildCode 获取交易费用收益 |
-| [Exchange Endpoint](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/exchange-endpoint) | 交易操作 API（下单、取消、修改等） |
-| [Info - Perpetuals](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/perpetuals) | 永续合约查询 API |
-| [Info - Spot](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot) | 现货交易查询 API |
+| `notes/hyperliquid/prd.md` | 产品需求文档 |
+| `notes/hyperliquid/exchange-api-guide.md` | Exchange API 开发指南 |
+| `notes/hyperliquid/http/*.http` | API 调试文件 |
+
+## HyperLiquid 官方文档
+
+### 核心 API
+- [Builder Codes](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/builder-codes) - BuildCode 机制
+- [Exchange Endpoint](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/exchange-endpoint) - 交易操作
+- [Info - Perpetuals](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/perpetuals) - 永续查询
+- [Info - Spot](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot) - 现货查询
+- [Signing](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/signing) - EIP-712 签名
 
 ### WebSocket
-| 文档 | 说明 |
-|------|------|
-| [WebSocket 概览](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket) | WebSocket 连接基础 |
-| [Subscriptions](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions) | 订阅类型（订单簿、成交、K线等） |
-| [Post Requests](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/post-requests) | 通过 WebSocket 发送请求 |
-| [Timeouts & Heartbeats](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/timeouts-and-heartbeats) | 连接保活机制 |
+- [Subscriptions](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions) - 订阅类型
+- [Timeouts & Heartbeats](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/timeouts-and-heartbeats) - 连接保活
 
-### 概念与规范
-| 文档 | 说明 |
-|------|------|
-| [Notation](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/notation) | API 符号与术语说明 |
-| [Asset IDs](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/asset-ids) | 资产 ID 规则（永续=index，现货=10000+index） |
-| [Tick & Lot Size](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size) | 价格精度与数量精度 |
-| [Nonces & API Wallets](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/nonces-and-api-wallets) | Nonce 规则与 API 钱包 |
-| [Signing](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/signing) | EIP-712 签名实现 |
-
-### 补充文档
-| 文档 | 说明 |
-|------|------|
-| [Error Responses](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/error-responses) | 错误码与处理 |
-| [Rate Limits](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/rate-limits-and-user-limits) | 请求频率限制 |
-| [Activation Gas Fee](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/activation-gas-fee) | 账户激活费用 |
-| [Optimizing Latency](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/optimizing-latency) | 延迟优化建议 |
-| [Bridge2](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/bridge2) | 跨链桥接口 |
-| [HIP-1/HIP-2 Assets](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/deploying-hip-1-and-hip-2-assets) | 资产部署 |
-| [HIP-3 Deployer](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/hip-3-deployer-actions) | HIP-3 部署操作 |
+### 规范
+- [Asset IDs](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/asset-ids) - 资产 ID（永续=index，现货=10000+index）
+- [Tick & Lot Size](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size) - 精度规则
+- [Rate Limits](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/rate-limits-and-user-limits) - 频率限制

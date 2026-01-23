@@ -1,3 +1,20 @@
+# 技术栈
+dex-ui前端技术栈：
+1. 核心框架使用React
+2. App路由 Next.js Router
+3. 状态管理 Zustand
+4. 样式+UI框架 shadcn/ui + Tailwind + Stitches 组合
+5. k线和图表 tradeview
+6. 钱包 Reown Appkit钱包链接 + wagmi
+7. 多语言: i18n
+8. 语法规范 eslint+ prettier
+
+将上述技术栈 简介的整理到 CLAUDE.md
+
+---
+
+遵循cursor的规范 将CLAUDE.md的规范整理和输出到 .cursorrules
+
 # HyperLiquid Query API 梳理
 
 ```
@@ -51,7 +68,7 @@ types/hyperliquid对写接口的类型定义是否完全。
 梳理完成后整理 dex-ui/notes/README.md
 
 
-
-
-
+HyperLiquid API http调用参看notes/hyperliquid/http
+exchange-api-guide.md  交易api的使用
+prd 参看prd.md
 
