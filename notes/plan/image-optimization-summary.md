@@ -19,6 +19,7 @@
 ### 1. Partners (Backed By) 区块 ✅
 
 **优化内容**:
+
 - 使用真实 SVG Logo 图片
 - 添加 `opacity-50 hover:opacity-100` 过渡效果
 - 间距调整为 `gap-12 lg:gap-16` 匹配原站
@@ -29,6 +30,7 @@
 ### 2. Predictions 预测市场区块 ✅
 
 **优化内容**:
+
 - 使用真实人物图片 (powell.png, trump.png)
 - **精确匹配 based.one 的定位**:
   - Powell: `bottom: 25.3281px, left: 169.148px, transform: matrix(1.15, 0, 0, 1.15, -199, 0)`
@@ -42,6 +44,7 @@
 ### 3. Borderless Spending 卡片区块 ✅
 
 **优化内容**:
+
 - **精确的 7x3 网格布局** (21 个卡片)
 - 主卡片位置: 第 3、10、17 个位置 (每行中心)
 - 主卡片样式:
@@ -56,6 +59,7 @@
 ### 4. Trade Crypto 24/7 区块 ✅
 
 **优化内容**:
+
 - 使用 `trading-app.png` 作为背景图片
 - 背景位置: `top: 10%`, 透明度 `opacity-10`
 - 添加网格图案叠加层
@@ -66,8 +70,9 @@
 ### 5. Features 功能展示区块 ✅
 
 **优化内容**:
+
 - **HyENA 区块**: 使用 `based-logo-white.svg`，尺寸 `53.3281px x 16px`，`opacity: 0.8`
-- **Multi-channel 区块**: 
+- **Multi-channel 区块**:
   - Desktop: `trade-screen.png` (512px x 400px)
   - Mobile: `mobile-screen.png` (170.664px x 347.914px)
 - 精确匹配 based.one 的图片尺寸
@@ -77,6 +82,7 @@
 ## 关键样式匹配点
 
 ### 卡片网格布局
+
 ```css
 /* 7 列网格 */
 grid-template-columns: repeat(7, 1fr);
@@ -88,6 +94,7 @@ filter: drop-shadow(rgba(0, 0, 0, 0.15) 0px 25px 25px);
 ```
 
 ### 预测市场人物图片
+
 ```css
 /* 精确的绝对定位 */
 position: absolute;
@@ -98,6 +105,7 @@ transform: matrix(1.15, 0, 0, 1.15, -199, 0);
 ```
 
 ### 合作伙伴 Logo
+
 ```css
 opacity: 0.5;
 transition: opacity 0.3s;
@@ -122,4 +130,3 @@ npm run dev
 ```
 
 访问 http://localhost:3000 查看复刻效果。
-

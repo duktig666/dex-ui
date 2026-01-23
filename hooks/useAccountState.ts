@@ -15,7 +15,7 @@ import { infoClient, hyperliquidWs, BUILDER_ADDRESS } from '@/lib/hyperliquid';
  */
 export function useAccountState() {
   const { address, isConnected } = useAccount();
-  
+
   const {
     marginSummary,
     positions,
@@ -131,36 +131,36 @@ export function useAccountState() {
     // 连接状态
     address,
     isConnected,
-    
+
     // 账户数据
     accountValue,
     availableBalance,
     totalMarginUsed,
     totalUnrealizedPnl,
     marginSummary,
-    
+
     // 持仓
     positions,
     formattedPositions,
     positionsCount: positions.length,
-    
+
     // 订单
     openOrders,
     formattedOrders,
     ordersCount: openOrders.length,
-    
+
     // 成交
     userFills,
-    
+
     // Builder Fee
     builderFeeApproved,
     builderFeeChecking,
-    
+
     // 状态
     isLoading,
     isInitialized,
     error,
-    
+
     // 方法
     refetch: fetchAccountData,
     checkBuilderFee,

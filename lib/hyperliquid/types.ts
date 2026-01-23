@@ -62,7 +62,7 @@ export interface MetaAndAssetCtxs {
 export interface L2BookLevel {
   px: string; // 价格
   sz: string; // 数量
-  n: number;  // 订单数量
+  n: number; // 订单数量
 }
 
 export interface L2Book {
@@ -74,16 +74,16 @@ export interface L2Book {
 // ==================== K线数据 ====================
 
 export interface Candle {
-  t: number;  // 开盘时间 (毫秒)
-  T: number;  // 收盘时间 (毫秒)
-  s: string;  // 交易对
-  i: string;  // 时间间隔
-  o: string;  // 开盘价
-  c: string;  // 收盘价
-  h: string;  // 最高价
-  l: string;  // 最低价
-  v: string;  // 成交量
-  n: number;  // 成交笔数
+  t: number; // 开盘时间 (毫秒)
+  T: number; // 收盘时间 (毫秒)
+  s: string; // 交易对
+  i: string; // 时间间隔
+  o: string; // 开盘价
+  c: string; // 收盘价
+  h: string; // 最高价
+  l: string; // 最低价
+  v: string; // 成交量
+  n: number; // 成交笔数
 }
 
 export interface CandleSnapshot {
@@ -113,19 +113,19 @@ export interface RecentTrades {
 
 export interface Position {
   coin: string;
-  szi: string;          // 持仓数量 (有符号, 正=多, 负=空)
+  szi: string; // 持仓数量 (有符号, 正=多, 负=空)
   leverage: {
     type: 'cross' | 'isolated';
     value: number;
-    rawUsd?: string;    // 逐仓保证金金额
+    rawUsd?: string; // 逐仓保证金金额
   };
-  entryPx: string;      // 入场价格
+  entryPx: string; // 入场价格
   positionValue: string; // 持仓价值
   unrealizedPnl: string; // 未实现盈亏
   returnOnEquity: string; // 收益率
   liquidationPx: string | null; // 强平价格
-  marginUsed: string;    // 已用保证金
-  maxLeverage: number;   // 最大杠杆
+  marginUsed: string; // 已用保证金
+  maxLeverage: number; // 最大杠杆
   cumFunding: {
     allTime: string;
     sinceOpen: string;
@@ -134,11 +134,11 @@ export interface Position {
 }
 
 export interface MarginSummary {
-  accountValue: string;     // 账户净值
-  totalNtlPos: string;      // 总持仓名义价值
-  totalRawUsd: string;      // 总保证金
-  totalMarginUsed: string;  // 已用保证金
-  withdrawable: string;     // 可提取金额
+  accountValue: string; // 账户净值
+  totalNtlPos: string; // 总持仓名义价值
+  totalRawUsd: string; // 总保证金
+  totalMarginUsed: string; // 已用保证金
+  withdrawable: string; // 可提取金额
 }
 
 export interface ClearinghouseState {
@@ -156,10 +156,10 @@ export interface ClearinghouseState {
 
 export interface SpotBalance {
   coin: string;
-  hold: string;    // 冻结数量
-  total: string;   // 总数量
+  hold: string; // 冻结数量
+  total: string; // 总数量
   entryNtl: string; // 入场名义价值
-  token: number;    // token index
+  token: number; // token index
 }
 
 export interface SpotClearinghouseState {
@@ -245,13 +245,13 @@ export interface FundingHistory {
 // ==================== 订单请求 ====================
 
 export interface OrderRequest {
-  a: number;        // asset index
-  b: boolean;       // true = buy, false = sell
-  p: string;        // price
-  s: string;        // size
-  r: boolean;       // reduce only
-  t: OrderTrigger;  // order type/trigger
-  c?: string;       // client order id (cloid)
+  a: number; // asset index
+  b: boolean; // true = buy, false = sell
+  p: string; // price
+  s: string; // size
+  r: boolean; // reduce only
+  t: OrderTrigger; // order type/trigger
+  c?: string; // client order id (cloid)
 }
 
 export interface OrderTrigger {
@@ -281,8 +281,8 @@ export interface PlaceOrderAction {
   orders: OrderWire[];
   grouping: 'na' | 'normalTpsl' | 'positionTpsl';
   builder?: {
-    b: string;  // builder address
-    f: number;  // fee in tenths of a basis point
+    b: string; // builder address
+    f: number; // fee in tenths of a basis point
   };
   [key: string]: unknown;
 }
@@ -290,8 +290,8 @@ export interface PlaceOrderAction {
 export interface CancelOrderAction {
   type: 'cancel';
   cancels: Array<{
-    a: number;  // asset index
-    o: number;  // order id
+    a: number; // asset index
+    o: number; // order id
   }>;
   [key: string]: unknown;
 }
@@ -507,19 +507,19 @@ export interface FormattedOrder {
 export interface TwapOrderParams {
   coin: string;
   isBuy: boolean;
-  sz: string;            // 总数量
+  sz: string; // 总数量
   reduceOnly: boolean;
-  minutes: number;       // 执行时长（分钟）
-  randomize: boolean;    // 是否随机化执行间隔
+  minutes: number; // 执行时长（分钟）
+  randomize: boolean; // 是否随机化执行间隔
 }
 
 export interface TwapOrderWire {
-  a: number;              // asset index
-  b: boolean;             // true = buy, false = sell
-  s: string;              // size
-  r: boolean;             // reduce only
-  m: number;              // duration in minutes
-  t: boolean;             // randomize (true = randomize intervals)
+  a: number; // asset index
+  b: boolean; // true = buy, false = sell
+  s: string; // size
+  r: boolean; // reduce only
+  m: number; // duration in minutes
+  t: boolean; // randomize (true = randomize intervals)
 }
 
 export interface PlaceTwapOrderAction {
@@ -530,8 +530,8 @@ export interface PlaceTwapOrderAction {
 
 export interface CancelTwapOrderAction {
   type: 'twapCancel';
-  a: number;              // asset index
-  t: number;              // twap id
+  a: number; // asset index
+  t: number; // twap id
   [key: string]: unknown;
 }
 
@@ -587,7 +587,7 @@ export interface FormattedTwapOrder {
   totalSize: number;
   filledSize: number;
   remainingSize: number;
-  progress: number;       // 0-100 百分比
+  progress: number; // 0-100 百分比
   durationMinutes: number;
   randomize: boolean;
   reduceOnly: boolean;
@@ -600,15 +600,15 @@ export interface FormattedTwapOrder {
 // ==================== Trailing Stop 订单 (前端管理) ====================
 
 export interface TrailingStopOrder {
-  id: string;                    // 唯一标识
+  id: string; // 唯一标识
   coin: string;
-  side: OrderSide;               // 触发方向: buy (做多止损/做空止盈), sell (做多止盈/做空止损)
-  size: string;                  // 数量
-  trailValue: string;            // 回撤值 (可以是百分比或固定价差)
+  side: OrderSide; // 触发方向: buy (做多止损/做空止盈), sell (做多止盈/做空止损)
+  size: string; // 数量
+  trailValue: string; // 回撤值 (可以是百分比或固定价差)
   trailType: 'percent' | 'price'; // 回撤类型
-  triggerPrice: string | null;   // 当前触发价格 (动态更新)
-  highestPrice: string | null;   // 追踪的最高价 (sell方向)
-  lowestPrice: string | null;    // 追踪的最低价 (buy方向)
+  triggerPrice: string | null; // 当前触发价格 (动态更新)
+  highestPrice: string | null; // 追踪的最高价 (sell方向)
+  lowestPrice: string | null; // 追踪的最低价 (buy方向)
   createdAt: number;
   status: 'active' | 'triggered' | 'cancelled';
   reduceOnly: boolean;

@@ -59,7 +59,9 @@ export default function TradingViewChart({
   const widgetRef = useRef<TradingViewWidget | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // 检查脚本是否已经加载（可能是之前的组件实例加载的）
-  const [scriptLoaded, setScriptLoaded] = useState(() => typeof window !== 'undefined' && !!window.TradingView);
+  const [scriptLoaded, setScriptLoaded] = useState(
+    () => typeof window !== 'undefined' && !!window.TradingView
+  );
   const prevSymbolRef = useRef(symbol);
 
   useEffect(() => {

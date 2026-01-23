@@ -17,13 +17,13 @@ interface NetworkWarningProps {
 }
 
 export function NetworkWarning({ dismissible = false, compact = false }: NetworkWarningProps) {
-  const { 
-    isConnected, 
-    isCorrectNetwork, 
-    expectedNetworkName, 
+  const {
+    isConnected,
+    isCorrectNetwork,
+    expectedNetworkName,
     currentNetworkName,
     switchToCorrectNetwork,
-    isSwitching 
+    isSwitching,
   } = useNetworkCheck();
   const [dismissed, setDismissed] = useState(false);
 
@@ -54,8 +54,8 @@ export function NetworkWarning({ dismissible = false, compact = false }: Network
     <div className="relative flex items-center justify-center gap-3 px-4 py-2 bg-yellow-500/10 border-b border-yellow-500/30">
       <AlertTriangle className="w-4 h-4 text-yellow-500" />
       <span className="text-yellow-500 text-sm">
-        You&apos;re connected to <span className="font-medium">{currentNetworkName}</span>. 
-        Please switch to <span className="font-medium">{expectedNetworkName}</span> to use this app.
+        You&apos;re connected to <span className="font-medium">{currentNetworkName}</span>. Please
+        switch to <span className="font-medium">{expectedNetworkName}</span> to use this app.
       </span>
       <button
         onClick={switchToCorrectNetwork}
@@ -65,7 +65,7 @@ export function NetworkWarning({ dismissible = false, compact = false }: Network
         {isSwitching ? 'Switching...' : 'Switch Network'}
       </button>
       {dismissible && (
-        <button 
+        <button
           onClick={() => setDismissed(true)}
           className="absolute right-2 p-1 text-yellow-500/70 hover:text-yellow-500"
         >
@@ -87,7 +87,13 @@ interface NetworkGateProps {
 }
 
 export function NetworkGate({ children, fallback }: NetworkGateProps) {
-  const { isConnected, isCorrectNetwork, expectedNetworkName, switchToCorrectNetwork, isSwitching } = useNetworkCheck();
+  const {
+    isConnected,
+    isCorrectNetwork,
+    expectedNetworkName,
+    switchToCorrectNetwork,
+    isSwitching,
+  } = useNetworkCheck();
 
   if (!isConnected) {
     return <>{children}</>;
@@ -97,7 +103,7 @@ export function NetworkGate({ children, fallback }: NetworkGateProps) {
     if (fallback) {
       return <>{fallback}</>;
     }
-    
+
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
         <AlertTriangle className="w-12 h-12 text-yellow-500" />

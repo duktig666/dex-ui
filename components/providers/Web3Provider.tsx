@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { type ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider, type State } from "wagmi";
-import { createAppKit } from "@reown/appkit/react";
-import { config, projectId, networks, wagmiAdapter } from "@/lib/wagmi/config";
+import { type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider, type State } from 'wagmi';
+import { createAppKit } from '@reown/appkit/react';
+import { config, projectId, networks, wagmiAdapter } from '@/lib/wagmi/config';
 
 // Create query client
 const queryClient = new QueryClient();
 
 // App metadata
 const metadata = {
-  name: "Hermes DEX",
-  description: "Hermes Decentralized Exchange - Trade Perpetuals and Spot",
-  url: "https://hermes.trade",
-  icons: ["https://hermes.trade/favicon.ico"],
+  name: 'Hermes DEX',
+  description: 'Hermes Decentralized Exchange - Trade Perpetuals and Spot',
+  url: 'https://hermes.trade',
+  icons: ['https://hermes.trade/favicon.ico'],
 };
 
 // Create AppKit modal
@@ -28,10 +28,10 @@ createAppKit({
     email: false,
     socials: false,
   },
-  themeMode: "dark",
+  themeMode: 'dark',
   themeVariables: {
-    "--w3m-accent": "#0ecb81",
-    "--w3m-border-radius-master": "2px",
+    '--w3m-accent': '#0ecb81',
+    '--w3m-border-radius-master': '2px',
   },
 });
 

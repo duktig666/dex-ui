@@ -4,7 +4,7 @@
  */
 
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { WS_URL, WS_PING_INTERVAL, CURRENT_NETWORK } from './constants';
+import { WS_URL, WS_PING_INTERVAL } from './constants';
 import type {
   WsSubscription,
   WsL2BookSubscription,
@@ -90,10 +90,10 @@ export class HyperliquidWebSocket {
         console.log('[HyperliquidWS] Connected');
         this.isConnected = true;
         this.startPing();
-        
+
         // 重新订阅所有活跃订阅
         this.resubscribeAll();
-        
+
         // 处理待订阅队列
         this.processPendingSubscriptions();
 
@@ -184,12 +184,17 @@ export class HyperliquidWebSocket {
   /**
    * 发送订阅/取消订阅请求
    */
-  private sendSubscription(subscription: WsSubscription, method: 'subscribe' | 'unsubscribe'): void {
+  private sendSubscription(
+    subscription: WsSubscription,
+    method: 'subscribe' | 'unsubscribe'
+  ): void {
     if (this.ws && this.isConnected) {
-      this.ws.send(JSON.stringify({
-        method,
-        subscription,
-      }));
+      this.ws.send(
+        JSON.stringify({
+          method,
+          subscription,
+        })
+      );
     }
   }
 
@@ -206,7 +211,7 @@ export class HyperliquidWebSocket {
       }
 
       // 分发消息到对应的订阅
-      for (const [key, sub] of this.subscriptions) {
+      for (const [_key, sub] of this.subscriptions) {
         if (this.matchesSubscription(message, sub.subscription)) {
           sub.callbacks.forEach((callback) => {
             try {
@@ -316,7 +321,11 @@ export class HyperliquidWebSocket {
   /**
    * 订阅 K 线数据
    */
-  subscribeCandle(coin: string, interval: string, callback: SubscriptionCallback<WsCandleData>): () => void {
+  subscribeCandle(
+    coin: string,
+    interval: string,
+    callback: SubscriptionCallback<WsCandleData>
+  ): () => void {
     const subscription: WsCandleSubscription = {
       type: 'candle',
       coin,

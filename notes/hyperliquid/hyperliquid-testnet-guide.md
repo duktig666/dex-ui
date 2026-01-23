@@ -8,30 +8,30 @@ HyperLiquid 提供完整的测试网环境，用于开发和测试。测试网�
 
 #### HyperCore（交易 API）
 
-| 项目 | 主网 (Mainnet) | 测试网 (Testnet) |
-|------|---------------|-----------------|
-| REST API | `https://api.hyperliquid.xyz` | `https://api.hyperliquid-testnet.xyz` |
-| WebSocket | `wss://api.hyperliquid.xyz/ws` | `wss://api.hyperliquid-testnet.xyz/ws` |
-| Web 应用 | `https://app.hyperliquid.xyz` | `https://app.hyperliquid-testnet.xyz` |
-| Chain ID (签名) | 42161 (Arbitrum) | 421614 (Arbitrum Sepolia) |
+| 项目            | 主网 (Mainnet)                 | 测试网 (Testnet)                       |
+| --------------- | ------------------------------ | -------------------------------------- |
+| REST API        | `https://api.hyperliquid.xyz`  | `https://api.hyperliquid-testnet.xyz`  |
+| WebSocket       | `wss://api.hyperliquid.xyz/ws` | `wss://api.hyperliquid-testnet.xyz/ws` |
+| Web 应用        | `https://app.hyperliquid.xyz`  | `https://app.hyperliquid-testnet.xyz`  |
+| Chain ID (签名) | 42161 (Arbitrum)               | 421614 (Arbitrum Sepolia)              |
 
 #### HyperEVM（EVM 兼容链）
 
-| 项目 | 主网 (Mainnet) | 测试网 (Testnet) |
-|------|---------------|-----------------|
-| RPC URL | `https://rpc.hyperliquid.xyz/evm` | `https://rpc.hyperliquid-testnet.xyz/evm` |
-| Chain ID | 999 | 998 |
-| Currency Symbol | HYPE | HYPE |
-| Block Explorer | `https://hyperevmscan.io` | `https://testnet.hyperevmscan.io` |
+| 项目            | 主网 (Mainnet)                    | 测试网 (Testnet)                          |
+| --------------- | --------------------------------- | ----------------------------------------- |
+| RPC URL         | `https://rpc.hyperliquid.xyz/evm` | `https://rpc.hyperliquid-testnet.xyz/evm` |
+| Chain ID        | 999                               | 998                                       |
+| Currency Symbol | HYPE                              | HYPE                                      |
+| Block Explorer  | `https://hyperevmscan.io`         | `https://testnet.hyperevmscan.io`         |
 
 ### 1.2 HyperCore vs HyperEVM
 
 **重要区别**：
 
-| 层 | 用途 | 资产存储 | MetaMask 可见 |
-|---|------|---------|--------------|
-| **HyperCore** | 交易（perps/spot） | 交易账户 USDC | ❌ 不可见 |
-| **HyperEVM** | EVM 智能合约 | EVM 钱包 HYPE | ✅ 可见 |
+| 层            | 用途               | 资产存储      | MetaMask 可见 |
+| ------------- | ------------------ | ------------- | ------------- |
+| **HyperCore** | 交易（perps/spot） | 交易账户 USDC | ❌ 不可见     |
+| **HyperEVM**  | EVM 智能合约       | EVM 钱包 HYPE | ✅ 可见       |
 
 - 水龙头领取的 USDC 在 **HyperCore** 上，用于交易
 - MetaMask 只能看到 **HyperEVM** 上的资产
@@ -63,20 +63,19 @@ export const NETWORKS = {
     wsUrl: 'wss://hyperliquid.hyperliquid.xyz/ws',
     appUrl: 'https://app.hyperliquid.xyz',
     chainId: 42161,
-    signatureChainId: '0xa4b1'
+    signatureChainId: '0xa4b1',
   },
   testnet: {
     restUrl: 'https://api.hyperliquid-testnet.xyz',
     wsUrl: 'wss://hyperliquid.hyperliquid-testnet.xyz/ws',
     appUrl: 'https://app.hyperliquid-testnet.xyz',
     chainId: 421614,
-    signatureChainId: '0x66eee'
-  }
+    signatureChainId: '0x66eee',
+  },
 } as const;
 
-export const CURRENT_NETWORK = process.env.NEXT_PUBLIC_NETWORK === 'mainnet'
-  ? NETWORKS.mainnet
-  : NETWORKS.testnet;
+export const CURRENT_NETWORK =
+  process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? NETWORKS.mainnet : NETWORKS.testnet;
 
 export const IS_MAINNET = process.env.NEXT_PUBLIC_NETWORK === 'mainnet';
 ```
@@ -102,7 +101,7 @@ class HyperliquidClient {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
     return response.json();
   }
@@ -119,10 +118,10 @@ class HyperliquidClient {
 
 #### 主网激活方式
 
-| 方式 | 要求 | 说明 |
-|------|------|------|
-| **方式一：存入 USDC** | 至少 $5 USDC | 从 Arbitrum 发送 USDC 到 HyperLiquid 桥接地址 |
-| **方式二：持有 HYPE** | 至少 0.1 HYPE | 在主网 HyperLiquid 账户持有 HYPE |
+| 方式                  | 要求          | 说明                                          |
+| --------------------- | ------------- | --------------------------------------------- |
+| **方式一：存入 USDC** | 至少 $5 USDC  | 从 Arbitrum 发送 USDC 到 HyperLiquid 桥接地址 |
+| **方式二：持有 HYPE** | 至少 0.1 HYPE | 在主网 HyperLiquid 账户持有 HYPE              |
 
 #### 主网激活操作步骤
 
@@ -146,19 +145,19 @@ class HyperliquidClient {
 
 ### 3.3 领取限制
 
-| 项目 | 说明 |
-|------|------|
-| 领取金额 | 1,000 mock USDC |
-| 领取次数 | 每个地址只能领取一次 |
+| 项目     | 说明                       |
+| -------- | -------------------------- |
+| 领取金额 | 1,000 mock USDC            |
+| 领取次数 | 每个地址只能领取一次       |
 | 代币用途 | 仅限测试网交易，无实际价值 |
 
 ### 3.4 第三方水龙头（备选）
 
 如果官方水龙头无法使用，可以尝试：
 
-| 平台 | 链接 | 要求 |
-|------|------|------|
-| QuickNode | [faucet.quicknode.com/hyperliquid](https://faucet.quicknode.com/hyperliquid) | 主网持有 0.05 HYPE |
+| 平台       | 链接                                                                                                         | 要求                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| QuickNode  | [faucet.quicknode.com/hyperliquid](https://faucet.quicknode.com/hyperliquid)                                 | 主网持有 0.05 HYPE      |
 | Chainstack | [faucet.chainstack.com/hyperliquid-testnet-faucet](https://faucet.chainstack.com/hyperliquid-testnet-faucet) | 每 24 小时可领取 1 HYPE |
 
 ### 3.5 注意事项
@@ -176,10 +175,10 @@ class HyperliquidClient {
 
 **测试网 Builder 同样需要满足以下条件**：
 
-| 要求 | 说明 |
-|------|------|
+| 要求     | 说明                                     |
+| -------- | ---------------------------------------- |
 | 最低资金 | 测试网 perps 账户需有 **100+ mock USDC** |
-| 资金来源 | 从测试网水龙头领取 |
+| 资金来源 | 从测试网水龙头领取                       |
 
 > **官方文档**: [Builder Codes](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/builder-codes)
 
@@ -202,23 +201,26 @@ class HyperliquidClient {
    - 记录地址作为 `BUILDER_ADDRESS`
 
 2. **主网激活**
+
    ```
    访问: https://app.hyperliquid.xyz
    操作: Deposit 至少 $5 USDC
    ```
 
 3. **测试网领取测试币**
+
    ```
    访问: https://app.hyperliquid-testnet.xyz/drip
    操作: 使用同一地址领取 1,000 mock USDC
    ```
 
 4. **验证 Builder 资格**
+
    ```typescript
    // 检查 Builder 地址的账户余额
    const state = await client.post('/info', {
      type: 'clearinghouseState',
-     user: BUILDER_ADDRESS
+     user: BUILDER_ADDRESS,
    });
 
    const accountValue = parseFloat(state.marginSummary.accountValue);
@@ -238,10 +240,10 @@ class HyperliquidClient {
 
 ### 4.1 HYPE Token
 
-| 网络 | Token ID | Spot ID |
-|------|----------|---------|
-| 主网 | 150 | 107 |
-| 测试网 | 1105 | 1035 |
+| 网络   | Token ID | Spot ID |
+| ------ | -------- | ------- |
+| 主网   | 150      | 107     |
+| 测试网 | 1105     | 1035    |
 
 ### 4.2 处理方式
 
@@ -251,13 +253,13 @@ class HyperliquidClient {
 // 资产 ID 映射 (测试网特殊处理)
 export const ASSET_OVERRIDES: Record<string, Record<string, number>> = {
   testnet: {
-    'HYPE_TOKEN': 1105,
-    'HYPE_SPOT': 1035
+    HYPE_TOKEN: 1105,
+    HYPE_SPOT: 1035,
   },
   mainnet: {
-    'HYPE_TOKEN': 150,
-    'HYPE_SPOT': 107
-  }
+    HYPE_TOKEN: 150,
+    HYPE_SPOT: 107,
+  },
 };
 
 // 获取资产 ID
@@ -275,9 +277,9 @@ export function getAssetId(
 
   // 使用标准计算方式
   if (assetType === 'perp') {
-    return meta.universe.findIndex(u => u.name === assetName);
+    return meta.universe.findIndex((u) => u.name === assetName);
   } else {
-    const spotIndex = meta.spotUniverse?.findIndex(u => u.name.startsWith(assetName));
+    const spotIndex = meta.spotUniverse?.findIndex((u) => u.name.startsWith(assetName));
     return spotIndex !== undefined ? 10000 + spotIndex : -1;
   }
 }
@@ -290,7 +292,7 @@ export function getAssetId(
 async function fetchAssetInfo() {
   const [perpMeta, spotMeta] = await Promise.all([
     client.post('/info', { type: 'meta' }),
-    client.post('/info', { type: 'spotMeta' })
+    client.post('/info', { type: 'spotMeta' }),
   ]);
 
   console.log('永续合约资产:');
@@ -311,11 +313,11 @@ async function fetchAssetInfo() {
 
 ### 5.1 签名参数差异
 
-| 参数 | 主网 | 测试网 |
-|------|------|--------|
+| 参数             | 主网        | 测试网      |
+| ---------------- | ----------- | ----------- |
 | hyperliquidChain | `"Mainnet"` | `"Testnet"` |
-| signatureChainId | `"0xa4b1"` | `"0x66eee"` |
-| EIP-712 chainId | 42161 | 421614 |
+| signatureChainId | `"0xa4b1"`  | `"0x66eee"` |
+| EIP-712 chainId  | 42161       | 421614      |
 
 ### 5.2 签名代码
 
@@ -326,7 +328,7 @@ export function getSigningConfig(isMainnet: boolean) {
   return {
     hyperliquidChain: isMainnet ? 'Mainnet' : 'Testnet',
     signatureChainId: isMainnet ? '0xa4b1' : '0x66eee',
-    eip712ChainId: isMainnet ? 42161 : 421614
+    eip712ChainId: isMainnet ? 42161 : 421614,
   };
 }
 
@@ -345,7 +347,7 @@ export async function signApproveBuilderFee(
     signatureChainId: config.signatureChainId,
     builder: builder.toLowerCase(),
     maxFeeRate,
-    nonce
+    nonce,
   };
 
   // ... 签名逻辑
@@ -405,7 +407,7 @@ class HyperliquidClient {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -460,7 +462,7 @@ export async function debugSignature(
     types: getTypes(action.type),
     primaryType: action.type,
     message: action,
-    signature: `${signature.r}${signature.s.slice(2)}${signature.v.toString(16)}`
+    signature: `${signature.r}${signature.s.slice(2)}${signature.v.toString(16)}`,
   });
 
   console.log('Expected signer:', expectedSigner);
@@ -471,13 +473,13 @@ export async function debugSignature(
 
 ### 7.4 常见问题排查
 
-| 问题 | 可能原因 | 解决方案 |
-|------|---------|---------|
-| 签名失败 | 地址未小写 | 使用 `.toLowerCase()` |
-| 签名失败 | 尾随零未移除 | 使用 `floatToWire()` |
-| Nonce 错误 | 时间不同步 | 使用 `Date.now()` |
-| 资产 ID 错误 | 主网/测试网混淆 | 检查网络配置 |
-| WebSocket 断开 | 心跳超时 | 实现 ping/pong |
+| 问题           | 可能原因        | 解决方案              |
+| -------------- | --------------- | --------------------- |
+| 签名失败       | 地址未小写      | 使用 `.toLowerCase()` |
+| 签名失败       | 尾随零未移除    | 使用 `floatToWire()`  |
+| Nonce 错误     | 时间不同步      | 使用 `Date.now()`     |
+| 资产 ID 错误   | 主网/测试网混淆 | 检查网络配置          |
+| WebSocket 断开 | 心跳超时        | 实现 ping/pong        |
 
 ---
 
@@ -486,6 +488,7 @@ export async function debugSignature(
 ### 8.1 Network 面板
 
 监控 API 请求：
+
 - 筛选 `api.hyperliquid-testnet.xyz`
 - 查看请求体和响应
 - 检查状态码
@@ -504,8 +507,10 @@ export async function debugSignature(
 fetch('https://api.hyperliquid-testnet.xyz/info', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ type: 'meta' })
-}).then(r => r.json()).then(console.log);
+  body: JSON.stringify({ type: 'meta' }),
+})
+  .then((r) => r.json())
+  .then(console.log);
 ```
 
 ---
@@ -606,11 +611,11 @@ HyperLiquid 支持在 HyperCore 上进行内部 USDC 转账。
 
 ### 11.2 转账限制
 
-| 项目 | 说明 |
-|------|------|
-| 最小金额 | 无明确限制 |
-| 手续费 | 内部转账免费 |
-| 确认时间 | 即时到账 |
+| 项目     | 说明         |
+| -------- | ------------ |
+| 最小金额 | 无明确限制   |
+| 手续费   | 内部转账免费 |
+| 确认时间 | 即时到账     |
 
 > **参考文档**: [USDC Transfer API](https://docs.chainstack.com/reference/hyperliquid-exchange-usd-send)
 
@@ -622,10 +627,10 @@ HyperLiquid 支持在 HyperCore 上进行内部 USDC 转账。
 
 **HyperCore 和 HyperEVM 是两个不同的层**：
 
-| 层 | 资产类型 | MetaMask 可见 |
-|---|---------|--------------|
-| HyperCore | 交易账户 USDC（水龙头领取） | ❌ 不可见 |
-| HyperEVM | EVM 钱包 HYPE | ✅ 可见 |
+| 层        | 资产类型                    | MetaMask 可见 |
+| --------- | --------------------------- | ------------- |
+| HyperCore | 交易账户 USDC（水龙头领取） | ❌ 不可见     |
+| HyperEVM  | EVM 钱包 HYPE               | ✅ 可见       |
 
 **水龙头领取的 USDC 在 HyperCore 上，无法在 MetaMask 中直接查看。**
 
@@ -635,23 +640,23 @@ HyperLiquid 支持在 HyperCore 上进行内部 USDC 转账。
 
 #### 主网配置
 
-| 参数 | 值 |
-|------|-----|
-| Network Name | `Hyperliquid EVM` |
-| RPC URL | `https://rpc.hyperliquid.xyz/evm` |
-| Chain ID | `999` |
-| Currency Symbol | `HYPE` |
-| Block Explorer | `https://hyperevmscan.io` |
+| 参数            | 值                                |
+| --------------- | --------------------------------- |
+| Network Name    | `Hyperliquid EVM`                 |
+| RPC URL         | `https://rpc.hyperliquid.xyz/evm` |
+| Chain ID        | `999`                             |
+| Currency Symbol | `HYPE`                            |
+| Block Explorer  | `https://hyperevmscan.io`         |
 
 #### 测试网配置
 
-| 参数 | 值 |
-|------|-----|
-| Network Name | `Hyperliquid EVM Testnet` |
-| RPC URL | `https://rpc.hyperliquid-testnet.xyz/evm` |
-| Chain ID | `998` |
-| Currency Symbol | `HYPE` |
-| Block Explorer | `https://testnet.hyperevmscan.io` |
+| 参数            | 值                                        |
+| --------------- | ----------------------------------------- |
+| Network Name    | `Hyperliquid EVM Testnet`                 |
+| RPC URL         | `https://rpc.hyperliquid-testnet.xyz/evm` |
+| Chain ID        | `998`                                     |
+| Currency Symbol | `HYPE`                                    |
+| Block Explorer  | `https://testnet.hyperevmscan.io`         |
 
 ### 12.3 添加方式
 
@@ -744,14 +749,14 @@ Builder Code 允许第三方平台（Builder）通过代发交易获取部分手
 
 #### Builder（收益地址）需要做什么？
 
-| 事项 | 是否需要 | 说明 |
-|------|---------|------|
-| 注册成为 Builder | ❌ 不需要 | 无需注册，任何地址都可以成为 Builder |
-| 签署 ApproveBuilderFee | ❌ 不需要 | 这是用户的操作 |
-| 持有 100+ USDC | ✅ 需要 | 在 **perps 账户**中保持最低余额 |
-| 签署任何交易 | ❌ 不需要 | Builder 地址只是被动接收费用 |
-| 主动操作 | ❌ 不需要 | 只需提供地址，等待收益 |
-| 领取收益 | ✅ 需要 | 通过 Referral Rewards 领取流程获取 |
+| 事项                   | 是否需要  | 说明                                 |
+| ---------------------- | --------- | ------------------------------------ |
+| 注册成为 Builder       | ❌ 不需要 | 无需注册，任何地址都可以成为 Builder |
+| 签署 ApproveBuilderFee | ❌ 不需要 | 这是用户的操作                       |
+| 持有 100+ USDC         | ✅ 需要   | 在 **perps 账户**中保持最低余额      |
+| 签署任何交易           | ❌ 不需要 | Builder 地址只是被动接收费用         |
+| 主动操作               | ❌ 不需要 | 只需提供地址，等待收益               |
+| 领取收益               | ✅ 需要   | 通过 Referral Rewards 领取流程获取   |
 
 #### Builder 完整要求清单
 
@@ -781,13 +786,13 @@ Builder Code 允许第三方平台（Builder）通过代发交易获取部分手
 
 Builder 的费用收益通过 **Referral Rewards** 系统领取：
 
-| 项目 | 说明 |
-|------|------|
-| 领取入口 | [app.hyperliquid.xyz/referrals](https://app.hyperliquid.xyz/referrals) |
-| 最低领取金额 | **> $1** 即可领取 |
-| 到账位置 | 领取后体现在 **现货账户余额** |
-| 支持资产 | 所有报价资产 (quote assets) |
-| 领取频率 | 无限制，满足最低金额即可随时领取 |
+| 项目         | 说明                                                                   |
+| ------------ | ---------------------------------------------------------------------- |
+| 领取入口     | [app.hyperliquid.xyz/referrals](https://app.hyperliquid.xyz/referrals) |
+| 最低领取金额 | **> $1** 即可领取                                                      |
+| 到账位置     | 领取后体现在 **现货账户余额**                                          |
+| 支持资产     | 所有报价资产 (quote assets)                                            |
+| 领取频率     | 无限制，满足最低金额即可随时领取                                       |
 
 #### 查询 Builder 收益（API）
 
@@ -822,19 +827,19 @@ URL: https://stats-data.hyperliquid.xyz/Mainnet/builder_fills/{builder_address}/
 
 #### 用户需要做什么？
 
-| 事项 | 是否需要 | 说明 |
-|------|---------|------|
-| 签署 ApproveBuilderFee | ✅ 需要 | 首次使用该 Builder 前，用主钱包签署 |
-| 下单时携带 builder 参数 | ✅ 需要 | 每笔订单都需附加 builder 参数 |
-| 使用主钱包授权 | ✅ 需要 | Agent/API 钱包无法执行授权 |
+| 事项                    | 是否需要 | 说明                                |
+| ----------------------- | -------- | ----------------------------------- |
+| 签署 ApproveBuilderFee  | ✅ 需要  | 首次使用该 Builder 前，用主钱包签署 |
+| 下单时携带 builder 参数 | ✅ 需要  | 每笔订单都需附加 builder 参数       |
+| 使用主钱包授权          | ✅ 需要  | Agent/API 钱包无法执行授权          |
 
 #### 总结
 
-| 操作 | 执行方 | 签名要求 | 频率 |
-|------|-------|---------|------|
-| 持有 100+ USDC | Builder | 无需签名 | 一次性（保持余额） |
-| ApproveBuilderFee | **用户** | 主钱包签名 | 一次性（每个 Builder） |
-| 订单附加 builder | 用户 | 订单签名包含 | 每笔订单 |
+| 操作              | 执行方   | 签名要求     | 频率                   |
+| ----------------- | -------- | ------------ | ---------------------- |
+| 持有 100+ USDC    | Builder  | 无需签名     | 一次性（保持余额）     |
+| ApproveBuilderFee | **用户** | 主钱包签名   | 一次性（每个 Builder） |
+| 订单附加 builder  | 用户     | 订单签名包含 | 每笔订单               |
 
 ### 13.3 签名机制说明
 
@@ -842,36 +847,36 @@ Builder Code 机制涉及两个不同的签名场景：
 
 #### ApproveBuilderFee（需要用户主钱包签名）
 
-| 项目 | 说明 |
-|------|------|
-| 签名要求 | **必须由用户主钱包签名** |
-| Agent/API 钱包 | ❌ 不可用 |
-| 操作频率 | 一次性授权，后续无需重复 |
-| 用途 | 用户授权 Builder 从其交易中收取最大费率 |
+| 项目           | 说明                                    |
+| -------------- | --------------------------------------- |
+| 签名要求       | **必须由用户主钱包签名**                |
+| Agent/API 钱包 | ❌ 不可用                               |
+| 操作频率       | 一次性授权，后续无需重复                |
+| 用途           | 用户授权 Builder 从其交易中收取最大费率 |
 
 #### 订单中的 builder 参数（不需要单独签名）
 
-| 项目 | 说明 |
-|------|------|
-| 参数格式 | `{"b": "0x...", "f": 10}` |
-| `b` 字段 | Builder 地址（必须小写） |
+| 项目     | 说明                                           |
+| -------- | ---------------------------------------------- |
+| 参数格式 | `{"b": "0x...", "f": 10}`                      |
+| `b` 字段 | Builder 地址（必须小写）                       |
 | `f` 字段 | 费用，以十分之一基点为单位（10 = 1bp = 0.01%） |
-| 签名方式 | 作为订单的一部分，随订单一起签名 |
-| 单独签名 | ❌ **buildAddress 本身不需要单独签名** |
+| 签名方式 | 作为订单的一部分，随订单一起签名               |
+| 单独签名 | ❌ **buildAddress 本身不需要单独签名**         |
 
 ### 13.3 费率限制
 
-| 交易类型 | 最大费率 |
-|---------|---------|
+| 交易类型         | 最大费率     |
+| ---------------- | ------------ |
 | 永续合约 (Perps) | 0.1% (10 bp) |
-| 现货 (Spot) | 1% (100 bp) |
+| 现货 (Spot)      | 1% (100 bp)  |
 
 ### 13.4 Builder 要求
 
-| 要求 | 说明 |
-|------|------|
+| 要求     | 说明                         |
+| -------- | ---------------------------- |
 | 最低资金 | perps 账户需有 **100+ USDC** |
-| 地址格式 | 42 字符十六进制，必须小写 |
+| 地址格式 | 42 字符十六进制，必须小写    |
 
 ---
 
@@ -917,14 +922,14 @@ Builder 从成交中收取费用
 
 ### 14.3 参数说明
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `type` | string | 固定值 `"approveBuilderFee"` |
-| `hyperliquidChain` | string | `"Mainnet"` 或 `"Testnet"` |
-| `signatureChainId` | string | 主网 `"0xa4b1"`，测试网 `"0x66eee"` |
-| `builder` | string | Builder 地址，必须小写 |
-| `maxFeeRate` | string | 最大费率，如 `"0.01%"` 或 `"0.001%"` |
-| `nonce` | number | 当前时间戳（毫秒） |
+| 参数               | 类型   | 说明                                 |
+| ------------------ | ------ | ------------------------------------ |
+| `type`             | string | 固定值 `"approveBuilderFee"`         |
+| `hyperliquidChain` | string | `"Mainnet"` 或 `"Testnet"`           |
+| `signatureChainId` | string | 主网 `"0xa4b1"`，测试网 `"0x66eee"`  |
+| `builder`          | string | Builder 地址，必须小写               |
+| `maxFeeRate`       | string | 最大费率，如 `"0.01%"` 或 `"0.001%"` |
+| `nonce`            | number | 当前时间戳（毫秒）                   |
 
 ### 14.4 Python SDK 示例
 
@@ -980,9 +985,7 @@ async function approveBuilderFee(
   maxFeeRate: string,
   isMainnet: boolean = false
 ) {
-  const baseUrl = isMainnet
-    ? 'https://api.hyperliquid.xyz'
-    : 'https://api.hyperliquid-testnet.xyz';
+  const baseUrl = isMainnet ? 'https://api.hyperliquid.xyz' : 'https://api.hyperliquid-testnet.xyz';
 
   const nonce = Date.now();
 
@@ -992,7 +995,7 @@ async function approveBuilderFee(
     signatureChainId: isMainnet ? '0xa4b1' : '0x66eee',
     builder: builderAddress.toLowerCase(),
     maxFeeRate,
-    nonce
+    nonce,
   };
 
   // EIP-712 签名
@@ -1000,7 +1003,7 @@ async function approveBuilderFee(
     name: 'HyperliquidSignTransaction',
     version: '1',
     chainId: isMainnet ? 42161 : 421614,
-    verifyingContract: '0x0000000000000000000000000000000000000000'
+    verifyingContract: '0x0000000000000000000000000000000000000000',
   };
 
   const types = {
@@ -1008,15 +1011,15 @@ async function approveBuilderFee(
       { name: 'hyperliquidChain', type: 'string' },
       { name: 'maxFeeRate', type: 'string' },
       { name: 'builder', type: 'address' },
-      { name: 'nonce', type: 'uint64' }
-    ]
+      { name: 'nonce', type: 'uint64' },
+    ],
   };
 
   const signature = await wallet._signTypedData(domain, types, {
     hyperliquidChain: action.hyperliquidChain,
     maxFeeRate: action.maxFeeRate,
     builder: action.builder,
-    nonce: action.nonce
+    nonce: action.nonce,
   });
 
   const { r, s, v } = ethers.utils.splitSignature(signature);
@@ -1027,8 +1030,8 @@ async function approveBuilderFee(
     body: JSON.stringify({
       action,
       nonce,
-      signature: { r, s, v }
-    })
+      signature: { r, s, v },
+    }),
   });
 
   return response.json();
@@ -1042,8 +1045,8 @@ async function main() {
   const result = await approveBuilderFee(
     wallet,
     builderAddress,
-    '0.01%',   // 最大费率
-    false      // 测试网
+    '0.01%', // 最大费率
+    false // 测试网
   );
 
   console.log('Result:', result);
@@ -1072,40 +1075,42 @@ async function main() {
 // 授权后，订单可携带 builder 参数
 const orderAction = {
   type: 'order',
-  orders: [{
-    a: 0,                    // 资产 ID
-    b: true,                 // 买入
-    p: '50000',              // 价格
-    s: '0.001',              // 数量
-    r: false,                // 非 reduce-only
-    t: { limit: { tif: 'Gtc' } }
-  }],
+  orders: [
+    {
+      a: 0, // 资产 ID
+      b: true, // 买入
+      p: '50000', // 价格
+      s: '0.001', // 数量
+      r: false, // 非 reduce-only
+      t: { limit: { tif: 'Gtc' } },
+    },
+  ],
   grouping: 'na',
   builder: {
-    b: '0x8c967e73e7b15087c42a10d344cff4c96d877f1d',  // Builder 地址
-    f: 1                                              // 费用: 1 = 0.1bp = 0.001%
-  }
+    b: '0x8c967e73e7b15087c42a10d344cff4c96d877f1d', // Builder 地址
+    f: 1, // 费用: 1 = 0.1bp = 0.001%
+  },
 };
 ```
 
 ### 14.8 注意事项
 
-| 事项 | 说明 |
-|------|------|
+| 事项     | 说明                                     |
+| -------- | ---------------------------------------- |
 | 钱包要求 | **必须使用主钱包**，Agent/API 钱包无权限 |
-| 地址格式 | Builder 地址必须**全部小写** |
-| 费率格式 | 字符串格式，如 `"0.01%"` |
-| 撤销授权 | 可随时重新授权更低费率或 `"0%"` 来撤销 |
-| 生效范围 | 授权仅对指定 Builder 生效 |
+| 地址格式 | Builder 地址必须**全部小写**             |
+| 费率格式 | 字符串格式，如 `"0.01%"`                 |
+| 撤销授权 | 可随时重新授权更低费率或 `"0%"` 来撤销   |
+| 生效范围 | 授权仅对指定 Builder 生效                |
 
 ### 14.9 常见错误
 
-| 错误 | 原因 | 解决方案 |
-|------|------|---------|
-| `Not authorized` | 使用了 Agent 钱包 | 切换到主钱包签名 |
-| `Invalid builder address` | 地址格式错误 | 确保 42 字符且小写 |
-| `Fee rate too high` | 费率超出限制 | Perps ≤0.1%, Spot ≤1% |
-| `Builder not eligible` | Builder 资金不足 | Builder 需 100+ USDC |
+| 错误                      | 原因              | 解决方案              |
+| ------------------------- | ----------------- | --------------------- |
+| `Not authorized`          | 使用了 Agent 钱包 | 切换到主钱包签名      |
+| `Invalid builder address` | 地址格式错误      | 确保 42 字符且小写    |
+| `Fee rate too high`       | 费率超出限制      | Perps ≤0.1%, Spot ≤1% |
+| `Builder not eligible`    | Builder 资金不足  | Builder 需 100+ USDC  |
 
 ### 14.10 参考资料
 
@@ -1122,12 +1127,12 @@ const orderAction = {
 
 **Based.one 目前不支持 HyperLiquid 测试网。**
 
-| 调研项目 | 结论 |
-|---------|------|
-| 网络切换选项 | ❌ 前端无可见的网络切换 UI |
-| 测试网域名 | ❌ `testnet.based.one` 重定向至主网 |
-| 后端支持 | ⚠️ 代码中有 `onlyTestnet: false` 配置 |
-| 用户入口 | ❌ 无公开的测试网入口 |
+| 调研项目     | 结论                                  |
+| ------------ | ------------------------------------- |
+| 网络切换选项 | ❌ 前端无可见的网络切换 UI            |
+| 测试网域名   | ❌ `testnet.based.one` 重定向至主网   |
+| 后端支持     | ⚠️ 代码中有 `onlyTestnet: false` 配置 |
+| 用户入口     | ❌ 无公开的测试网入口                 |
 
 #### 分析
 
@@ -1140,22 +1145,22 @@ const orderAction = {
 
 如果需要在测试网环境开发和测试，有以下方案：
 
-| 方案 | 说明 | 适用场景 |
-|------|------|---------|
-| **HyperLiquid 官方测试网** | [app.hyperliquid-testnet.xyz](https://app.hyperliquid-testnet.xyz) | 功能验证、API 测试 |
-| **自建 DEX 前端** | 基于本项目文档实现 | 完整开发、自定义功能 |
+| 方案                       | 说明                                                               | 适用场景             |
+| -------------------------- | ------------------------------------------------------------------ | -------------------- |
+| **HyperLiquid 官方测试网** | [app.hyperliquid-testnet.xyz](https://app.hyperliquid-testnet.xyz) | 功能验证、API 测试   |
+| **自建 DEX 前端**          | 基于本项目文档实现                                                 | 完整开发、自定义功能 |
 
 ### 15.3 自建 DEX 的优势
 
 相比依赖第三方平台，基于 BuildCode 自建 DEX 有以下优势：
 
-| 优势 | 说明 |
-|------|------|
-| **测试网支持** | 可自由切换主网/测试网 |
-| **环境变量控制** | `NEXT_PUBLIC_NETWORK=testnet` |
-| **完整调试能力** | 可查看所有 API 请求/响应 |
-| **自定义 Builder 费率** | 完全控制费率设置 |
-| **功能定制** | 不受第三方平台限制 |
+| 优势                    | 说明                          |
+| ----------------------- | ----------------------------- |
+| **测试网支持**          | 可自由切换主网/测试网         |
+| **环境变量控制**        | `NEXT_PUBLIC_NETWORK=testnet` |
+| **完整调试能力**        | 可查看所有 API 请求/响应      |
+| **自定义 Builder 费率** | 完全控制费率设置              |
+| **功能定制**            | 不受第三方平台限制            |
 
 ### 15.4 相关配置
 
@@ -1163,9 +1168,8 @@ const orderAction = {
 
 ```typescript
 // 通过环境变量切换网络
-const CURRENT_NETWORK = process.env.NEXT_PUBLIC_NETWORK === 'mainnet'
-  ? NETWORKS.mainnet
-  : NETWORKS.testnet;
+const CURRENT_NETWORK =
+  process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? NETWORKS.mainnet : NETWORKS.testnet;
 ```
 
 ```bash

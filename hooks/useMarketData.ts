@@ -86,7 +86,7 @@ export function useMarketData() {
 export function useAssetPrice(coin: string) {
   const assetInfoMap = useMarketStore((state) => state.assetInfoMap);
   const allMids = useMarketStore((state) => state.allMids);
-  
+
   const assetInfo = assetInfoMap.get(coin);
   const midPrice = assetInfo?.midPx || allMids[coin] || '0';
   const markPrice = assetInfo?.markPx || midPrice;
@@ -97,9 +97,10 @@ export function useAssetPrice(coin: string) {
   const dayVolume = assetInfo?.dayNtlVlm || '0';
 
   // 计算 24h 变化
-  const priceChange = prevDayPrice !== '0' 
-    ? ((parseFloat(midPrice) - parseFloat(prevDayPrice)) / parseFloat(prevDayPrice)) 
-    : 0;
+  const priceChange =
+    prevDayPrice !== '0'
+      ? (parseFloat(midPrice) - parseFloat(prevDayPrice)) / parseFloat(prevDayPrice)
+      : 0;
 
   return {
     coin,
@@ -130,9 +131,10 @@ export function useAssetList() {
     const info = assetInfoMap.get(meta.name);
     const midPrice = info?.midPx || allMids[meta.name] || '0';
     const prevDayPrice = info?.prevDayPx || '0';
-    const priceChange = prevDayPrice !== '0'
-      ? ((parseFloat(midPrice) - parseFloat(prevDayPrice)) / parseFloat(prevDayPrice))
-      : 0;
+    const priceChange =
+      prevDayPrice !== '0'
+        ? (parseFloat(midPrice) - parseFloat(prevDayPrice)) / parseFloat(prevDayPrice)
+        : 0;
 
     return {
       name: meta.name,

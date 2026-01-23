@@ -49,14 +49,14 @@ export function useNetworkCheck(): NetworkCheckResult {
   const isCorrectNetwork = isConnected && chainId === expectedChainId;
 
   const expectedNetworkName = IS_TESTNET ? 'Arbitrum Sepolia' : 'Arbitrum One';
-  const currentNetworkName = chainId ? (CHAIN_NAMES[chainId] || `Chain ${chainId}`) : 'Not Connected';
+  const currentNetworkName = chainId ? CHAIN_NAMES[chainId] || `Chain ${chainId}` : 'Not Connected';
 
   const switchToCorrectNetwork = useCallback(async () => {
     if (!switchChain) {
       console.error('switchChain not available');
       return;
     }
-    
+
     try {
       await switchChain({ chainId: expectedChainId });
     } catch (error) {
@@ -65,28 +65,31 @@ export function useNetworkCheck(): NetworkCheckResult {
     }
   }, [switchChain, expectedChainId]);
 
-  return useMemo(() => ({
-    currentChainId: chainId,
-    expectedChainId,
-    isConnected,
-    isCorrectNetwork,
-    expectedNetworkName,
-    currentNetworkName,
-    isTestnet: IS_TESTNET,
-    switchToCorrectNetwork,
-    isSwitching,
-    switchError: switchError as Error | null,
-  }), [
-    chainId, 
-    expectedChainId, 
-    isConnected, 
-    isCorrectNetwork, 
-    expectedNetworkName, 
-    currentNetworkName,
-    switchToCorrectNetwork, 
-    isSwitching, 
-    switchError
-  ]);
+  return useMemo(
+    () => ({
+      currentChainId: chainId,
+      expectedChainId,
+      isConnected,
+      isCorrectNetwork,
+      expectedNetworkName,
+      currentNetworkName,
+      isTestnet: IS_TESTNET,
+      switchToCorrectNetwork,
+      isSwitching,
+      switchError: switchError as Error | null,
+    }),
+    [
+      chainId,
+      expectedChainId,
+      isConnected,
+      isCorrectNetwork,
+      expectedNetworkName,
+      currentNetworkName,
+      switchToCorrectNetwork,
+      isSwitching,
+      switchError,
+    ]
+  );
 }
 
 /**

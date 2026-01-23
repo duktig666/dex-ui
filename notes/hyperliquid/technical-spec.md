@@ -6,9 +6,9 @@
 
 ### 1.1 API 端点
 
-| 网络 | REST API | WebSocket |
-|------|----------|-----------|
-| 主网 | `https://api.hyperliquid.xyz` | `wss://api.hyperliquid.xyz/ws` |
+| 网络   | REST API                              | WebSocket                              |
+| ------ | ------------------------------------- | -------------------------------------- |
+| 主网   | `https://api.hyperliquid.xyz`         | `wss://api.hyperliquid.xyz/ws`         |
 | 测试网 | `https://api.hyperliquid-testnet.xyz` | `wss://api.hyperliquid-testnet.xyz/ws` |
 
 ---
@@ -22,6 +22,7 @@
 #### 2.1.1 永续合约元数据
 
 **请求**
+
 ```typescript
 {
   "type": "meta"
@@ -29,6 +30,7 @@
 ```
 
 **响应**
+
 ```typescript
 {
   "universe": [
@@ -46,6 +48,7 @@
 #### 2.1.2 永续合约元数据 + 上下文
 
 **请求**
+
 ```typescript
 {
   "type": "metaAndAssetCtxs"
@@ -53,6 +56,7 @@
 ```
 
 **响应**
+
 ```typescript
 [
   // meta 数据
@@ -77,6 +81,7 @@
 #### 2.1.3 现货元数据
 
 **请求**
+
 ```typescript
 {
   "type": "spotMeta"
@@ -84,6 +89,7 @@
 ```
 
 **响应**
+
 ```typescript
 {
   "tokens": [
@@ -108,6 +114,7 @@
 #### 2.1.4 现货元数据 + 上下文
 
 **请求**
+
 ```typescript
 {
   "type": "spotMetaAndAssetCtxs"
@@ -117,6 +124,7 @@
 #### 2.1.5 用户永续状态
 
 **请求**
+
 ```typescript
 {
   "type": "clearinghouseState",
@@ -125,6 +133,7 @@
 ```
 
 **响应**
+
 ```typescript
 {
   "marginSummary": {
@@ -157,6 +166,7 @@
 #### 2.1.6 用户现货余额
 
 **请求**
+
 ```typescript
 {
   "type": "spotClearinghouseState",
@@ -165,6 +175,7 @@
 ```
 
 **响应**
+
 ```typescript
 {
   "balances": [
@@ -183,6 +194,7 @@
 #### 2.1.7 当前挂单
 
 **请求**
+
 ```typescript
 {
   "type": "openOrders",
@@ -191,25 +203,27 @@
 ```
 
 **响应**
+
 ```typescript
 [
   {
-    "coin": "BTC",
-    "oid": 123456,           // 订单 ID
-    "cloid": "my-order-1",   // 客户端订单 ID
-    "side": "B",             // B=买, A=卖
-    "limitPx": "90000.0",    // 限价
-    "sz": "0.1",             // 数量
-    "origSz": "0.1",         // 原始数量
-    "timestamp": 1700000000000
+    coin: 'BTC',
+    oid: 123456, // 订单 ID
+    cloid: 'my-order-1', // 客户端订单 ID
+    side: 'B', // B=买, A=卖
+    limitPx: '90000.0', // 限价
+    sz: '0.1', // 数量
+    origSz: '0.1', // 原始数量
+    timestamp: 1700000000000,
   },
   // ...
-]
+];
 ```
 
 #### 2.1.8 成交记录
 
 **请求**
+
 ```typescript
 {
   "type": "userFills",
@@ -218,28 +232,30 @@
 ```
 
 **响应**
+
 ```typescript
 [
   {
-    "coin": "BTC",
-    "px": "90000.0",
-    "sz": "0.1",
-    "side": "B",
-    "time": 1700000000000,
-    "startPosition": "0.0",
-    "dir": "Open Long",
-    "closedPnl": "0.0",
-    "fee": "0.9",
-    "oid": 123456,
-    "tid": 789012
+    coin: 'BTC',
+    px: '90000.0',
+    sz: '0.1',
+    side: 'B',
+    time: 1700000000000,
+    startPosition: '0.0',
+    dir: 'Open Long',
+    closedPnl: '0.0',
+    fee: '0.9',
+    oid: 123456,
+    tid: 789012,
   },
   // ...
-]
+];
 ```
 
 #### 2.1.9 L2 订单簿
 
 **请求**
+
 ```typescript
 {
   "type": "l2Book",
@@ -248,6 +264,7 @@
 ```
 
 **响应**
+
 ```typescript
 {
   "coin": "BTC",
@@ -274,6 +291,7 @@
 #### 2.1.10 Builder 费率授权状态
 
 **请求**
+
 ```typescript
 {
   "type": "maxBuilderFee",
@@ -283,6 +301,7 @@
 ```
 
 **响应**
+
 ```typescript
 {
   "maxFeeRate": "10"  // 10 = 1 基点 (0.01%)，null = 未授权
@@ -298,6 +317,7 @@
 #### 2.2.1 下单
 
 **请求结构**
+
 ```typescript
 {
   "action": {
@@ -351,6 +371,7 @@
 ```
 
 **响应**
+
 ```typescript
 {
   "status": "ok",
@@ -384,6 +405,7 @@
 #### 2.2.2 取消订单
 
 **请求**
+
 ```typescript
 {
   "action": {
@@ -403,6 +425,7 @@
 #### 2.2.3 按 CLOID 取消
 
 **请求**
+
 ```typescript
 {
   "action": {
@@ -422,6 +445,7 @@
 #### 2.2.4 修改订单
 
 **请求**
+
 ```typescript
 {
   "action": {
@@ -444,6 +468,7 @@
 #### 2.2.5 设置杠杆
 
 **请求**
+
 ```typescript
 {
   "action": {
@@ -460,6 +485,7 @@
 #### 2.2.6 授权 Builder 费用
 
 **请求**
+
 ```typescript
 {
   "action": {
@@ -512,11 +538,7 @@ class HyperliquidWebSocket {
     });
   }
 
-  subscribe<T>(
-    type: string,
-    params: Record<string, any>,
-    callback: (data: T) => void
-  ): () => void {
+  subscribe<T>(type: string, params: Record<string, any>, callback: (data: T) => void): () => void {
     const key = this.getSubscriptionKey(type, params);
 
     if (!this.subscriptions.has(key)) {
@@ -541,14 +563,14 @@ class HyperliquidWebSocket {
   private sendSubscribe(type: string, params: Record<string, any>) {
     this.send({
       method: 'subscribe',
-      subscription: { type, ...params }
+      subscription: { type, ...params },
     });
   }
 
   private sendUnsubscribe(type: string, params: Record<string, any>) {
     this.send({
       method: 'unsubscribe',
-      subscription: { type, ...params }
+      subscription: { type, ...params },
     });
   }
 
@@ -556,7 +578,7 @@ class HyperliquidWebSocket {
     const { channel, data } = message;
     const callbacks = this.subscriptions.get(channel);
     if (callbacks) {
-      callbacks.forEach(cb => cb(data));
+      callbacks.forEach((cb) => cb(data));
     }
   }
 
@@ -574,6 +596,7 @@ class HyperliquidWebSocket {
 #### 3.2.1 订单簿 (l2Book)
 
 **订阅**
+
 ```typescript
 {
   "method": "subscribe",
@@ -582,6 +605,7 @@ class HyperliquidWebSocket {
 ```
 
 **推送数据**
+
 ```typescript
 {
   "channel": "l2Book",
@@ -596,6 +620,7 @@ class HyperliquidWebSocket {
 #### 3.2.2 最近成交 (trades)
 
 **订阅**
+
 ```typescript
 {
   "method": "subscribe",
@@ -604,6 +629,7 @@ class HyperliquidWebSocket {
 ```
 
 **推送数据**
+
 ```typescript
 {
   "channel": "trades",
@@ -623,6 +649,7 @@ class HyperliquidWebSocket {
 #### 3.2.3 K线数据 (candle)
 
 **订阅**
+
 ```typescript
 {
   "method": "subscribe",
@@ -635,6 +662,7 @@ class HyperliquidWebSocket {
 ```
 
 **推送数据**
+
 ```typescript
 {
   "channel": "candle",
@@ -656,6 +684,7 @@ class HyperliquidWebSocket {
 #### 3.2.4 所有中间价 (allMids)
 
 **订阅**
+
 ```typescript
 {
   "method": "subscribe",
@@ -664,6 +693,7 @@ class HyperliquidWebSocket {
 ```
 
 **推送数据**
+
 ```typescript
 {
   "channel": "allMids",
@@ -680,6 +710,7 @@ class HyperliquidWebSocket {
 #### 3.2.5 订单更新 (orderUpdates)
 
 **订阅**
+
 ```typescript
 {
   "method": "subscribe",
@@ -688,6 +719,7 @@ class HyperliquidWebSocket {
 ```
 
 **推送数据**
+
 ```typescript
 {
   "channel": "orderUpdates",
@@ -712,6 +744,7 @@ class HyperliquidWebSocket {
 #### 3.2.6 用户成交 (userFills)
 
 **订阅**
+
 ```typescript
 {
   "method": "subscribe",
@@ -722,6 +755,7 @@ class HyperliquidWebSocket {
 #### 3.2.7 账户状态 (clearinghouseState)
 
 **订阅**
+
 ```typescript
 {
   "method": "subscribe",
@@ -747,7 +781,7 @@ import { signTypedData } from 'viem/actions';
 import { WalletClient } from 'viem';
 
 // 常量
-const MAINNET_CHAIN_ID = 42161;  // Arbitrum
+const MAINNET_CHAIN_ID = 42161; // Arbitrum
 const TESTNET_CHAIN_ID = 421614; // Arbitrum Sepolia
 
 // EIP-712 Domain
@@ -755,7 +789,7 @@ const getDomain = (isMainnet: boolean) => ({
   name: 'Exchange',
   version: '1',
   chainId: isMainnet ? MAINNET_CHAIN_ID : TESTNET_CHAIN_ID,
-  verifyingContract: '0x0000000000000000000000000000000000000000'
+  verifyingContract: '0x0000000000000000000000000000000000000000',
 });
 
 // 签名 L1 Action (交易操作)
@@ -771,20 +805,20 @@ export async function signL1Action(
   const types = {
     Agent: [
       { name: 'source', type: 'string' },
-      { name: 'connectionId', type: 'bytes32' }
-    ]
+      { name: 'connectionId', type: 'bytes32' },
+    ],
   };
 
   const message = {
     source: isMainnet ? 'a' : 'b',
-    connectionId: actionHash
+    connectionId: actionHash,
   };
 
   const signature = await walletClient.signTypedData({
     domain: getDomain(isMainnet),
     types,
     primaryType: 'Agent',
-    message
+    message,
   });
 
   return parseSignature(signature);
@@ -798,14 +832,14 @@ export async function signUserSignedAction(
   isMainnet: boolean
 ) {
   const types = {
-    [action.type]: payloadTypes
+    [action.type]: payloadTypes,
   };
 
   const signature = await walletClient.signTypedData({
     domain: getDomain(isMainnet),
     types,
     primaryType: action.type,
-    message: action
+    message: action,
   });
 
   return parseSignature(signature);
@@ -823,9 +857,9 @@ export async function signApproveBuilderFee(
     type: 'approveBuilderFee',
     hyperliquidChain: isMainnet ? 'Mainnet' : 'Testnet',
     signatureChainId: '0x66eee',
-    builder: builder.toLowerCase(),  // 重要：小写
+    builder: builder.toLowerCase(), // 重要：小写
     maxFeeRate,
-    nonce
+    nonce,
   };
 
   const types = [
@@ -833,7 +867,7 @@ export async function signApproveBuilderFee(
     { name: 'signatureChainId', type: 'string' },
     { name: 'builder', type: 'address' },
     { name: 'maxFeeRate', type: 'string' },
-    { name: 'nonce', type: 'uint64' }
+    { name: 'nonce', type: 'uint64' },
   ];
 
   return signUserSignedAction(walletClient, action, types, isMainnet);
@@ -857,12 +891,12 @@ export function floatToWire(x: number): string {
 
 ### 4.3 签名注意事项
 
-| 项目 | 要求 |
-|------|------|
-| 地址格式 | 必须小写 |
-| 数字格式 | 移除尾随零（使用 `floatToWire`）|
-| Nonce | 时间戳，必须在 (T - 2天, T + 1天) 窗口内 |
-| Chain ID | 主网 42161，测试网 421614 |
+| 项目     | 要求                                     |
+| -------- | ---------------------------------------- |
+| 地址格式 | 必须小写                                 |
+| 数字格式 | 移除尾随零（使用 `floatToWire`）         |
+| Nonce    | 时间戳，必须在 (T - 2天, T + 1天) 窗口内 |
+| Chain ID | 主网 42161，测试网 421614                |
 
 ---
 
@@ -874,9 +908,9 @@ export function floatToWire(x: number): string {
 // lib/hyperliquid/constants.ts
 export const BUILDER_CONFIG = {
   address: process.env.NEXT_PUBLIC_BUILDER_ADDRESS!,
-  feeRate: 10,           // 10 = 1 基点 (0.01%)
-  maxFeeRatePerps: 100,  // 100 = 10 基点 (0.1%)
-  maxFeeRateSpot: 1000   // 1000 = 100 基点 (1%)
+  feeRate: 10, // 10 = 1 基点 (0.01%)
+  maxFeeRatePerps: 100, // 100 = 10 基点 (0.1%)
+  maxFeeRateSpot: 1000, // 1000 = 100 基点 (1%)
 };
 ```
 
@@ -892,13 +926,10 @@ export function useBuilderApproval() {
   const { data: isApproved } = useQuery({
     queryKey: ['builderApproval', address],
     queryFn: async () => {
-      const result = await hyperliquidClient.getMaxBuilderFee(
-        address!,
-        BUILDER_CONFIG.address
-      );
+      const result = await hyperliquidClient.getMaxBuilderFee(address!, BUILDER_CONFIG.address);
       return result.maxFeeRate !== null;
     },
-    enabled: !!address
+    enabled: !!address,
   });
 
   // 授权操作
@@ -910,16 +941,16 @@ export function useBuilderApproval() {
         BUILDER_CONFIG.address,
         BUILDER_CONFIG.maxFeeRatePerps.toString(),
         nonce,
-        true  // isMainnet
+        true // isMainnet
       );
 
       return hyperliquidClient.approveBuilderFee({
         builder: BUILDER_CONFIG.address,
         maxFeeRate: BUILDER_CONFIG.maxFeeRatePerps.toString(),
         nonce,
-        signature
+        signature,
       });
-    }
+    },
   });
 
   return { isApproved, approve };
@@ -936,8 +967,8 @@ const orderAction = {
   grouping: 'na',
   builder: {
     b: BUILDER_CONFIG.address,
-    f: BUILDER_CONFIG.feeRate
-  }
+    f: BUILDER_CONFIG.feeRate,
+  },
 };
 ```
 
@@ -949,7 +980,7 @@ const orderAction = {
 
 ```typescript
 // 直接使用 meta 返回的 index
-const perpAssetId = perpMeta.universe.findIndex(u => u.name === 'BTC');
+const perpAssetId = perpMeta.universe.findIndex((u) => u.name === 'BTC');
 // BTC = 0, ETH = 1, ...
 ```
 
@@ -957,7 +988,7 @@ const perpAssetId = perpMeta.universe.findIndex(u => u.name === 'BTC');
 
 ```typescript
 // 10000 + spotInfo.index
-const spotIndex = spotMeta.universe.findIndex(u => u.name === 'HYPE/USDC');
+const spotIndex = spotMeta.universe.findIndex((u) => u.name === 'HYPE/USDC');
 const spotAssetId = 10000 + spotIndex;
 // HYPE/USDC index = 0, 所以 assetId = 10000
 ```
@@ -967,7 +998,7 @@ const spotAssetId = 10000 + spotIndex;
 ```typescript
 // 100000 + perp_dex_index * 10000 + index_in_meta
 // 例如 test:ABC 在 testnet: perp_dex_index = 1, index = 0
-const builderPerpAssetId = 100000 + 1 * 10000 + 0;  // = 110000
+const builderPerpAssetId = 100000 + 1 * 10000 + 0; // = 110000
 ```
 
 ---
@@ -976,13 +1007,13 @@ const builderPerpAssetId = 100000 + 1 * 10000 + 0;  // = 110000
 
 ### 7.1 常见错误码
 
-| 错误信息 | 原因 | 解决方案 |
-|---------|------|---------|
-| `Insufficient margin` | 保证金不足 | 减少数量或增加保证金 |
-| `Invalid signature` | 签名错误 | 检查地址小写、尾随零 |
-| `Order would cross` | 限价单会立即成交 | 使用 IOC 或调整价格 |
-| `Rate limit exceeded` | 超过频率限制 | 降低请求频率 |
-| `Nonce too old/new` | Nonce 不在有效窗口 | 使用当前时间戳 |
+| 错误信息              | 原因               | 解决方案             |
+| --------------------- | ------------------ | -------------------- |
+| `Insufficient margin` | 保证金不足         | 减少数量或增加保证金 |
+| `Invalid signature`   | 签名错误           | 检查地址小写、尾随零 |
+| `Order would cross`   | 限价单会立即成交   | 使用 IOC 或调整价格  |
+| `Rate limit exceeded` | 超过频率限制       | 降低请求频率         |
+| `Nonce too old/new`   | Nonce 不在有效窗口 | 使用当前时间戳       |
 
 ### 7.2 错误处理代码
 
@@ -1022,11 +1053,11 @@ async function submitOrder(params: OrderParams) {
 
 ### 8.1 API 限制
 
-| 类型 | 限制 |
-|------|------|
-| REST API | 1200 请求/分钟 |
-| WebSocket 订阅 | 无明确限制 |
-| 订单操作 | 10 订单/秒 |
+| 类型           | 限制           |
+| -------------- | -------------- |
+| REST API       | 1200 请求/分钟 |
+| WebSocket 订阅 | 无明确限制     |
+| 订单操作       | 10 订单/秒     |
 
 ### 8.2 客户端限流
 
@@ -1044,11 +1075,11 @@ class RateLimiter {
 
   async acquire(): Promise<void> {
     const now = Date.now();
-    this.timestamps = this.timestamps.filter(t => now - t < this.window);
+    this.timestamps = this.timestamps.filter((t) => now - t < this.window);
 
     if (this.timestamps.length >= this.limit) {
       const waitTime = this.timestamps[0] + this.window - now;
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
     this.timestamps.push(Date.now());

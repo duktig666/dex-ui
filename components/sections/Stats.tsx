@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { motion } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
 
 interface StatItemProps {
   label: string;
@@ -28,7 +28,7 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
     const steps = 60;
     const increment = value / steps;
     let current = 0;
-    
+
     const timer = setInterval(() => {
       current += increment;
       if (current >= value) {
@@ -40,6 +40,7 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
     }, duration / steps);
 
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInView, value]);
 
   useEffect(() => {
@@ -75,12 +76,10 @@ function AnimatedNumber({ value, decimals = 0 }: { value: number; decimals?: num
   );
 }
 
-function StatItem({ label, value, prefix = "", suffix = "", decimals = 0 }: StatItemProps) {
+function StatItem({ label, value, prefix = '', suffix = '', decimals = 0 }: StatItemProps) {
   return (
     <div className="text-center">
-      <dt className="text-sm text-text-secondary mb-2 uppercase tracking-wider">
-        {label}
-      </dt>
+      <dt className="text-sm text-text-secondary mb-2 uppercase tracking-wider">{label}</dt>
       <dd className="text-4xl lg:text-5xl font-gilroy font-bold text-white">
         {prefix}
         <AnimatedNumber value={value} decimals={decimals} />
@@ -92,9 +91,9 @@ function StatItem({ label, value, prefix = "", suffix = "", decimals = 0 }: Stat
 
 export function Stats() {
   const stats = [
-    { label: "Lifetime Trading Volume", value: 60, prefix: ">$", suffix: " billion" },
-    { label: "Hermes Users", value: 86200, prefix: "", suffix: "+" },
-    { label: "Affiliate Fees Distributed", value: 15, prefix: ">$", suffix: " million" },
+    { label: 'Lifetime Trading Volume', value: 60, prefix: '>$', suffix: ' billion' },
+    { label: 'Hermes Users', value: 86200, prefix: '', suffix: '+' },
+    { label: 'Affiliate Fees Distributed', value: 15, prefix: '>$', suffix: ' million' },
   ];
 
   return (

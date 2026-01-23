@@ -1,16 +1,17 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import { useOrderBook, type OrderBookLevel } from "@/hooks/useOrderBook";
-import { useRecentTrades, type FormattedTrade } from "@/hooks/useRecentTrades";
-import { formatPrice, formatSize } from "@/lib/hyperliquid/utils";
+import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
+import { useOrderBook, type OrderBookLevel } from '@/hooks/useOrderBook';
+import { useRecentTrades, type FormattedTrade } from '@/hooks/useRecentTrades';
+import { formatPrice, formatSize } from '@/lib/hyperliquid/utils';
 
 interface OrderBookProps {
   symbol: string;
 }
 
-type TabType = "orderbook" | "trades";
+type TabType = 'orderbook' | 'trades';
 
 function OrderBookRow({
   level,
@@ -19,11 +20,11 @@ function OrderBookRow({
   sizeDecimals,
 }: {
   level: OrderBookLevel;
-  side: "bid" | "ask";
+  side: 'bid' | 'ask';
   priceDecimals: number;
   sizeDecimals: number;
 }) {
-  const bgColor = side === "bid" ? "rgba(14, 203, 129, 0.15)" : "rgba(246, 70, 93, 0.15)";
+  const bgColor = side === 'bid' ? 'rgba(14, 203, 129, 0.15)' : 'rgba(246, 70, 93, 0.15)';
 
   return (
     <div className="relative flex items-center text-xs h-6 px-2 hover:bg-[#1a1d26]/50 cursor-pointer">
@@ -33,14 +34,16 @@ function OrderBookRow({
         style={{
           background: bgColor,
           width: `${Math.min(level.percent, 100)}%`,
-          right: side === "ask" ? 0 : "auto",
-          left: side === "bid" ? "auto" : 0,
+          right: side === 'ask' ? 0 : 'auto',
+          left: side === 'bid' ? 'auto' : 0,
         }}
       />
-      
+
       {/* Content */}
       <div className="relative flex items-center justify-between w-full">
-        <span className={cn("font-mono w-20", side === "bid" ? "text-[#0ecb81]" : "text-[#f6465d]")}>
+        <span
+          className={cn('font-mono w-20', side === 'bid' ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
+        >
           {formatPrice(level.price, priceDecimals)}
         </span>
         <span className="font-mono text-[#eaecef] w-24 text-right">
@@ -54,26 +57,26 @@ function OrderBookRow({
   );
 }
 
-function TradeRow({ 
+function TradeRow({
   trade,
   priceDecimals,
   sizeDecimals,
-}: { 
+}: {
   trade: FormattedTrade;
   priceDecimals: number;
   sizeDecimals: number;
 }) {
   return (
     <div className="flex items-center text-xs h-6 px-2 hover:bg-[#1a1d26]/50">
-      <span className={cn("font-mono w-20", trade.side === "buy" ? "text-[#0ecb81]" : "text-[#f6465d]")}>
+      <span
+        className={cn('font-mono w-20', trade.side === 'buy' ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
+      >
         {formatPrice(trade.price, priceDecimals)}
       </span>
       <span className="font-mono text-[#eaecef] w-24 text-right">
         {formatSize(trade.size, sizeDecimals)}
       </span>
-      <span className="font-mono text-[#848e9c] w-24 text-right">
-        {trade.timeStr}
-      </span>
+      <span className="font-mono text-[#848e9c] w-24 text-right">{trade.timeStr}</span>
     </div>
   );
 }
@@ -89,11 +92,12 @@ function LoadingSkeleton() {
 }
 
 export function OrderBook({ symbol }: OrderBookProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("orderbook");
-  
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<TabType>('orderbook');
+
   // 从 symbol 提取 coin (如 "BTC-USDC" -> "BTC")
-  const coin = symbol.split("-")[0] || symbol;
-  
+  const coin = symbol.split('-')[0] || symbol;
+
   // 使用真实数据 hooks
   const { data: orderBookData, isLoading: orderBookLoading } = useOrderBook(coin, 15);
   const { trades, isLoading: tradesLoading } = useRecentTrades(coin, 50);
@@ -116,36 +120,40 @@ export function OrderBook({ symbol }: OrderBookProps) {
       {/* Tabs */}
       <div className="flex items-center border-b border-[#1a1d26]">
         <button
-          onClick={() => setActiveTab("orderbook")}
+          onClick={() => setActiveTab('orderbook')}
           className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors",
-            activeTab === "orderbook"
-              ? "text-white border-b-2 border-[#2962ff]"
-              : "text-[#848e9c] hover:text-white"
+            'px-4 py-2 text-sm font-medium transition-colors',
+            activeTab === 'orderbook'
+              ? 'text-white border-b-2 border-[#2962ff]'
+              : 'text-[#848e9c] hover:text-white'
           )}
         >
-          Order Book
+          {t('Order Book')}
         </button>
         <button
-          onClick={() => setActiveTab("trades")}
+          onClick={() => setActiveTab('trades')}
           className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors",
-            activeTab === "trades"
-              ? "text-white border-b-2 border-[#2962ff]"
-              : "text-[#848e9c] hover:text-white"
+            'px-4 py-2 text-sm font-medium transition-colors',
+            activeTab === 'trades'
+              ? 'text-white border-b-2 border-[#2962ff]'
+              : 'text-[#848e9c] hover:text-white'
           )}
         >
-          Trades
+          {t('Trades')}
         </button>
       </div>
 
-      {activeTab === "orderbook" ? (
+      {activeTab === 'orderbook' ? (
         <>
           {/* Header */}
           <div className="flex items-center text-xs text-[#848e9c] px-2 py-1 border-b border-[#1a1d26]">
-            <span className="w-20">Price</span>
-            <span className="w-24 text-right">Amount ({coin})</span>
-            <span className="w-24 text-right">Total ({coin})</span>
+            <span className="w-20">{t('Price')}</span>
+            <span className="w-24 text-right">
+              {t('Amount')} ({coin})
+            </span>
+            <span className="w-24 text-right">
+              {t('Total')} ({coin})
+            </span>
           </div>
 
           {orderBookLoading || !orderBookData ? (
@@ -155,10 +163,10 @@ export function OrderBook({ symbol }: OrderBookProps) {
               {/* Asks (reversed so lowest ask is at bottom) */}
               <div className="flex-1 overflow-y-auto flex flex-col-reverse">
                 {orderBookData.asks.map((ask, i) => (
-                  <OrderBookRow 
-                    key={`ask-${i}`} 
-                    level={ask} 
-                    side="ask" 
+                  <OrderBookRow
+                    key={`ask-${i}`}
+                    level={ask}
+                    side="ask"
                     priceDecimals={priceDecimals}
                     sizeDecimals={sizeDecimals}
                   />
@@ -170,21 +178,22 @@ export function OrderBook({ symbol }: OrderBookProps) {
                 <span className="text-white font-mono text-sm">
                   {orderBookData.bids[0]
                     ? formatPrice(orderBookData.bids[0].price, priceDecimals)
-                    : "—"}
+                    : '—'}
                 </span>
-                <span className="text-xs text-[#848e9c]">Spread</span>
+                <span className="text-xs text-[#848e9c]">{t('Spread')}</span>
                 <span className="text-[#848e9c] font-mono text-xs">
-                  {formatPrice(orderBookData.spread, priceDecimals)} ({orderBookData.spreadPercent.toFixed(3)}%)
+                  {formatPrice(orderBookData.spread, priceDecimals)} (
+                  {orderBookData.spreadPercent.toFixed(3)}%)
                 </span>
               </div>
 
               {/* Bids */}
               <div className="flex-1 overflow-y-auto">
                 {orderBookData.bids.map((bid, i) => (
-                  <OrderBookRow 
-                    key={`bid-${i}`} 
-                    level={bid} 
-                    side="bid" 
+                  <OrderBookRow
+                    key={`bid-${i}`}
+                    level={bid}
+                    side="bid"
                     priceDecimals={priceDecimals}
                     sizeDecimals={sizeDecimals}
                   />
@@ -197,9 +206,9 @@ export function OrderBook({ symbol }: OrderBookProps) {
         <>
           {/* Trades Header */}
           <div className="flex items-center text-xs text-[#848e9c] px-2 py-1 border-b border-[#1a1d26]">
-            <span className="w-20">Price</span>
-            <span className="w-24 text-right">Amount</span>
-            <span className="w-24 text-right">Time</span>
+            <span className="w-20">{t('Price')}</span>
+            <span className="w-24 text-right">{t('Amount')}</span>
+            <span className="w-24 text-right">{t('Time')}</span>
           </div>
 
           {/* Trades List */}
@@ -208,8 +217,8 @@ export function OrderBook({ symbol }: OrderBookProps) {
               <LoadingSkeleton />
             ) : (
               trades.map((trade) => (
-                <TradeRow 
-                  key={trade.id} 
+                <TradeRow
+                  key={trade.id}
                   trade={trade}
                   priceDecimals={priceDecimals}
                   sizeDecimals={sizeDecimals}

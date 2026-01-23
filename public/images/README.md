@@ -5,6 +5,7 @@
 ## 需要下载的图片
 
 ### 1. 合作伙伴 Logo (partners/)
+
 ```bash
 # 下载合作伙伴 Logo（如果直接访问失败，请从 based.one 网站右键保存）
 curl -L "https://based.one/home/ethena.svg" -o partners/ethena.svg
@@ -15,12 +16,14 @@ curl -L "https://based.one/home/newman.svg" -o partners/newman.svg
 ```
 
 ### 2. 预测市场图片 (predictions/)
+
 ```bash
 curl -L "https://based.one/home/prediction-market/powell.png" -o predictions/powell.png
 curl -L "https://based.one/home/prediction-market/trump.png" -o predictions/trump.png
 ```
 
 ### 3. 卡片图片 (cards/)
+
 ```bash
 curl -L "https://based.one/home/based-card.svg" -o cards/based-card.svg
 curl -L "https://based.one/cards/orange-card.png" -o cards/orange-card.png
@@ -30,11 +33,13 @@ curl -L "https://based.one/home/hype-blueprint-2.svg" -o cards/hype-blueprint-2.
 ```
 
 ### 4. 交易界面 (trading/)
+
 ```bash
 curl -L "https://based.one/home/trading-app.png" -o trading/trading-app.png
 ```
 
 ### 5. 功能展示 (features/)
+
 ```bash
 curl -L "https://based.one/based-logo-white.svg" -o features/based-logo-white.svg
 curl -L "https://based.one/multi-channel/trade-screen.png" -o features/trade-screen.png
@@ -75,4 +80,3 @@ public/images/
 - 如果图片下载失败，组件会显示文字 fallback
 - 确保图片文件名与代码中的路径一致
 - SVG 文件可以直接使用，PNG/WebP 文件会自动优化
-

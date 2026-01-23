@@ -1,40 +1,42 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useCallback } from "react";
-import { useAccount } from "wagmi";
-import { cn } from "@/lib/utils";
-import { useAccountState, usePosition } from "@/hooks/useAccountState";
-import { useAssetPrice } from "@/hooks/useMarketData";
-import { formatPrice, formatSize } from "@/lib/hyperliquid/utils";
-import { useCreateTrailingStop, useTrailingStopMonitor } from "@/hooks/useTrailingStop";
-import { useTrailingStopStore } from "@/stores/trailingStopStore";
-import { useCanSign } from "@/hooks/useNetworkCheck";
+import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAccount } from 'wagmi';
+import { cn } from '@/lib/utils';
+import { useAccountState, usePosition } from '@/hooks/useAccountState';
+import { useAssetPrice } from '@/hooks/useMarketData';
+import { formatPrice, formatSize } from '@/lib/hyperliquid/utils';
+import { useCreateTrailingStop, useTrailingStopMonitor } from '@/hooks/useTrailingStop';
+import { useTrailingStopStore } from '@/stores/trailingStopStore';
+import { useCanSign } from '@/hooks/useNetworkCheck';
 
 interface TrailingStopFormProps {
   symbol: string;
 }
 
-type OrderSide = "buy" | "sell";
-type TrailType = "percent" | "price";
+type OrderSide = 'buy' | 'sell';
+type TrailType = 'percent' | 'price';
 
 // 预设回撤百分比
 const TRAIL_PERCENT_PRESETS = [1, 2, 3, 5, 10];
 
 export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
+  const { t } = useTranslation();
   const { isConnected } = useAccount();
   const canSign = useCanSign();
 
-  const [side, setSide] = useState<OrderSide>("sell");
-  const [amount, setAmount] = useState("");
-  const [trailValue, setTrailValue] = useState("2");
-  const [trailType, setTrailType] = useState<TrailType>("percent");
+  const [side, setSide] = useState<OrderSide>('sell');
+  const [amount, setAmount] = useState('');
+  const [trailValue, setTrailValue] = useState('2');
+  const [trailType, setTrailType] = useState<TrailType>('percent');
   const [reduceOnly, setReduceOnly] = useState(true);
 
-  const coin = symbol.split("-")[0] || "BTC";
-  const quote = "USDC";
+  const coin = symbol.split('-')[0] || 'BTC';
+  const quote = 'USDC';
 
   // Hooks
-  const { availableBalance } = useAccountState();
+  const {} = useAccountState();
   const position = usePosition(coin);
   const { midPrice } = useAssetPrice(coin);
   const { createOrder } = useCreateTrailingStop();
@@ -45,10 +47,10 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
   const exampleTriggerPrice = useMemo(() => {
     if (!midPrice) return 0;
     const trail = parseFloat(trailValue) || 0;
-    
-    if (trailType === "percent") {
+
+    if (trailType === 'percent') {
       const trailPercent = trail / 100;
-      if (side === "sell") {
+      if (side === 'sell') {
         // 追踪最高价，回落触发
         return midPrice * (1 - trailPercent);
       } else {
@@ -56,7 +58,7 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
         return midPrice * (1 + trailPercent);
       }
     } else {
-      if (side === "sell") {
+      if (side === 'sell') {
         return midPrice - trail;
       } else {
         return midPrice + trail;
@@ -70,13 +72,13 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
 
     const amountNum = parseFloat(amount);
     if (!amountNum || amountNum <= 0) {
-      alert("Please enter a valid amount");
+      alert('Please enter a valid amount');
       return;
     }
 
     const trailNum = parseFloat(trailValue);
     if (!trailNum || trailNum <= 0) {
-      alert("Please enter a valid trail value");
+      alert('Please enter a valid trail value');
       return;
     }
 
@@ -90,7 +92,7 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
     });
 
     // 清空表单
-    setAmount("");
+    setAmount('');
   }, [isConnected, canSign, amount, trailValue, trailType, side, reduceOnly, coin, createOrder]);
 
   // 使用持仓大小
@@ -103,54 +105,54 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
 
   // 按钮文本
   const buttonText = useMemo(() => {
-    if (!isConnected) return "Connect Wallet";
-    if (!canSign) return "Switch Network";
-    return side === "sell" ? "Create Trailing Stop Sell" : "Create Trailing Stop Buy";
-  }, [isConnected, canSign, side]);
+    if (!isConnected) return t('Connect Wallet');
+    if (!canSign) return t('Switch Network');
+    return side === 'sell' ? t('Create Trailing Stop Sell') : t('Create Trailing Stop Buy');
+  }, [isConnected, canSign, side, t]);
 
   return (
     <div className="flex flex-col h-full p-4 bg-[#0b0e11]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white">Trailing Stop</h3>
-        <span className="text-xs text-[#848e9c]">Local Order</span>
+        <h3 className="text-sm font-semibold text-white">{t('Trailing Stop')}</h3>
+        <span className="text-xs text-[#848e9c]">{t('Local Order')}</span>
       </div>
 
       {/* Side Selection */}
       <div className="flex gap-2 mb-4">
         <button
-          onClick={() => setSide("sell")}
+          onClick={() => setSide('sell')}
           className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded transition-colors",
-            side === "sell"
-              ? "bg-[#f6465d] text-white"
-              : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+            'flex-1 py-2 text-sm font-semibold rounded transition-colors',
+            side === 'sell'
+              ? 'bg-[#f6465d] text-white'
+              : 'bg-[#1a1d26] text-[#848e9c] hover:text-white'
           )}
         >
-          Trailing Sell
+          {t('Trailing Sell')}
         </button>
         <button
-          onClick={() => setSide("buy")}
+          onClick={() => setSide('buy')}
           className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded transition-colors",
-            side === "buy"
-              ? "bg-[#0ecb81] text-white"
-              : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+            'flex-1 py-2 text-sm font-semibold rounded transition-colors',
+            side === 'buy'
+              ? 'bg-[#0ecb81] text-white'
+              : 'bg-[#1a1d26] text-[#848e9c] hover:text-white'
           )}
         >
-          Trailing Buy
+          {t('Trailing Buy')}
         </button>
       </div>
 
       {/* Current Position */}
       {position && (
         <div className="flex items-center justify-between text-xs mb-4">
-          <span className="text-[#848e9c]">Current Position</span>
+          <span className="text-[#848e9c]">{t('Current Position')}</span>
           <button
             onClick={usePositionSize}
             className={cn(
-              "font-mono hover:underline",
-              position.size > 0 ? "text-[#0ecb81]" : "text-[#f6465d]"
+              'font-mono hover:underline',
+              position.size > 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'
             )}
           >
             {formatSize(position.size, 5)} {coin}
@@ -161,7 +163,7 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
       {/* Size Input */}
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-[#848e9c]">Size</span>
+          <span className="text-[#848e9c]">{t('Size')}</span>
         </div>
         <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
           <input
@@ -178,30 +180,30 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
       {/* Trail Type */}
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-[#848e9c]">Trail Type</span>
+          <span className="text-[#848e9c]">{t('Trail Type')}</span>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setTrailType("percent")}
+            onClick={() => setTrailType('percent')}
             className={cn(
-              "flex-1 py-1.5 text-xs font-medium rounded transition-colors",
-              trailType === "percent"
-                ? "bg-[#f0b90b] text-black"
-                : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+              'flex-1 py-1.5 text-xs font-medium rounded transition-colors',
+              trailType === 'percent'
+                ? 'bg-[#f0b90b] text-black'
+                : 'bg-[#1a1d26] text-[#848e9c] hover:text-white'
             )}
           >
-            Percentage
+            {t('Percentage')}
           </button>
           <button
-            onClick={() => setTrailType("price")}
+            onClick={() => setTrailType('price')}
             className={cn(
-              "flex-1 py-1.5 text-xs font-medium rounded transition-colors",
-              trailType === "price"
-                ? "bg-[#f0b90b] text-black"
-                : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+              'flex-1 py-1.5 text-xs font-medium rounded transition-colors',
+              trailType === 'price'
+                ? 'bg-[#f0b90b] text-black'
+                : 'bg-[#1a1d26] text-[#848e9c] hover:text-white'
             )}
           >
-            Price
+            {t('Price')}
           </button>
         </div>
       </div>
@@ -210,25 +212,23 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-1">
           <span className="text-[#848e9c]">
-            Callback {trailType === "percent" ? "Rate" : "Amount"}
+            {t('Callback')} {trailType === 'percent' ? t('Rate') : t('Amount')}
           </span>
-          {trailType === "percent" && (
-            <span className="text-white">{trailValue}%</span>
-          )}
+          {trailType === 'percent' && <span className="text-white">{trailValue}%</span>}
         </div>
-        
+
         {/* Percentage Presets */}
-        {trailType === "percent" && (
+        {trailType === 'percent' && (
           <div className="flex gap-1 mb-2">
             {TRAIL_PERCENT_PRESETS.map((pct) => (
               <button
                 key={pct}
                 onClick={() => setTrailValue(pct.toString())}
                 className={cn(
-                  "flex-1 py-1 text-xs font-medium rounded transition-colors",
+                  'flex-1 py-1 text-xs font-medium rounded transition-colors',
                   trailValue === pct.toString()
-                    ? "bg-[#f0b90b] text-black"
-                    : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+                    ? 'bg-[#f0b90b] text-black'
+                    : 'bg-[#1a1d26] text-[#848e9c] hover:text-white'
                 )}
               >
                 {pct}%
@@ -246,7 +246,7 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
             placeholder="0"
           />
           <span className="px-3 text-sm text-[#848e9c]">
-            {trailType === "percent" ? "%" : quote}
+            {trailType === 'percent' ? '%' : quote}
           </span>
         </div>
       </div>
@@ -259,25 +259,25 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
           onChange={(e) => setReduceOnly(e.target.checked)}
           className="w-4 h-4 accent-[#f0b90b]"
         />
-        <span className="text-xs text-[#848e9c]">Reduce Only</span>
+        <span className="text-xs text-[#848e9c]">{t('Reduce Only')}</span>
       </label>
 
       {/* Order Info */}
       <div className="mb-4 p-3 bg-[#1a1d26] rounded text-xs space-y-1">
         <div className="flex justify-between">
-          <span className="text-[#848e9c]">Current Price</span>
+          <span className="text-[#848e9c]">{t('Current Price')}</span>
           <span className="text-white">${formatPrice(midPrice, 2)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[#848e9c]">Est. Trigger Price</span>
-          <span className={side === "sell" ? "text-[#f6465d]" : "text-[#0ecb81]"}>
+          <span className="text-[#848e9c]">{t('Est. Trigger Price')}</span>
+          <span className={side === 'sell' ? 'text-[#f6465d]' : 'text-[#0ecb81]'}>
             ${formatPrice(exampleTriggerPrice, 2)}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[#848e9c]">Trail Direction</span>
+          <span className="text-[#848e9c]">{t('Trail Direction')}</span>
           <span className="text-white">
-            {side === "sell" ? "↑ Track High → Sell on Drop" : "↓ Track Low → Buy on Rise"}
+            {side === 'sell' ? t('↑ Track High → Sell on Drop') : t('↓ Track Low → Buy on Rise')}
           </span>
         </div>
       </div>
@@ -287,11 +287,11 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
         onClick={handleSubmit}
         disabled={!isConnected || !canSign || !amount || !trailValue}
         className={cn(
-          "w-full py-3 text-sm font-semibold rounded transition-colors",
-          side === "sell"
-            ? "bg-[#f6465d] hover:bg-[#f6465d]/80 text-white"
-            : "bg-[#0ecb81] hover:bg-[#0ecb81]/80 text-white",
-          (!isConnected || !canSign || !amount || !trailValue) && "opacity-50 cursor-not-allowed"
+          'w-full py-3 text-sm font-semibold rounded transition-colors',
+          side === 'sell'
+            ? 'bg-[#f6465d] hover:bg-[#f6465d]/80 text-white'
+            : 'bg-[#0ecb81] hover:bg-[#0ecb81]/80 text-white',
+          (!isConnected || !canSign || !amount || !trailValue) && 'opacity-50 cursor-not-allowed'
         )}
       >
         {buttonText}
@@ -301,7 +301,7 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
       {activeOrders.length > 0 && (
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-[#848e9c]">Active Trailing Stops</span>
+            <span className="text-[#848e9c]">{t('Active Trailing Stops')}</span>
             <span className="text-white">{activeOrders.length}</span>
           </div>
           <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -311,11 +311,14 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
                 className="flex items-center justify-between p-2 bg-[#1a1d26] rounded text-xs"
               >
                 <div>
-                  <span className={order.side === "sell" ? "text-[#f6465d]" : "text-[#0ecb81]"}>
+                  <span className={order.side === 'sell' ? 'text-[#f6465d]' : 'text-[#0ecb81]'}>
                     {order.side.toUpperCase()}
                   </span>
                   <span className="text-white ml-2">{formatSize(parseFloat(order.size), 5)}</span>
-                  <span className="text-[#848e9c] ml-1">@ {order.trailValue}{order.trailType === "percent" ? "%" : ""}</span>
+                  <span className="text-[#848e9c] ml-1">
+                    @ {order.trailValue}
+                    {order.trailType === 'percent' ? '%' : ''}
+                  </span>
                 </div>
                 <button
                   onClick={() => {
@@ -324,7 +327,7 @@ export function TrailingStopForm({ symbol }: TrailingStopFormProps) {
                   }}
                   className="text-[#848e9c] hover:text-[#f6465d]"
                 >
-                  Cancel
+                  {t('Cancel')}
                 </button>
               </div>
             ))}

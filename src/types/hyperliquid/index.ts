@@ -191,11 +191,7 @@ export function formatFundingRate(funding: string): string {
  * @param markPx 标记价
  * @returns 未实现盈亏 (USD)
  */
-export function calcUnrealizedPnl(
-  szi: string,
-  entryPx: string,
-  markPx: string
-): number {
+export function calcUnrealizedPnl(szi: string, entryPx: string, markPx: string): number {
   const size = parseFloat(szi);
   const entry = parseFloat(entryPx);
   const mark = parseFloat(markPx);

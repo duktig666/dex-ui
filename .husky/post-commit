@@ -1,0 +1,82 @@
+#!/bin/sh
+
+# 自动生成 CHANGELOG 条目
+# 每次 commit 后自动追加变更记录
+
+CHANGELOG_FILE="CHANGELOG.md"
+
+# 获取最新 commit 信息
+COMMIT_HASH=$(git rev-parse --short HEAD)
+COMMIT_MSG=$(git log -1 --pretty=%s)
+COMMIT_DATE=$(date +%Y-%m-%d)
+COMMIT_TIME=$(date +%H:%M:%S)
+
+# 获取变更的文件列表
+CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+# 如果没有变更文件，退出
+if [ -z "$CHANGED_FILES" ]; then
+  exit 0
+fi
+
+# 排除 CHANGELOG.md 自身的变更，避免循环
+if [ "$CHANGED_FILES" = "CHANGELOG.md" ]; then
+  exit 0
+fi
+
+# 统计变更文件数量
+FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
+
+# 构建变更条目
+ENTRY="### [$COMMIT_DATE $COMMIT_TIME] $COMMIT_MSG
+
+> Commit: \`$COMMIT_HASH\` | Files: $FILE_COUNT
+
+<details>
+<summary>变更文件</summary>
+
+\`\`\`
+$CHANGED_FILES
+\`\`\`
+
+</details>
+
+---
+
+"
+
+# 检查 CHANGELOG.md 是否存在
+if [ ! -f "$CHANGELOG_FILE" ]; then
+  echo "# Changelog
+
+$ENTRY" > "$CHANGELOG_FILE"
+else
+  # 在 CHANGELOG.md 开头插入新条目（保留标题行）
+  # 找到第一个 ## 或 ### 标记并在其前面插入
+  TEMP_FILE=$(mktemp)
+
+  # 读取第一行（标题）
+  HEAD_LINE=$(head -n 1 "$CHANGELOG_FILE")
+
+  # 跳过标题和空行，获取剩余内容
+  REMAINING=$(tail -n +2 "$CHANGELOG_FILE" | sed '/^$/d' | head -n 1)
+
+  # 重新构建文件
+  {
+    echo "$HEAD_LINE"
+    echo ""
+    echo "$ENTRY"
+    tail -n +3 "$CHANGELOG_FILE"
+  } > "$TEMP_FILE"
+
+  mv "$TEMP_FILE" "$CHANGELOG_FILE"
+fi
+
+# 将 CHANGELOG.md 添加到暂存区（amend 当前 commit）
+git add "$CHANGELOG_FILE"
+
+# 使用 --amend --no-edit 将 CHANGELOG 变更合并到当前 commit
+# 注意：这会修改 commit hash
+git commit --amend --no-edit --no-verify >/dev/null 2>&1
+
+echo "✅ CHANGELOG updated: $COMMIT_MSG"

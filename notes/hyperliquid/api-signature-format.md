@@ -42,11 +42,11 @@ Hyperliquid API 对请求体的 `signature` 字段有严格的格式要求。API
 
 EIP-712 签名是 65 字节（130 个十六进制字符，不含 `0x` 前缀），结构如下：
 
-| 字段 | 长度 | 位置 |
-|------|------|------|
-| r | 32 bytes (64 hex) | 0-64 |
-| s | 32 bytes (64 hex) | 64-128 |
-| v | 1 byte (2 hex) | 128-130 |
+| 字段 | 长度              | 位置    |
+| ---- | ----------------- | ------- |
+| r    | 32 bytes (64 hex) | 0-64    |
+| s    | 32 bytes (64 hex) | 64-128  |
+| v    | 1 byte (2 hex)    | 128-130 |
 
 ### TypeScript 解析函数
 
@@ -60,7 +60,7 @@ export interface ParsedSignature {
 export function parseSignature(signature: string): ParsedSignature {
   // 移除 0x 前缀（如果有）
   const sig = signature.startsWith('0x') ? signature.slice(2) : signature;
-  
+
   const r = '0x' + sig.slice(0, 64);
   const s = '0x' + sig.slice(64, 128);
   const v = parseInt(sig.slice(128, 130), 16);
@@ -72,11 +72,13 @@ export function parseSignature(signature: string): ParsedSignature {
 ### 示例
 
 输入签名字符串：
+
 ```
 0xf5b8db073089fe8c4c283d27c4cedcfd295f38d6e30254c68cedcd68d8d88d2d367c5089243243428f99f60e36ef467bcee7133ce006651faaa863dc576651e71c
 ```
 
 解析结果：
+
 ```json
 {
   "r": "0xf5b8db073089fe8c4c283d27c4cedcfd295f38d6e30254c68cedcd68d8d88d2d",
@@ -107,10 +109,10 @@ builder: { b: "0xefc3a654a44facd6da111f3114cdd65f16d9a681", f: 1 }
 
 ```typescript
 // ❌ 错误
-maxFeeRate: "0.0001%"  // 计算错误
+maxFeeRate: '0.0001%'; // 计算错误
 
 // ✅ 正确
-maxFeeRate: "0.01%"    // 1 basis point = 0.01%
+maxFeeRate: '0.01%'; // 1 basis point = 0.01%
 ```
 
 ### 3. 数字精度
@@ -119,10 +121,10 @@ maxFeeRate: "0.01%"    // 1 basis point = 0.01%
 
 ```typescript
 // ❌ 可能有问题
-price: "50000.00000000"
+price: '50000.00000000';
 
 // ✅ 更好
-price: "50000"
+price: '50000';
 ```
 
 ## 适用范围
@@ -154,9 +156,16 @@ price: "50000"
 
 ```typescript
 // 调试日志示例
-console.log('[postSigned] Request:', JSON.stringify({
-  action,
-  nonce,
-  signature: parseSignature(signature)
-}, null, 2));
+console.log(
+  '[postSigned] Request:',
+  JSON.stringify(
+    {
+      action,
+      nonce,
+      signature: parseSignature(signature),
+    },
+    null,
+    2
+  )
+);
 ```

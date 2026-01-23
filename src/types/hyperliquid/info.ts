@@ -301,10 +301,7 @@ export interface MetaResponse {
 }
 
 /** metaAndAssetCtxs 响应 */
-export type MetaAndAssetCtxsResponse = [
-  { universe: PerpAsset[] },
-  AssetCtx[]
-];
+export type MetaAndAssetCtxsResponse = [{ universe: PerpAsset[] }, AssetCtx[]];
 
 // ============================================================
 // 响应类型 - 订单簿
@@ -501,7 +498,12 @@ export interface OpenOrder {
 export type OpenOrdersResponse = OpenOrder[];
 
 /** 订单类型 */
-export type OrderType = 'Limit' | 'Stop Market' | 'Stop Limit' | 'Take Profit Market' | 'Take Profit Limit';
+export type OrderType =
+  | 'Limit'
+  | 'Stop Market'
+  | 'Stop Limit'
+  | 'Take Profit Market'
+  | 'Take Profit Limit';
 
 /** 有效期类型 */
 export type TimeInForce = 'Gtc' | 'Ioc' | 'Alo';

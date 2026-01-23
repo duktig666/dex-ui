@@ -1,9 +1,9 @@
 // Type declarations for TradingView Charting Library
 // These are minimal types for our usage, the full types are in charting_library.d.ts
 
-declare module "@/public/static/charting_library/charting_library" {
-  export * from "./charting_library.d.ts";
-  
+declare module '@/public/static/charting_library/charting_library' {
+  export * from './charting_library.d.ts';
+
   export interface ChartingLibraryWidgetOptions {
     debug?: boolean;
     symbol: string;
@@ -11,7 +11,7 @@ declare module "@/public/static/charting_library/charting_library" {
     container: HTMLElement;
     library_path: string;
     locale?: LanguageCode;
-    theme?: "dark" | "light";
+    theme?: 'dark' | 'light';
     loading_screen?: {
       backgroundColor?: string;
       foregroundColor?: string;
@@ -46,11 +46,46 @@ declare module "@/public/static/charting_library/charting_library" {
     setResolution: (resolution: ResolutionString, callback?: () => void) => void;
   }
 
-  export type LanguageCode = "en" | "zh" | "ja" | "ko" | "ru" | "es" | "fr" | "de" | "it" | "pt" | "ar" | "tr" | "vi" | "th" | "id" | "ms" | "pl" | "sv" | "nl" | "el" | "cs" | "hu" | "ro" | "he" | "fa";
-  
+  export type LanguageCode =
+    | 'en'
+    | 'zh'
+    | 'ja'
+    | 'ko'
+    | 'ru'
+    | 'es'
+    | 'fr'
+    | 'de'
+    | 'it'
+    | 'pt'
+    | 'ar'
+    | 'tr'
+    | 'vi'
+    | 'th'
+    | 'id'
+    | 'ms'
+    | 'pl'
+    | 'sv'
+    | 'nl'
+    | 'el'
+    | 'cs'
+    | 'hu'
+    | 'ro'
+    | 'he'
+    | 'fa';
+
   export type Timezone = string;
-  
-  export type ResolutionString = "1" | "5" | "15" | "30" | "60" | "240" | "1D" | "1W" | "1M" | string;
+
+  export type ResolutionString =
+    | '1'
+    | '5'
+    | '15'
+    | '30'
+    | '60'
+    | '240'
+    | '1D'
+    | '1W'
+    | '1M'
+    | string;
 
   export interface DatafeedConfiguration {
     supported_resolutions?: ResolutionString[];
@@ -133,11 +168,7 @@ declare module "@/public/static/charting_library/charting_library" {
       symbolType: string,
       onResult: SearchSymbolsCallback
     ) => void;
-    resolveSymbol: (
-      symbolName: string,
-      onResolve: ResolveCallback,
-      onError: ErrorCallback
-    ) => void;
+    resolveSymbol: (symbolName: string, onResolve: ResolveCallback, onError: ErrorCallback) => void;
     getBars: (
       symbolInfo: LibrarySymbolInfo,
       resolution: ResolutionString,

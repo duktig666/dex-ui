@@ -87,8 +87,8 @@
 }
 
 /* Input fields */
-input[type="text"],
-input[type="number"] {
+input[type='text'],
+input[type='number'] {
   background-color: #1a1d26 !important;
   border: 1px solid #363a45 !important;
   color: #eaecef !important;

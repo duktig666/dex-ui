@@ -5,29 +5,32 @@
 
 ## 1. 核心框架
 
-| 技术 | 版本/说明 |
-|------|----------|
-| **Next.js** | React SSR/SSG 框架，页面使用 App Router |
-| **React** | 核心 UI 库，使用 Suspense、Fragment 等现代特性 |
+| 技术        | 版本/说明                                      |
+| ----------- | ---------------------------------------------- |
+| **Next.js** | React SSR/SSG 框架，页面使用 App Router        |
+| **React**   | 核心 UI 库，使用 Suspense、Fragment 等现代特性 |
 
 **识别依据:**
+
 - 全局变量 `__next_f`、`__next_s`
 - 动态 chunk 加载模式 `.js?dpl=`
 - React Server Components 流式渲染
 
 ## 2. 样式方案
 
-| 技术 | 说明 |
-|------|------|
-| **Tailwind CSS** | Utility-first CSS 框架 |
-| **CSS Variables** | 自定义主题变量系统 |
+| 技术              | 说明                   |
+| ----------------- | ---------------------- |
+| **Tailwind CSS**  | Utility-first CSS 框架 |
+| **CSS Variables** | 自定义主题变量系统     |
 
 **Tailwind 特征类名:**
+
 ```
 font-inter, text-trading-textPrimary, bg-background, antialiased
 ```
 
 **主题 CSS 变量示例:**
+
 ```css
 --brand-primary
 --bg-secondary
@@ -37,23 +40,25 @@ font-inter, text-trading-textPrimary, bg-background, antialiased
 
 ## 3. 字体系统
 
-| 字体 | 用途 |
-|------|------|
-| **Inter** | 主要 UI 字体 |
+| 字体                | 用途              |
+| ------------------- | ----------------- |
+| **Inter**           | 主要 UI 字体      |
 | **Source Code Pro** | 代码/数字展示字体 |
 
 **加载优化:**
+
 - Google Fonts CDN 加载
 - `font-display: swap` 防止 FOIT
 - `requestIdleCallback` 延迟加载非关键字体
 
 ## 4. 图表库
 
-| 技术 | 说明 |
-|------|------|
+| 技术                             | 说明             |
+| -------------------------------- | ---------------- |
 | **TradingView Charting Library** | 专业交易图表组件 |
 
 **预加载资源:**
+
 ```
 charting_library/bundles/runtime.js
 charting_library/bundles/library.js
@@ -64,12 +69,13 @@ charting_library/bundles/library.js
 网站使用动态配置注入，支持多品牌定制:
 
 ```javascript
-window.__TENANT_BRANDING__   // 品牌配置
-window.__TENANT_CSS_VARS__   // 主题变量
-window.__TENANT_PLUGINS__    // 功能插件开关
+window.__TENANT_BRANDING__; // 品牌配置
+window.__TENANT_CSS_VARS__; // 主题变量
+window.__TENANT_PLUGINS__; // 功能插件开关
 ```
 
 **插件系统功能:**
+
 - HIP3
 - Affiliate (联盟营销)
 - Airdrop (空投)
@@ -99,14 +105,14 @@ window.__TENANT_PLUGINS__    // 功能插件开关
 
 ### 8.1 推荐技术选型
 
-| 层级 | 推荐方案 | 理由 |
-|------|----------|------|
-| 框架 | Next.js 14+ (App Router) | 与原站一致，SSR/SSG 支持好 |
-| UI | React 18+ | 支持 Server Components |
-| 样式 | Tailwind CSS 3.x | 快速开发，与原站风格一致 |
-| 图表 | TradingView Lightweight Charts 或完整 Charting Library | 专业交易图表 |
-| 状态管理 | Zustand / Jotai | 轻量级，适合交易应用 |
-| 国际化 | next-intl / react-i18next | Next.js 友好 |
+| 层级     | 推荐方案                                               | 理由                       |
+| -------- | ------------------------------------------------------ | -------------------------- |
+| 框架     | Next.js 14+ (App Router)                               | 与原站一致，SSR/SSG 支持好 |
+| UI       | React 18+                                              | 支持 Server Components     |
+| 样式     | Tailwind CSS 3.x                                       | 快速开发，与原站风格一致   |
+| 图表     | TradingView Lightweight Charts 或完整 Charting Library | 专业交易图表               |
+| 状态管理 | Zustand / Jotai                                        | 轻量级，适合交易应用       |
+| 国际化   | next-intl / react-i18next                              | Next.js 友好               |
 
 ### 8.2 项目结构建议
 
