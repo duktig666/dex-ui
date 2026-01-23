@@ -2,6 +2,8 @@
  * HyperLiquid EIP-712 签名工具
  */
 
+import { keccak256, encodeAbiParameters, parseAbiParameters, toHex } from 'viem';
+import { encode as msgpackEncode } from '@msgpack/msgpack';
 import { L1_ACTION_DOMAIN, EIP712_DOMAIN, IS_TESTNET } from './constants';
 
 export interface ParsedSignature {
@@ -34,27 +36,34 @@ type SignTypedDataFn = (params: {
 }) => Promise<string>;
 
 /**
- * 计算 action hash
- * 用于 L1 Action 签名
+ * 计算 connectionId
+ * HyperLiquid 使用 keccak256(abi.encode(actionHash, nonce)) 或
+ * keccak256(abi.encode(actionHash, vaultAddress, nonce))
  */
-function actionHash(
-  action: Record<string, unknown>,
+function computeConnectionId(
+  actionHash: `0x${string}`,
   vaultAddress: string | null,
   nonce: number
-): string {
-  // 简化处理：直接将 action 序列化
-  const actionStr = JSON.stringify(action);
-  const dataToHash = vaultAddress
-    ? `${actionStr}${vaultAddress}${nonce}`
-    : `${actionStr}${nonce}`;
-  
-  // 使用 Web Crypto API 计算 hash (在浏览器环境)
-  // 这里返回一个占位符，实际签名时会用 EIP-712 structured data
-  return dataToHash;
+): `0x${string}` {
+  if (vaultAddress) {
+    return keccak256(
+      encodeAbiParameters(
+        parseAbiParameters('bytes32, address, uint64'),
+        [actionHash, vaultAddress as `0x${string}`, BigInt(nonce)]
+      )
+    );
+  }
+  return keccak256(
+    encodeAbiParameters(
+      parseAbiParameters('bytes32, uint64'),
+      [actionHash, BigInt(nonce)]
+    )
+  );
 }
 
 /**
  * 构建 L1 Action 的 EIP-712 类型数据
+ * 注意：L1 Action 使用固定的 chainId 1337 (HyperLiquid L1)
  */
 function buildL1ActionTypedData(
   connectionId: string,
@@ -63,7 +72,7 @@ function buildL1ActionTypedData(
   return {
     domain: {
       ...L1_ACTION_DOMAIN,
-      chainId: isTestnet ? 421614 : 42161,
+      // chainId 固定为 1337，不要覆盖
     },
     types: {
       Agent: [
@@ -82,6 +91,12 @@ function buildL1ActionTypedData(
 /**
  * 为 L1 Action 签名
  * 用于交易类操作 (下单、撤单、修改订单、更新杠杆等)
+ * 
+ * HyperLiquid 签名流程:
+ * 1. 使用 msgpack 编码 action
+ * 2. 计算 keccak256(msgpack(action)) 得到 actionHash
+ * 3. 计算 connectionId = keccak256(abi.encode(actionHash, nonce))
+ * 4. EIP-712 签名 { source: 'a'|'b', connectionId }
  */
 export async function signL1Action(
   action: Record<string, unknown>,
@@ -90,24 +105,19 @@ export async function signL1Action(
   vaultAddress: string | null = null,
   isTestnet: boolean = IS_TESTNET
 ): Promise<string> {
-  // 构建要签名的数据
-  // HyperLiquid 使用特殊的签名方案
-  const actionData = {
-    ...action,
-    nonce,
-    ...(vaultAddress ? { vaultAddress } : {}),
-  };
+  // 1. 使用 msgpack 编码 action
+  const actionBytes = msgpackEncode(action);
+  
+  // 2. 计算 action hash (keccak256)
+  const actionHash = keccak256(toHex(actionBytes)) as `0x${string}`;
+  
+  // 3. 计算 connectionId
+  const connectionId = computeConnectionId(actionHash, vaultAddress, nonce);
 
-  // 将 action 数据转换为 bytes32 格式的 hash
-  const encoder = new TextEncoder();
-  const data = encoder.encode(JSON.stringify(actionData));
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const connectionId = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
+  // 4. 构建 EIP-712 类型数据
   const typedData = buildL1ActionTypedData(connectionId, isTestnet);
 
-  // 调用钱包签名
+  // 5. 调用钱包签名
   const signature = await signTypedData({
     domain: typedData.domain as Record<string, unknown>,
     types: typedData.types as Record<string, unknown>,

@@ -101,12 +101,88 @@ export function useTrading() {
   }, [assetInfoMap, allMids]);
 
   // 签名适配器
+  // HyperLiquid L1 Action 需要 chainId 1337，但钱包会验证 chainId 匹配
+  // 尝试多种方法绕过验证
   const signTypedData = useCallback(async (params: {
     domain: Record<string, unknown>;
     types: Record<string, unknown>;
     primaryType: string;
     message: Record<string, unknown>;
   }): Promise<string> => {
+    // 检查是否是 L1 Action 签名 (chainId 1337)
+    const isL1Action = params.domain.chainId === 1337;
+    
+    console.log('[signTypedData] isL1Action:', isL1Action, 'chainId:', params.domain.chainId);
+    
+    if (isL1Action) {
+      // 构建 EIP-712 类型数据
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          ...params.types,
+        },
+        primaryType: params.primaryType,
+        domain: params.domain,
+        message: params.message,
+      };
+      
+      const typedDataString = JSON.stringify(typedData);
+      console.log('[signTypedData] Attempting to sign with chainId 1337');
+      
+      // 尝试获取原始的 ethereum provider（绕过 AppKit 包装）
+      const win = window as any;
+      let provider = null;
+      
+      // 方法1: 检查是否有多个 providers (MetaMask 注入)
+      if (win.ethereum?.providers?.length) {
+        // 优先使用 MetaMask
+        provider = win.ethereum.providers.find((p: any) => p.isMetaMask && !p.isTokenPocket);
+        if (!provider) {
+          provider = win.ethereum.providers[0];
+        }
+        console.log('[signTypedData] Found provider from providers array');
+      }
+      // 方法2: 直接使用 window.ethereum
+      else if (win.ethereum) {
+        provider = win.ethereum;
+        console.log('[signTypedData] Using window.ethereum directly');
+      }
+      
+      if (!provider) {
+        throw new Error('No ethereum provider found. Please install MetaMask or another wallet.');
+      }
+      
+      try {
+        // 先尝试直接签名
+        const signature = await provider.request({
+          method: 'eth_signTypedData_v4',
+          params: [address, typedDataString],
+        });
+        console.log('[signTypedData] Got signature:', signature);
+        return signature as string;
+      } catch (err: any) {
+        console.log('[signTypedData] Direct signing failed:', err.message);
+        
+        // 如果失败，尝试使用 personal_sign 作为后备（不推荐，但某些场景可用）
+        // 注意：这会改变签名格式，可能导致服务器验证失败
+        
+        // 抛出更有帮助的错误信息
+        if (err.message?.includes('chainId')) {
+          throw new Error(
+            'Your wallet does not support signing for HyperLiquid L1 (chainId 1337). ' +
+            'Please try using MetaMask or add HyperLiquid as a custom network with chainId 1337.'
+          );
+        }
+        throw err;
+      }
+    }
+    
+    // 其他签名使用 wagmi 的标准方法
     const signature = await signTypedDataAsync({
       domain: params.domain as any,
       types: params.types as any,
@@ -114,7 +190,7 @@ export function useTrading() {
       message: params.message as any,
     });
     return signature;
-  }, [signTypedDataAsync]);
+  }, [signTypedDataAsync, address]);
 
   // 检查并授权 Builder Fee（按需）
   // 如果已有足够的授权，直接返回 true，不会弹出签名
