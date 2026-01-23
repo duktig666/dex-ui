@@ -7,6 +7,8 @@ import { useTrading, type OrderSide as TradingOrderSide, type OrderType as Tradi
 import { useAccountState, usePosition, useLeverage } from "@/hooks/useAccountState";
 import { useAssetPrice } from "@/hooks/useMarketData";
 import { useBestPrices } from "@/hooks/useOrderBook";
+import { useCreateTrailingStop } from "@/hooks/useTrailingStop";
+import { useActiveTrailingStopsByCoin, useTrailingStopActions } from "@/stores/trailingStopStore";
 import { formatPrice, formatSize, calcNotionalValue, calcRequiredMargin } from "@/lib/hyperliquid/utils";
 import type { TIF } from "@/lib/hyperliquid/types";
 import { LeverageModal, useLeverageModal } from "./LeverageModal";
@@ -16,9 +18,10 @@ interface TradeFormProps {
 }
 
 type OrderSide = "buy" | "sell";
-type OrderType = "limit" | "market" | "stop-limit";
+type OrderType = "limit" | "market" | "stop-market" | "stop-limit" | "trailing-stop";
 type MarginMode = "cross" | "isolated";
 type TimeInForce = "gtc" | "ioc" | "alo";
+type TrailType = "percent" | "price";
 
 export function TradeForm({ symbol }: TradeFormProps) {
   const { isConnected } = useAccount();
@@ -33,6 +36,17 @@ export function TradeForm({ symbol }: TradeFormProps) {
   const [reduceOnly, setReduceOnly] = useState(false);
   const [tpsl, setTpsl] = useState(false);
   const [timeInForce, setTimeInForce] = useState<TimeInForce>("gtc");
+  
+  // Stop 订单相关
+  const [triggerPrice, setTriggerPrice] = useState("");
+  
+  // Trailing Stop 相关
+  const [trailType, setTrailType] = useState<TrailType>("percent");
+  const [trailValue, setTrailValue] = useState("");
+  
+  // TP/SL 设置
+  const [takeProfitPrice, setTakeProfitPrice] = useState("");
+  const [stopLossPrice, setStopLossPrice] = useState("");
 
   const coin = symbol.split("-")[0] || "BTC";
   const quote = "USDC";
@@ -47,6 +61,11 @@ export function TradeForm({ symbol }: TradeFormProps) {
   const { leverage: currentLeverage, isCross } = useLeverage(coin);
   const { midPrice, markPrice } = useAssetPrice(coin);
   const { bestBid, bestAsk } = useBestPrices(coin);
+  
+  // Trailing Stop hooks
+  const { createOrder: createTrailingStop } = useCreateTrailingStop();
+  const activeTrailingStops = useActiveTrailingStopsByCoin(coin);
+  const { cancelOrder: cancelTrailingStop } = useTrailingStopActions();
 
   // 价格精度
   const priceDecimals = useMemo(() => {
@@ -136,7 +155,41 @@ export function TradeForm({ symbol }: TradeFormProps) {
       return;
     }
 
-    if (orderType === "limit") {
+    // Trailing Stop 特殊处理 - 本地管理
+    if (orderType === "trailing-stop") {
+      const trailValueNum = parseFloat(trailValue);
+      if (!trailValueNum || trailValueNum <= 0) {
+        alert("Please enter a valid trail value");
+        return;
+      }
+      
+      createTrailingStop({
+        coin,
+        side,
+        size: amount,
+        trailValue,
+        trailType,
+        reduceOnly,
+      });
+      
+      // 清空表单
+      setAmount("");
+      setTotal("");
+      setPercentage(0);
+      setTrailValue("");
+      return;
+    }
+
+    // Stop 订单需要触发价
+    if (orderType === "stop-market" || orderType === "stop-limit") {
+      const triggerPriceNum = parseFloat(triggerPrice);
+      if (!triggerPriceNum || triggerPriceNum <= 0) {
+        alert("Please enter a valid trigger price");
+        return;
+      }
+    }
+
+    if (orderType === "limit" || orderType === "stop-limit") {
       const priceNum = parseFloat(price);
       if (!priceNum || priceNum <= 0) {
         alert("Please enter a valid price");
@@ -151,15 +204,24 @@ export function TradeForm({ symbol }: TradeFormProps) {
       alo: "Alo",
     };
 
+    // 根据订单类型构建参数
+    let orderTypeForApi: TradingOrderType;
+    if (orderType === "market" || orderType === "stop-market") {
+      orderTypeForApi = "market";
+    } else {
+      orderTypeForApi = "limit";
+    }
+
     const result = await placeOrder({
       coin,
       side: side as TradingOrderSide,
-      orderType: orderType === "stop-limit" ? "limit" : orderType as TradingOrderType,
+      orderType: orderTypeForApi,
       size: amountNum,
-      price: orderType === "market" ? undefined : parseFloat(price),
+      price: orderType === "market" || orderType === "stop-market" ? undefined : parseFloat(price),
       reduceOnly,
       tif: tifMap[timeInForce],
       slippagePercent: 1,
+      // TODO: 添加 trigger price 支持，需要扩展 placeOrder API
     });
 
     if (result.success) {
@@ -167,6 +229,7 @@ export function TradeForm({ symbol }: TradeFormProps) {
       setAmount("");
       setTotal("");
       setPercentage(0);
+      setTriggerPrice("");
     } else {
       alert(result.error || "Order failed");
     }
@@ -184,9 +247,24 @@ export function TradeForm({ symbol }: TradeFormProps) {
   const buttonText = useMemo(() => {
     if (!isConnected) return "Connect Wallet";
     if (isSubmitting) return "Submitting...";
-    if (!builderFeeApproved) return "Approve & " + (side === "buy" ? "Buy / Long" : "Sell / Short");
-    return side === "buy" ? "Buy / Long" : "Sell / Short";
-  }, [isConnected, isSubmitting, builderFeeApproved, side]);
+    
+    if (orderType === "trailing-stop") {
+      return "Create Trailing Stop";
+    }
+    
+    const actionText = side === "buy" ? "Buy / Long" : "Sell / Short";
+    const orderTypeLabel = {
+      "limit": "Limit",
+      "market": "Market",
+      "stop-market": "Stop Market",
+      "stop-limit": "Stop Limit",
+    }[orderType] || "";
+    
+    if (!builderFeeApproved) {
+      return `Approve & ${actionText}`;
+    }
+    return `${orderTypeLabel} ${actionText}`;
+  }, [isConnected, isSubmitting, builderFeeApproved, side, orderType]);
 
   return (
     <div className="flex flex-col h-full bg-[#0b0e11]">
@@ -229,7 +307,9 @@ export function TradeForm({ symbol }: TradeFormProps) {
         >
           <option value="limit">Limit</option>
           <option value="market">Market</option>
+          <option value="stop-market">Stop Market</option>
           <option value="stop-limit">Stop Limit</option>
+          <option value="trailing-stop">Trailing Stop</option>
         </select>
       </div>
 
@@ -290,15 +370,119 @@ export function TradeForm({ symbol }: TradeFormProps) {
           <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
             <input
               type="text"
-              value={orderType === "market" ? "Market Price" : price}
+              value={orderType === "market" || orderType === "stop-market" ? "Market Price" : price}
               onChange={(e) => setPrice(e.target.value)}
               className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono"
               placeholder="0.00"
-              disabled={orderType === "market"}
+              disabled={orderType === "market" || orderType === "stop-market"}
             />
             <span className="px-3 text-xs text-[#848e9c] font-medium">{quote}</span>
           </div>
         </div>
+
+        {/* Trigger Price - for Stop orders */}
+        {(orderType === "stop-market" || orderType === "stop-limit") && (
+          <div className="space-y-1">
+            <span className="text-xs text-[#848e9c]">Trigger Price</span>
+            <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
+              <input
+                type="text"
+                value={triggerPrice}
+                onChange={(e) => setTriggerPrice(e.target.value)}
+                className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono"
+                placeholder={`Current: ${formatPrice(midPrice, priceDecimals)}`}
+              />
+              <span className="px-3 text-xs text-[#848e9c] font-medium">{quote}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Trailing Stop Settings */}
+        {orderType === "trailing-stop" && (
+          <div className="space-y-2 p-3 bg-[#1a1d26] rounded">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-[#848e9c]">Trail Type</span>
+              <div className="flex items-center bg-[#0b0e11] rounded overflow-hidden">
+                <button
+                  className={cn(
+                    "px-3 py-1 text-xs transition-colors",
+                    trailType === "percent"
+                      ? "bg-[#2a2d36] text-[#f0b90b]"
+                      : "text-[#848e9c] hover:text-white"
+                  )}
+                  onClick={() => setTrailType("percent")}
+                >
+                  %
+                </button>
+                <button
+                  className={cn(
+                    "px-3 py-1 text-xs transition-colors",
+                    trailType === "price"
+                      ? "bg-[#2a2d36] text-[#f0b90b]"
+                      : "text-[#848e9c] hover:text-white"
+                  )}
+                  onClick={() => setTrailType("price")}
+                >
+                  Fixed
+                </button>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs text-[#848e9c]">
+                Callback {trailType === "percent" ? "Rate" : "Amount"}
+              </span>
+              <div className="flex items-center bg-[#0b0e11] rounded overflow-hidden h-10">
+                <input
+                  type="text"
+                  value={trailValue}
+                  onChange={(e) => setTrailValue(e.target.value)}
+                  className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono"
+                  placeholder={trailType === "percent" ? "1.0" : "100"}
+                />
+                <span className="px-3 text-xs text-[#848e9c] font-medium">
+                  {trailType === "percent" ? "%" : quote}
+                </span>
+              </div>
+            </div>
+            <p className="text-[10px] text-[#848e9c] leading-tight">
+              {side === "sell" 
+                ? "Tracks the highest price. When price drops by the callback value, a sell order is triggered."
+                : "Tracks the lowest price. When price rises by the callback value, a buy order is triggered."
+              }
+            </p>
+          </div>
+        )}
+
+        {/* Active Trailing Stops */}
+        {orderType === "trailing-stop" && activeTrailingStops.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-xs text-[#848e9c]">Active Trailing Stops</span>
+            <div className="space-y-1 max-h-24 overflow-y-auto">
+              {activeTrailingStops.map((ts) => (
+                <div key={ts.id} className="flex items-center justify-between p-2 bg-[#1a1d26] rounded text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                      ts.side === "buy" ? "bg-[#0ecb81]/20 text-[#0ecb81]" : "bg-[#f6465d]/20 text-[#f6465d]"
+                    )}>
+                      {ts.side.toUpperCase()}
+                    </span>
+                    <span className="text-white font-mono">{ts.size}</span>
+                    <span className="text-[#848e9c]">
+                      {ts.trailType === "percent" ? `${ts.trailValue}%` : `$${ts.trailValue}`}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => cancelTrailingStop(ts.id)}
+                    className="text-[#848e9c] hover:text-[#f6465d] transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Size Inputs - Side by Side */}
         <div className="grid grid-cols-2 gap-2">

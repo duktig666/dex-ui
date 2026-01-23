@@ -16,9 +16,13 @@ import {
   generateCloid,
   BUILDER_ADDRESS,
   BUILDER_FEE_PERP,
+  BUILDER_FEE_SPOT,
   IS_TESTNET,
 } from '@/lib/hyperliquid';
 import type { TIF, ExchangeResponse } from '@/lib/hyperliquid/types';
+
+// 市场类型
+export type MarketType = 'perp' | 'spot';
 
 // 订单类型
 export type OrderType = 'limit' | 'market';
@@ -34,6 +38,7 @@ export interface PlaceOrderParams {
   reduceOnly?: boolean;
   tif?: TIF;
   slippagePercent?: number; // 市价单滑点百分比，默认 1%
+  marketType?: MarketType; // 市场类型，默认 perp
 }
 
 // 撤单参数
@@ -64,8 +69,10 @@ export function useTrading() {
   const allMids = useMarketStore((state) => state.allMids);
   
   const {
-    builderFeeApproved,
-    setBuilderFeeApproved,
+    builderFeeMaxRate,
+    builderFeeChecked,
+    setBuilderFeeMaxRate,
+    setBuilderFeeChecked,
     updateOpenOrders,
     updateClearinghouseState,
   } = useUserStore();
@@ -109,24 +116,48 @@ export function useTrading() {
     return signature;
   }, [signTypedDataAsync]);
 
-  // 检查并授权 Builder Fee
-  const approveBuilderFee = useCallback(async (): Promise<boolean> => {
+  // 检查并授权 Builder Fee（按需）
+  // 如果已有足够的授权，直接返回 true，不会弹出签名
+  const ensureBuilderFeeApproved = useCallback(async (
+    marketType: MarketType = 'perp'
+  ): Promise<boolean> => {
     if (!address) {
       setLastError('Please connect wallet');
       return false;
     }
 
-    if (builderFeeApproved) {
+    const requiredFee = marketType === 'spot' ? BUILDER_FEE_SPOT : BUILDER_FEE_PERP;
+
+    // 如果已经检查过且费率足够，直接返回
+    if (builderFeeChecked && builderFeeMaxRate !== null && builderFeeMaxRate >= requiredFee) {
+      console.log('[useTrading] Builder fee already approved:', { builderFeeMaxRate, requiredFee });
       return true;
     }
 
     try {
-      console.log('[useTrading] Approving builder fee...');
-      const success = await exchangeClient.checkAndApproveBuilderFee(address, signTypedData);
+      // 先查询当前状态
+      const status = await exchangeClient.getBuilderFeeStatus(address);
+      console.log('[useTrading] Builder fee status:', status);
+      
+      // 更新 store
+      setBuilderFeeMaxRate(status.maxFee);
+      setBuilderFeeChecked(true);
+
+      // 检查是否需要授权
+      if (status.maxFee >= requiredFee) {
+        console.log('[useTrading] Builder fee sufficient, no approval needed');
+        return true;
+      }
+
+      // 需要授权
+      console.log('[useTrading] Approving builder fee for', marketType);
+      const success = await exchangeClient.checkAndApproveBuilderFee(address, signTypedData, marketType);
       
       if (success) {
-        setBuilderFeeApproved(true);
-        console.log('[useTrading] Builder fee approved');
+        // 使用较大的费率更新 store，因为授权时使用的是 max(PERP, SPOT)
+        const newRate = Math.max(BUILDER_FEE_PERP, BUILDER_FEE_SPOT);
+        setBuilderFeeMaxRate(newRate);
+        console.log('[useTrading] Builder fee approved, new rate:', newRate);
       }
       
       return success;
@@ -135,11 +166,26 @@ export function useTrading() {
       setLastError((error as Error).message);
       return false;
     }
-  }, [address, builderFeeApproved, signTypedData, setBuilderFeeApproved]);
+  }, [address, builderFeeChecked, builderFeeMaxRate, signTypedData, setBuilderFeeMaxRate, setBuilderFeeChecked]);
+
+  // 向后兼容的 approveBuilderFee（默认永续市场）
+  const approveBuilderFee = useCallback(async (): Promise<boolean> => {
+    return ensureBuilderFeeApproved('perp');
+  }, [ensureBuilderFeeApproved]);
 
   // 下单
   const placeOrder = useCallback(async (params: PlaceOrderParams): Promise<TradeResult> => {
-    const { coin, side, orderType, size, price, reduceOnly = false, tif = 'Gtc', slippagePercent = 1 } = params;
+    const { 
+      coin, 
+      side, 
+      orderType, 
+      size, 
+      price, 
+      reduceOnly = false, 
+      tif = 'Gtc', 
+      slippagePercent = 1,
+      marketType = 'perp',
+    } = params;
 
     if (!isConnected || !address) {
       return { success: false, error: 'Please connect wallet' };
@@ -149,8 +195,8 @@ export function useTrading() {
     setLastError(null);
 
     try {
-      // 检查 Builder Fee 授权
-      const feeApproved = await approveBuilderFee();
+      // 检查 Builder Fee 授权（传入市场类型）
+      const feeApproved = await ensureBuilderFeeApproved(marketType);
       if (!feeApproved) {
         return { success: false, error: 'Failed to approve builder fee' };
       }
@@ -239,7 +285,7 @@ export function useTrading() {
   }, [
     isConnected,
     address,
-    approveBuilderFee,
+    ensureBuilderFeeApproved,
     getAssetId,
     getSzDecimals,
     getCurrentPrice,
@@ -423,7 +469,7 @@ export function useTrading() {
     // 状态
     isSubmitting,
     lastError,
-    builderFeeApproved,
+    builderFeeApproved: builderFeeMaxRate !== null && builderFeeMaxRate >= BUILDER_FEE_PERP,
     
     // 方法
     placeOrder,
@@ -432,6 +478,7 @@ export function useTrading() {
     updateLeverage,
     closePosition,
     approveBuilderFee,
+    ensureBuilderFeeApproved,
     
     // 工具
     getAssetId,

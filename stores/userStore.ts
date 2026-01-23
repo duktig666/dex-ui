@@ -23,9 +23,10 @@ interface UserState {
   address: string | null;
   isConnected: boolean;
   
-  // Builder Fee 授权状态
-  builderFeeApproved: boolean;
-  builderFeeChecking: boolean;
+  // Builder Fee 授权状态 (存储实际授权费率，而非布尔值)
+  builderFeeMaxRate: number | null;  // 链上授权的最大费率 (basis points)
+  builderFeeChecked: boolean;        // 是否已完成初始化检查
+  builderFeeChecking: boolean;       // 是否正在检查中
   
   // 永续合约账户状态
   clearinghouseState: ClearinghouseState | null;
@@ -62,7 +63,8 @@ interface UserActions {
   setConnected: (connected: boolean) => void;
   
   // Builder Fee
-  setBuilderFeeApproved: (approved: boolean) => void;
+  setBuilderFeeMaxRate: (rate: number | null) => void;
+  setBuilderFeeChecked: (checked: boolean) => void;
   setBuilderFeeChecking: (checking: boolean) => void;
   
   // 更新账户状态
@@ -149,7 +151,8 @@ function formatOrder(order: Order): FormattedOrder {
 const initialState: UserState = {
   address: null,
   isConnected: false,
-  builderFeeApproved: false,
+  builderFeeMaxRate: null,
+  builderFeeChecked: false,
   builderFeeChecking: false,
   clearinghouseState: null,
   marginSummary: null,
@@ -191,14 +194,19 @@ export const useUserStore = create<UserState & UserActions>()(
           openOrders: [],
           formattedOrders: [],
           userFills: [],
-          builderFeeApproved: false,
+          builderFeeMaxRate: null,
+          builderFeeChecked: false,
           isInitialized: false,
         });
       }
     },
 
-    setBuilderFeeApproved: (approved) => {
-      set({ builderFeeApproved: approved });
+    setBuilderFeeMaxRate: (rate) => {
+      set({ builderFeeMaxRate: rate });
+    },
+
+    setBuilderFeeChecked: (checked) => {
+      set({ builderFeeChecked: checked });
     },
 
     setBuilderFeeChecking: (checking) => {

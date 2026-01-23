@@ -5,6 +5,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
 import type { TrailingStopOrder, OrderSide } from "@/lib/hyperliquid/types";
 
 // 生成唯一 ID
@@ -172,19 +173,21 @@ export const useTrailingStopStore = create<TrailingStopState>()(
   )
 );
 
-// 选择器 hooks
+// 选择器 hooks - 使用 useShallow 避免无限渲染
 export const useActiveTrailingStops = () =>
-  useTrailingStopStore((state) => state.getActiveOrders());
+  useTrailingStopStore(useShallow((state) => state.orders.filter((o) => o.status === "active")));
 
 export const useActiveTrailingStopsByCoin = (coin: string) =>
-  useTrailingStopStore((state) => state.getActiveOrdersByCoin(coin));
+  useTrailingStopStore(useShallow((state) => state.orders.filter((o) => o.status === "active" && o.coin === coin)));
 
 export const useTrailingStopActions = () =>
-  useTrailingStopStore((state) => ({
-    addOrder: state.addOrder,
-    removeOrder: state.removeOrder,
-    cancelOrder: state.cancelOrder,
-    triggerOrder: state.triggerOrder,
-    updatePriceTracking: state.updatePriceTracking,
-    clearAllOrders: state.clearAllOrders,
-  }));
+  useTrailingStopStore(
+    useShallow((state) => ({
+      addOrder: state.addOrder,
+      removeOrder: state.removeOrder,
+      cancelOrder: state.cancelOrder,
+      triggerOrder: state.triggerOrder,
+      updatePriceTracking: state.updatePriceTracking,
+      clearAllOrders: state.clearAllOrders,
+    }))
+  );
