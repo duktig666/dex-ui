@@ -17,7 +17,7 @@ COMMIT_MSG=$(git log -1 --pretty=%s)
 COMMIT_DATE=$(date +%Y-%m-%d)
 
 # 获取变更的文件列表（排除 CHANGELOG.md）
-CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -v "^CHANGELOG.md$")
+CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -v "CHANGELOG.md")
 
 # 如果没有变更文件（或只有 CHANGELOG.md），退出
 if [ -z "$CHANGED_FILES" ]; then
@@ -40,17 +40,20 @@ if [ ! -f "$CHANGELOG_FILE" ]; then
 $ENTRY
 EOF
 else
+  # 检查该 commit hash 是否已记录（避免重复）
+  if grep -q "$COMMIT_HASH" "$CHANGELOG_FILE"; then
+    exit 0
+  fi
+
   # 检查今天的日期是否已存在
   if grep -q "## $COMMIT_DATE" "$CHANGELOG_FILE"; then
-    # 日期已存在，在该日期下追加条目（避免重复）
-    if ! grep -qF "$ENTRY" "$CHANGELOG_FILE"; then
-      TEMP_FILE=$(mktemp)
-      awk -v date="## $COMMIT_DATE" -v entry="$ENTRY" '
-        $0 == date { print; getline; print entry; print; next }
-        { print }
-      ' "$CHANGELOG_FILE" > "$TEMP_FILE"
-      mv "$TEMP_FILE" "$CHANGELOG_FILE"
-    fi
+    # 日期已存在，在该日期下追加条目
+    TEMP_FILE=$(mktemp)
+    awk -v date="## $COMMIT_DATE" -v entry="$ENTRY" '
+      $0 == date { print; getline; print entry; print; next }
+      { print }
+    ' "$CHANGELOG_FILE" > "$TEMP_FILE"
+    mv "$TEMP_FILE" "$CHANGELOG_FILE"
   else
     # 日期不存在，在标题后添加新日期和条目
     TEMP_FILE=$(mktemp)
