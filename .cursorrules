@@ -1,0 +1,180 @@
+# DEX Frontend Project Rules
+
+You are an expert in React, Next.js, TypeScript, and Web3 development for a decentralized exchange (DEX) frontend.
+
+## Project Context
+
+This is a DEX frontend based on HyperLiquid + BuildCode mechanism. The goal is to create a third-party trading platform similar to Based.one.
+
+## Tech Stack
+
+- Framework: React + Next.js (App Router)
+- State Management: Zustand
+- Styling: Tailwind CSS + Stitches + shadcn/ui
+- Charts: TradingView
+- Wallet: Reown AppKit + wagmi
+- i18n: i18next
+- Linting: ESLint + Prettier
+
+## Language Rules
+
+- Code: Use English for variable names, function names, and identifiers
+- Comments: Use Chinese for code comments
+- Documentation: Use Chinese for docs, READMEs, and reports
+- Responses: Always respond in Chinese
+
+## Code Style
+
+### TypeScript
+
+- Use TypeScript strict mode
+- Prefer `interface` over `type` for object shapes
+- Use explicit return types for functions
+- Import types using `import type { ... }`
+
+### React & Next.js
+
+- Use functional components with hooks
+- Prefer Server Components by default, use `'use client'` only when necessary
+- Use Next.js App Router conventions (`app/` directory)
+- Colocate related files (component, styles, tests)
+
+### Styling
+
+- Use Tailwind CSS utility classes as primary styling method
+- Use shadcn/ui components for common UI patterns
+- Use Stitches for complex component variants
+- Follow mobile-first responsive design
+
+### State Management
+
+- Use Zustand for global state
+- Keep stores small and focused
+- Use React Query / SWR for server state
+- Prefer local state when possible
+
+## HyperLiquid API
+
+### Endpoints
+
+- Mainnet REST: `https://api.hyperliquid.xyz`
+- Testnet REST: `https://api.hyperliquid-testnet.xyz`
+- WebSocket: `wss://api.hyperliquid.xyz/ws`
+
+### API Types
+
+- Query API: `POST /info` - market data, account state, orders
+- Exchange API: `POST /exchange` - place/cancel/modify orders (requires EIP-712 signature)
+
+### Asset ID Rules
+
+- Perpetuals: `assetId = coinIndex` (BTC=0, ETH=1, ...)
+- Spot: `assetId = 10000 + marketIndex`
+
+### Signature Format
+
+- Use EIP-712 structured signing
+- Signature must be object format: `{ r: string, s: string, v: number }`
+- Never use string format for signatures
+
+## BuildCode Integration
+
+When implementing trading features:
+
+1. Check user's builder fee approval status on wallet connect
+2. Prompt `approveBuilderFee` signature if not approved
+3. Attach `builder` parameter to every order:
+   ```typescript
+   builder: {
+     b: "0xBuilderAddress",  // Platform wallet
+     f: 10                    // Fee in basis points (10 = 0.1%)
+   }
+   ```
+
+## File Organization
+
+```
+src/
+├── app/                    # Next.js App Router pages
+├── components/             # Reusable UI components
+│   ├── ui/                # shadcn/ui components
+│   └── trading/           # Trading-specific components
+├── hooks/                  # Custom React hooks
+├── stores/                 # Zustand stores
+├── services/              # API services
+├── types/                 # TypeScript type definitions
+│   └── hyperliquid/       # HyperLiquid API types
+├── utils/                 # Utility functions
+└── lib/                   # Third-party integrations
+```
+
+## Key Documentation
+
+- API Types: `src/types/hyperliquid/`
+- Query API Reference: `notes/hyperliquid/http/hyperliquid-query.http`
+- Exchange API Reference: `notes/hyperliquid/http/hyperliquid-exchange.http`
+- Exchange API Guide: `notes/hyperliquid/exchange-api-guide.md`
+- Page-Field Mapping: `notes/hyperliquid/api-page-mapping.md`
+
+## Common Patterns
+
+### Fetching Market Data
+
+```typescript
+import type { MetaAndAssetCtxsResponse } from '@/types/hyperliquid';
+
+const response = await fetch('/info', {
+  method: 'POST',
+  body: JSON.stringify({ type: 'metaAndAssetCtxs' })
+});
+const data: MetaAndAssetCtxsResponse = await response.json();
+```
+
+### Placing Orders
+
+```typescript
+import type { OrderAction, Signature } from '@/types/hyperliquid';
+
+const action: OrderAction = {
+  type: 'order',
+  orders: [{ a: 0, b: true, p: '95000', s: '0.001', r: false, t: { limit: { tif: 'Gtc' } } }],
+  grouping: 'na',
+  builder: { b: BUILDER_ADDRESS, f: 10 }
+};
+
+// Sign with EIP-712 and send to /exchange
+```
+
+### WebSocket Subscription
+
+```typescript
+// Subscribe to order book updates
+ws.send(JSON.stringify({
+  method: 'subscribe',
+  subscription: { type: 'l2Book', coin: 'BTC' }
+}));
+
+// Heartbeat every 15 seconds
+setInterval(() => ws.send(JSON.stringify({ method: 'ping' })), 15000);
+```
+
+## Error Handling
+
+- Always handle API errors gracefully
+- Show user-friendly error messages in Chinese
+- Log detailed errors for debugging
+- Implement retry logic for transient failures
+
+## Testing
+
+- Write unit tests for utility functions
+- Write integration tests for API services
+- Use React Testing Library for component tests
+- Test wallet connection flows manually on testnet
+
+## Performance
+
+- Use React.memo for expensive components
+- Implement virtual scrolling for long lists
+- Debounce/throttle frequent updates (order book, prices)
+- Use WebSocket for real-time data instead of polling

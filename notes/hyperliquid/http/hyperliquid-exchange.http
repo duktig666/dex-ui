@@ -1,0 +1,1153 @@
+### HyperLiquid Exchange API (写操作)
+### ============================================================================
+### 端点: POST /exchange
+### 主网: https://api.hyperliquid.xyz/exchange
+### 测试网: https://api.hyperliquid-testnet.xyz/exchange
+###
+### ⚠️ 注意: 以下所有请求需要 EIP-712 签名，无法直接执行
+### 仅作为请求格式参考，signature 字段需要通过钱包签名生成
+### ============================================================================
+
+###############################################################################
+# 1. 订单操作 (Order Operations)
+###############################################################################
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 1.1 下单 (order)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "order"              - 固定值
+#   action.orders[]: array            - 订单数组，支持批量下单
+#     .a: number                      - 资产索引
+#                                       永续: meta.universe 中的索引 (BTC=0, ETH=1...)
+#                                       现货: 10000 + spotMeta.universe 中的索引
+#     .b: boolean                     - 方向: true=买入/开多, false=卖出/开空
+#     .p: string                      - 限价 (需移除尾随零，如 "95000" 而非 "95000.00")
+#     .s: string                      - 数量 (精度由 szDecimals 决定)
+#     .r: boolean                     - 是否仅减仓 (平仓时设为 true)
+#     .t: object                      - 订单类型
+#       .limit.tif: string            - 有效期: "Gtc"=一直有效, "Ioc"=立即成交否则取消, "Alo"=只挂单
+#       .trigger?: object             - 条件单触发条件 (可选)
+#         .triggerPx: string          - 触发价格
+#         .isMarket: boolean          - 触发后是否市价成交
+#         .tpsl: "tp" | "sl"          - 止盈或止损
+#     .c?: string                     - 客户端订单ID (可选, 128位十六进制, 如 "0x...")
+#   action.grouping: string           - 订单分组
+#                                       "na" = 普通订单
+#                                       "normalTpsl" = 带 TP/SL 的订单组
+#                                       "positionTpsl" = 持仓 TP/SL
+#   action.builder?: object           - Builder 费用 (BuildCode 功能)
+#     .b: string                      - Builder 钱包地址
+#     .f: number                      - 费率 (基点 bp, 如 10 = 0.1%)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#     .r: string                      - 签名 r 值 (0x...)
+#     .s: string                      - 签名 s 值 (0x...)
+#     .v: number                      - 签名 v 值 (27 或 28)
+#   vaultAddress?: string             - Vault 地址 (代理交易时使用)
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "order"
+#   response.data.statuses[]:         - 每个订单的状态
+#     .status: string                 - "filled" | "resting" | "error"
+#     .filled?: object                - 成交信息 (status="filled" 时)
+#       .totalSz: string              - 成交数量
+#       .avgPx: string                - 成交均价
+#       .oid: number                  - 订单ID
+#     .resting?: object               - 挂单信息 (status="resting" 时)
+#       .oid: number                  - 订单ID
+#     .error?: string                 - 错误信息 (status="error" 时)
+#
+# 签名方法: signL1Action (type="order")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 0,
+      "b": true,
+      "p": "95000",
+      "s": "0.001",
+      "r": false,
+      "t": { "limit": { "tif": "Gtc" } }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.1 永续开多示例 (BTC 做多)
+# BTC 资产索引 = 0，买入 0.001 BTC，限价 95000
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 0,
+      "b": true,
+      "p": "95000",
+      "s": "0.001",
+      "r": false,
+      "t": { "limit": { "tif": "Gtc" } }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.2 永续开空示例 (ETH 做空)
+# ETH 资产索引 = 1，卖出 0.01 ETH，限价 3500
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 1,
+      "b": false,
+      "p": "3500",
+      "s": "0.01",
+      "r": false,
+      "t": { "limit": { "tif": "Gtc" } }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.3 永续平仓示例 (减仓模式)
+# 平掉 BTC 多头持仓，设置 r=true 表示仅减仓
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 0,
+      "b": false,
+      "p": "96000",
+      "s": "0.001",
+      "r": true,
+      "t": { "limit": { "tif": "Gtc" } }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.4 市价单示例 (IOC 模式)
+# 使用 IOC (立即成交否则取消) 模拟市价单
+# 设置一个很高的买入价或很低的卖出价
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 0,
+      "b": true,
+      "p": "999999",
+      "s": "0.001",
+      "r": false,
+      "t": { "limit": { "tif": "Ioc" } }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.5 现货买入示例
+# 现货资产索引 = 10000 + marketIndex
+# 假设 PURR/USDC 在 spotMeta.universe 中索引为 0，则资产索引 = 10000
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 10000,
+      "b": true,
+      "p": "0.5",
+      "s": "100",
+      "r": false,
+      "t": { "limit": { "tif": "Gtc" } }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.6 条件单 - 止盈 (Take Profit)
+# 当价格上涨到 100000 时触发卖出
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 0,
+      "b": false,
+      "p": "100000",
+      "s": "0.001",
+      "r": true,
+      "t": {
+        "limit": { "tif": "Gtc" },
+        "trigger": {
+          "triggerPx": "100000",
+          "isMarket": true,
+          "tpsl": "tp"
+        }
+      }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.7 条件单 - 止损 (Stop Loss)
+# 当价格下跌到 90000 时触发卖出
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 0,
+      "b": false,
+      "p": "90000",
+      "s": "0.001",
+      "r": true,
+      "t": {
+        "limit": { "tif": "Gtc" },
+        "trigger": {
+          "triggerPx": "90000",
+          "isMarket": true,
+          "tpsl": "sl"
+        }
+      }
+    }],
+    "grouping": "na"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.8 带 TP/SL 的订单组
+# 主订单 + 止盈 + 止损，使用 grouping="normalTpsl"
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [
+      {
+        "a": 0,
+        "b": true,
+        "p": "95000",
+        "s": "0.001",
+        "r": false,
+        "t": { "limit": { "tif": "Gtc" } }
+      },
+      {
+        "a": 0,
+        "b": false,
+        "p": "100000",
+        "s": "0.001",
+        "r": true,
+        "t": {
+          "limit": { "tif": "Gtc" },
+          "trigger": { "triggerPx": "100000", "isMarket": true, "tpsl": "tp" }
+        }
+      },
+      {
+        "a": 0,
+        "b": false,
+        "p": "90000",
+        "s": "0.001",
+        "r": true,
+        "t": {
+          "limit": { "tif": "Gtc" },
+          "trigger": { "triggerPx": "90000", "isMarket": true, "tpsl": "sl" }
+        }
+      }
+    ],
+    "grouping": "normalTpsl"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.1.9 带 Builder 费用的订单 (BuildCode)
+# builder.b = Builder 钱包地址
+# builder.f = 费率基点 (10 = 0.1%)
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "order",
+    "orders": [{
+      "a": 0,
+      "b": true,
+      "p": "95000",
+      "s": "0.001",
+      "r": false,
+      "t": { "limit": { "tif": "Gtc" } }
+    }],
+    "grouping": "na",
+    "builder": {
+      "b": "0xYourBuilderAddress",
+      "f": 10
+    }
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 1.2 撤单 (cancel)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "cancel"             - 固定值
+#   action.cancels[]: array           - 撤单数组
+#     .a: number                      - 资产索引
+#     .o: number                      - 订单ID (从下单响应或 frontendOpenOrders 获取)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "cancel"
+#   response.data.statuses[]:         - 每个撤单的状态
+#     "success" | { error: string }
+#
+# 签名方法: signL1Action (type="cancel")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "cancel",
+    "cancels": [
+      { "a": 0, "o": 123456789 }
+    ]
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 1.2.1 批量撤单
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "cancel",
+    "cancels": [
+      { "a": 0, "o": 123456789 },
+      { "a": 0, "o": 123456790 },
+      { "a": 1, "o": 987654321 }
+    ]
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 1.3 按客户端订单ID撤单 (cancelByCloid)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "cancelByCloid"      - 固定值
+#   action.cancels[]: array           - 撤单数组
+#     .asset: number                  - 资产索引
+#     .cloid: string                  - 客户端订单ID (下单时指定的 .c 字段)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 签名方法: signL1Action (type="cancelByCloid")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "cancelByCloid",
+    "cancels": [
+      { "asset": 0, "cloid": "0x1234567890abcdef1234567890abcdef" }
+    ]
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 1.4 修改订单 (modify)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "modify"             - 固定值
+#   action.oid: number                - 要修改的订单ID
+#   action.order: object              - 新的订单参数 (同 OrderRequest)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 注意: 修改订单会取消原订单并创建新订单，新订单获得新的 oid
+#
+# 签名方法: signL1Action (type="modify")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "modify",
+    "oid": 123456789,
+    "order": {
+      "a": 0,
+      "b": true,
+      "p": "94000",
+      "s": "0.002",
+      "r": false,
+      "t": { "limit": { "tif": "Gtc" } }
+    }
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 1.5 批量修改订单 (batchModify)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "batchModify"        - 固定值
+#   action.modifies[]: array          - 修改数组
+#     .oid: number                    - 订单ID
+#     .order: object                  - 新的订单参数
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 签名方法: signL1Action (type="batchModify")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "batchModify",
+    "modifies": [
+      {
+        "oid": 123456789,
+        "order": {
+          "a": 0,
+          "b": true,
+          "p": "94000",
+          "s": "0.002",
+          "r": false,
+          "t": { "limit": { "tif": "Gtc" } }
+        }
+      },
+      {
+        "oid": 123456790,
+        "order": {
+          "a": 0,
+          "b": true,
+          "p": "93000",
+          "s": "0.003",
+          "r": false,
+          "t": { "limit": { "tif": "Gtc" } }
+        }
+      }
+    ]
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+###############################################################################
+# 2. 账户操作 (Account Operations)
+###############################################################################
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 2.1 更新杠杆 (updateLeverage)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "updateLeverage"     - 固定值
+#   action.asset: number              - 资产索引
+#   action.isCross: boolean           - 是否为全仓模式
+#                                       true = 全仓 (Cross)
+#                                       false = 逐仓 (Isolated)
+#   action.leverage: number           - 杠杆倍数 (1-100，具体上限取决于资产)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "updateLeverage"
+#
+# 注意:
+#   - 有持仓时也可以修改杠杆
+#   - 降低杠杆需要有足够的保证金
+#   - 切换全仓/逐仓模式可能需要先平仓
+#
+# 签名方法: signL1Action (type="updateLeverage")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "updateLeverage",
+    "asset": 0,
+    "isCross": true,
+    "leverage": 10
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 2.1.1 设置逐仓 20x 杠杆
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "updateLeverage",
+    "asset": 0,
+    "isCross": false,
+    "leverage": 20
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 2.2 更新逐仓保证金 (updateIsolatedMargin)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "updateIsolatedMargin" - 固定值
+#   action.asset: number              - 资产索引
+#   action.isBuy: boolean             - 操作类型
+#                                       true = 增加保证金
+#                                       false = 减少保证金
+#   action.ntli: number               - 保证金变化量 (USD)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "updateIsolatedMargin"
+#
+# 注意:
+#   - 仅适用于逐仓模式
+#   - 减少保证金不能使仓位处于清算风险
+#   - ntli 是正数，方向由 isBuy 决定
+#
+# 签名方法: signL1Action (type="updateIsolatedMargin")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "updateIsolatedMargin",
+    "asset": 0,
+    "isBuy": true,
+    "ntli": 100
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 2.2.1 减少逐仓保证金
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "updateIsolatedMargin",
+    "asset": 0,
+    "isBuy": false,
+    "ntli": 50
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+###############################################################################
+# 3. 资金操作 (Fund Operations)
+###############################################################################
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 3.1 USDC 转账 (usdSend) - L2 内部转账
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "usdSend"            - 固定值
+#   action.destination: string        - 接收地址 (0x...)
+#   action.amount: string             - 转账金额 (USDC)
+#   action.time: number               - 发送时间 (毫秒时间戳)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "usdSend"
+#
+# 注意:
+#   - 这是 HyperLiquid L2 内部转账，即时到账
+#   - 不消耗 gas
+#   - 接收方必须是有效的以太坊地址
+#
+# 签名方法: signUserSignedAction
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "usdSend",
+    "destination": "0x1234567890123456789012345678901234567890",
+    "amount": "100",
+    "time": {{$timestamp}}
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 3.2 提现到 L1 (withdraw3)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "withdraw3"          - 固定值 (注意是 withdraw3 不是 withdraw)
+#   action.destination: string        - 接收地址 (0x...)
+#   action.amount: string             - 提现金额 (USDC)
+#   action.time: number               - 发送时间 (毫秒时间戳)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "withdraw3"
+#
+# 注意:
+#   - 提现到 Arbitrum L1，需要等待处理时间
+#   - 有最小提现金额限制
+#   - 可能收取提现手续费
+#
+# 签名方法: signUserSignedAction
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "withdraw3",
+    "destination": "0x1234567890123456789012345678901234567890",
+    "amount": "100",
+    "time": {{$timestamp}}
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 3.3 现货转账 (spotSend)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "spotSend"           - 固定值
+#   action.destination: string        - 接收地址 (0x...)
+#   action.token: string              - 代币名称 (如 "PURR", "HFUN" 等)
+#   action.amount: string             - 转账数量
+#   action.time: number               - 发送时间 (毫秒时间戳)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "spotSend"
+#
+# 签名方法: signUserSignedAction
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "spotSend",
+    "destination": "0x1234567890123456789012345678901234567890",
+    "token": "PURR",
+    "amount": "1000",
+    "time": {{$timestamp}}
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 3.4 账户互转 (usdClassTransfer) - 永续 ↔ 现货
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "usdClassTransfer"   - 固定值
+#   action.toPerp: boolean            - 转账方向
+#                                       true = 现货账户 → 永续账户
+#                                       false = 永续账户 → 现货账户
+#   action.amount: string             - 转账金额 (USDC)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "usdClassTransfer"
+#
+# 注意:
+#   - 用于在永续交易账户和现货交易账户之间转移资金
+#   - 即时生效
+#
+# 签名方法: signL1Action (type="usdClassTransfer")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "usdClassTransfer",
+    "toPerp": true,
+    "amount": "1000"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 3.4.1 从永续转到现货
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "usdClassTransfer",
+    "toPerp": false,
+    "amount": "500"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 3.5 子账户转账 (subAccountTransfer)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "subAccountTransfer" - 固定值
+#   action.subAccountUser: string     - 子账户地址 (0x...)
+#   action.isDeposit: boolean         - 转账方向
+#                                       true = 主账户 → 子账户 (存入)
+#                                       false = 子账户 → 主账户 (取出)
+#   action.usd: number                - 转账金额 (USD)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "subAccountTransfer"
+#
+# 签名方法: signL1Action (type="subAccountTransfer")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "subAccountTransfer",
+    "subAccountUser": "0xSubAccountAddress",
+    "isDeposit": true,
+    "usd": 1000
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 3.5.1 从子账户取出
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "subAccountTransfer",
+    "subAccountUser": "0xSubAccountAddress",
+    "isDeposit": false,
+    "usd": 500
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+###############################################################################
+# 4. Vault 操作 (Vault Operations)
+###############################################################################
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 4.1 存入 Vault (vaultDeposit)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "vaultDeposit"       - 固定值
+#   action.vaultAddress: string       - Vault 地址 (0x...)
+#   action.usd: number                - 存入金额 (USD)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "vaultDeposit"
+#
+# 注意:
+#   - Vault 是由其他交易者管理的投资组合
+#   - 存入后资金由 Vault 管理者代为交易
+#   - 收益和亏损按份额分配
+#
+# 签名方法: signL1Action (type="vaultDeposit")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "vaultDeposit",
+    "vaultAddress": "0xVaultAddress",
+    "usd": 1000
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 4.2 从 Vault 取出 (vaultWithdraw)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "vaultWithdraw"      - 固定值
+#   action.vaultAddress: string       - Vault 地址 (0x...)
+#   action.usd: number                - 取出金额 (USD)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "vaultWithdraw"
+#
+# 注意:
+#   - 取出可能有锁定期限制
+#   - 实际到账金额取决于当前份额价值
+#
+# 签名方法: signL1Action (type="vaultWithdraw")
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "vaultWithdraw",
+    "vaultAddress": "0xVaultAddress",
+    "usd": 500
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+###############################################################################
+# 5. BuildCode 授权 (Builder Authorization) - 重点
+###############################################################################
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 5.1 授权 Builder 费率 (approveBuilderFee)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "approveBuilderFee"  - 固定值
+#   action.builder: string            - Builder 钱包地址 (平台收款地址)
+#   action.maxFeeRate: string         - 授权的最大费率 (基点字符串)
+#                                       例如 "10" 表示 0.1%
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "approveBuilderFee"
+#
+# ⭐ BuildCode 流程说明:
+#   1. 用户首次使用平台时，需要先调用此接口授权平台收取费用
+#   2. 授权后，用户下单时附加 builder 参数即可自动收费
+#   3. 平台在用户每笔成交时收取 builder.f 指定的费率
+#
+# ⭐ 实现建议:
+#   - 在用户首次连接钱包时检查是否已授权
+#   - 未授权则弹窗引导用户签名授权
+#   - 授权一次永久有效（除非用户主动取消）
+#
+# 签名方法: signUserSignedAction
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "approveBuilderFee",
+    "builder": "0xYourPlatformBuilderAddress",
+    "maxFeeRate": "10"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 5.1.1 授权较高费率 (0.5%)
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "approveBuilderFee",
+    "builder": "0xYourPlatformBuilderAddress",
+    "maxFeeRate": "50"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+###############################################################################
+# 6. API 钱包授权 (Agent Authorization)
+###############################################################################
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 6.1 授权 API 钱包 (approveAgent)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "approveAgent"       - 固定值
+#   action.agentAddress: string       - Agent 钱包地址 (API 钱包)
+#   action.agentName?: string         - Agent 名称 (可选)
+#   action.nonce?: number             - 授权到期时间 (毫秒时间戳, 可选)
+#   nonce: number                     - 请求时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "approveAgent"
+#
+# 使用场景:
+#   - 用于创建 API 钱包，允许程序化交易
+#   - Agent 钱包可以代替主钱包签名交易
+#   - 但 Agent 钱包无法提现或转账
+#
+# 签名方法: signUserSignedAction
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "approveAgent",
+    "agentAddress": "0xAgentWalletAddress",
+    "agentName": "TradingBot"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### 6.1.1 带过期时间的授权
+# nonce (在 action 内) 作为授权到期时间
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "approveAgent",
+    "agentAddress": "0xAgentWalletAddress",
+    "agentName": "TempBot",
+    "nonce": 1735689600000
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+###############################################################################
+# 7. 推荐相关 (Referral)
+###############################################################################
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 7.1 设置推荐码 (setReferrer)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "setReferrer"        - 固定值
+#   action.code: string               - 推荐码
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "setReferrer"
+#
+# 注意:
+#   - 每个账户只能设置一次推荐码
+#   - 设置后无法更改
+#
+# 签名方法: signUserSignedAction
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "setReferrer",
+    "code": "ABCD1234"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+### ─────────────────────────────────────────────────────────────────────────────
+### 7.2 创建推荐码 (createReferralCode)
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# 请求参数:
+#   action.type: "createReferralCode" - 固定值
+#   action.code: string               - 推荐码 (自定义)
+#   nonce: number                     - 时间戳 (毫秒)
+#   signature: object                 - EIP-712 签名
+#
+# 响应结构:
+#   status: "ok" | "err"
+#   response.type: "createReferralCode"
+#
+# 注意:
+#   - 推荐码必须唯一
+#   - 长度和字符限制请参考官方文档
+#
+# 签名方法: signUserSignedAction
+#
+POST {{baseUrl}}/exchange
+Content-Type: application/json
+
+{
+  "action": {
+    "type": "createReferralCode",
+    "code": "MYCODE123"
+  },
+  "nonce": {{$timestamp}},
+  "signature": { "r": "0x...", "s": "0x...", "v": 28 }
+}
+
+###############################################################################
+# 附录: 响应结构汇总
+###############################################################################
+#
+# 所有 Exchange API 响应的通用结构:
+#
+# 成功响应:
+# {
+#   "status": "ok",
+#   "response": {
+#     "type": "<action_type>",
+#     "data": { ... }           // 根据操作类型不同
+#   }
+# }
+#
+# 错误响应:
+# {
+#   "status": "err",
+#   "response": "Error message"
+# }
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# 订单响应详情 (type="order"):
+# {
+#   "status": "ok",
+#   "response": {
+#     "type": "order",
+#     "data": {
+#       "statuses": [
+#         {
+#           "status": "filled",
+#           "filled": {
+#             "totalSz": "0.001",
+#             "avgPx": "95000",
+#             "oid": 123456789
+#           }
+#         },
+#         {
+#           "status": "resting",
+#           "resting": {
+#             "oid": 123456790
+#           }
+#         },
+#         {
+#           "status": "error",
+#           "error": "Insufficient margin"
+#         }
+#       ]
+#     }
+#   }
+# }
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# 撤单响应详情 (type="cancel"):
+# {
+#   "status": "ok",
+#   "response": {
+#     "type": "cancel",
+#     "data": {
+#       "statuses": ["success", { "error": "Order not found" }]
+#     }
+#   }
+# }
+#
+###############################################################################
+# 附录: 签名方法说明
+###############################################################################
+#
+# HyperLiquid 使用 EIP-712 结构化签名，有两种签名方法:
+#
+# 1. signL1Action - 用于交易相关操作
+#    适用于: order, cancel, cancelByCloid, modify, batchModify,
+#           updateLeverage, updateIsolatedMargin, usdClassTransfer,
+#           subAccountTransfer, vaultDeposit, vaultWithdraw
+#
+# 2. signUserSignedAction - 用于授权和资金操作
+#    适用于: approveBuilderFee, approveAgent, usdSend, withdraw3,
+#           spotSend, setReferrer, createReferralCode
+#
+# 签名格式必须为对象 { r, s, v }，不能是字符串
+#
+# 示例 TypeScript 代码见 exchange-api-guide.md
+#
+###############################################################################
