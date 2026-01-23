@@ -1,6 +1,7 @@
 export { Button, IconButton, buttonVariants } from './Button';
 export { HermesLogo, HermesLogoIcon } from './HermesLogo';
 export { ScrollReveal, StaggerContainer, StaggerItem } from './ScrollReveal';
+export { SettingsModal } from './SettingsModal';
 
 // shadcn/ui components
 export { Input } from './input';

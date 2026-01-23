@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -67,7 +67,7 @@ function DeviceMockup() {
 
 // HyENA visual
 function HyenaVisual() {
-  const { t } = useTranslation();
+  const { t } = useT();
   return (
     <div className="bg-bg-secondary rounded-xl h-64 flex items-center justify-center relative overflow-hidden">
       {/* Background glow */}
@@ -134,7 +134,7 @@ const features = [
 ];
 
 export function Features() {
-  const { t } = useTranslation();
+  const { t } = useT();
 
   return (
     <section className="py-32 bg-bg-primary">

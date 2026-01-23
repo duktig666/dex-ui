@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TradeLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[#0b0e11] flex flex-col">
+    <div className="h-screen w-screen overflow-hidden bg-bg-primary flex flex-col">
       <TestnetBanner />
       <NetworkWarning dismissible />
       <div className="flex-1 overflow-hidden">{children}</div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { useAccount, useSignTypedData } from 'wagmi';
 import { cn } from '@/lib/utils';
 import { useLeverage, usePosition } from '@/hooks/useAccountState';
@@ -23,7 +23,7 @@ type MarginMode = 'cross' | 'isolated';
 const LEVERAGE_PRESETS = [1, 2, 5, 10, 20, 50, 100];
 
 export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: LeverageModalProps) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { isConnected } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
   const canSign = useCanSign();
@@ -127,11 +127,14 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-[#1a1d26] rounded-lg w-full max-w-md mx-4 p-6 shadow-xl">
+      <div className="relative bg-bg-secondary rounded-lg w-full max-w-md mx-4 p-6 shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-white">{t('Adjust Leverage')}</h2>
-          <button onClick={onClose} className="text-[#848e9c] hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="text-text-secondary hover:text-white transition-colors"
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -144,22 +147,22 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
         </div>
 
         {/* Coin Info */}
-        <div className="flex items-center justify-between mb-4 p-3 bg-[#0b0e11] rounded">
-          <span className="text-[#848e9c]">{t('Pair')}</span>
+        <div className="flex items-center justify-between mb-4 p-3 bg-bg-primary rounded">
+          <span className="text-text-secondary">{t('Pair')}</span>
           <span className="text-white font-semibold">{coin}/USDC</span>
         </div>
 
         {/* Margin Mode */}
         <div className="mb-6">
-          <label className="block text-sm text-[#848e9c] mb-2">{t('Margin Mode')}</label>
+          <label className="block text-sm text-text-secondary mb-2">{t('Margin Mode')}</label>
           <div className="flex gap-2">
             <button
               onClick={() => setMarginMode('cross')}
               className={cn(
                 'flex-1 py-3 text-sm font-medium rounded transition-colors',
                 marginMode === 'cross'
-                  ? 'bg-[#f0b90b] text-black'
-                  : 'bg-[#0b0e11] text-[#848e9c] hover:text-white'
+                  ? 'bg-accent-yellow text-black'
+                  : 'bg-bg-primary text-text-secondary hover:text-white'
               )}
             >
               {t('Cross')}
@@ -169,8 +172,8 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
               className={cn(
                 'flex-1 py-3 text-sm font-medium rounded transition-colors',
                 marginMode === 'isolated'
-                  ? 'bg-[#f0b90b] text-black'
-                  : 'bg-[#0b0e11] text-[#848e9c] hover:text-white'
+                  ? 'bg-accent-yellow text-black'
+                  : 'bg-bg-primary text-text-secondary hover:text-white'
               )}
             >
               {t('Isolated')}
@@ -180,7 +183,7 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
 
         {/* Leverage Value Display */}
         <div className="mb-4 text-center">
-          <span className="text-4xl font-bold text-[#f0b90b]">{leverageValue}x</span>
+          <span className="text-4xl font-bold text-accent-yellow">{leverageValue}x</span>
         </div>
 
         {/* Leverage Slider */}
@@ -192,16 +195,16 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
             step="1"
             value={leverageValue}
             onChange={(e) => setLeverageValue(Number(e.target.value))}
-            className="w-full h-2 bg-[#0b0e11] rounded-lg appearance-none cursor-pointer
+            className="w-full h-2 bg-bg-primary rounded-lg appearance-none cursor-pointer
               [&::-webkit-slider-thumb]:appearance-none
               [&::-webkit-slider-thumb]:w-4
               [&::-webkit-slider-thumb]:h-4
-              [&::-webkit-slider-thumb]:bg-[#f0b90b]
+              [&::-webkit-slider-thumb]:bg-accent-yellow
               [&::-webkit-slider-thumb]:rounded-full
               [&::-webkit-slider-thumb]:cursor-pointer
               [&::-webkit-slider-thumb]:shadow-md"
           />
-          <div className="flex justify-between text-xs text-[#848e9c] mt-1">
+          <div className="flex justify-between text-xs text-text-secondary mt-1">
             <span>1x</span>
             <span>{actualMaxLeverage}x</span>
           </div>
@@ -217,8 +220,8 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
                 className={cn(
                   'px-4 py-2 text-sm font-medium rounded transition-colors',
                   leverageValue === preset
-                    ? 'bg-[#f0b90b] text-black'
-                    : 'bg-[#0b0e11] text-[#848e9c] hover:text-white'
+                    ? 'bg-accent-yellow text-black'
+                    : 'bg-bg-primary text-text-secondary hover:text-white'
                 )}
               >
                 {preset}x
@@ -229,23 +232,21 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
 
         {/* Position Info */}
         {position && (
-          <div className="mb-4 p-3 bg-[#0b0e11] rounded text-sm space-y-2">
+          <div className="mb-4 p-3 bg-bg-primary rounded text-sm space-y-2">
             <div className="flex justify-between">
-              <span className="text-[#848e9c]">{t('Position Size')}</span>
-              <span
-                className={cn('font-mono', position.size > 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-              >
+              <span className="text-text-secondary">{t('Position Size')}</span>
+              <span className={cn('font-mono', position.size > 0 ? 'text-long' : 'text-short')}>
                 {formatPrice(Math.abs(position.size), 4)} {coin}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#848e9c]">{t('Entry Price')}</span>
+              <span className="text-text-secondary">{t('Entry Price')}</span>
               <span className="text-white font-mono">${formatPrice(position.entryPrice, 2)}</span>
             </div>
             {estimatedLiquidationPrice && (
               <div className="flex justify-between">
-                <span className="text-[#848e9c]">{t('Est. Liq. Price')}</span>
-                <span className="text-[#f6465d] font-mono">
+                <span className="text-text-secondary">{t('Est. Liq. Price')}</span>
+                <span className="text-short font-mono">
                   ${formatPrice(estimatedLiquidationPrice, 2)}
                 </span>
               </div>
@@ -254,7 +255,7 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
         )}
 
         {/* Warning */}
-        <div className="mb-4 p-3 bg-[#f6465d]/10 border border-[#f6465d]/30 rounded text-xs text-[#f6465d]">
+        <div className="mb-4 p-3 bg-short/10 border border-short/30 rounded text-xs text-short">
           <p>
             ⚠️{' '}
             {t(
@@ -264,13 +265,13 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
         </div>
 
         {/* Error */}
-        {error && <div className="mb-4 text-sm text-[#f6465d]">{error}</div>}
+        {error && <div className="mb-4 text-sm text-short">{error}</div>}
 
         {/* Actions */}
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-3 text-sm font-semibold rounded bg-[#0b0e11] text-white hover:bg-[#0b0e11]/80 transition-colors"
+            className="flex-1 py-3 text-sm font-semibold rounded bg-bg-primary text-white hover:bg-bg-primary/80 transition-colors"
           >
             {t('Cancel')}
           </button>
@@ -279,7 +280,7 @@ export function LeverageModal({ coin, isOpen, onClose, maxLeverage = 100 }: Leve
             disabled={!isConnected || !canSign || isSubmitting}
             className={cn(
               'flex-1 py-3 text-sm font-semibold rounded transition-colors',
-              'bg-[#f0b90b] text-black hover:bg-[#f0b90b]/80',
+              'bg-accent-yellow text-black hover:bg-accent-yellow/80',
               (!isConnected || !canSign || isSubmitting) && 'opacity-50 cursor-not-allowed'
             )}
           >

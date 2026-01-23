@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { useAssetPrice, useAssetList } from '@/hooks/useMarketData';
 import { useHyperliquid } from '@/components/providers/HyperliquidProvider';
@@ -27,23 +27,20 @@ function PriceTicker({ coin, price, change, active, onClick }: PriceTickerProps)
       onClick={onClick}
       className={cn(
         'flex items-center gap-1.5 px-3 py-1.5 transition-colors cursor-pointer',
-        'hover:bg-[#1a1d26]/70',
-        active ? 'bg-[#1a1d26]' : 'bg-transparent'
+        'hover:bg-bg-secondary/70',
+        active ? 'bg-bg-secondary' : 'bg-transparent'
       )}
     >
       {/* 涨跌幅 */}
       <span
-        className={cn(
-          'text-xs font-medium min-w-[52px]',
-          isPositive ? 'text-[#0ecb81]' : 'text-[#f6465d]'
-        )}
+        className={cn('text-xs font-medium min-w-[52px]', isPositive ? 'text-long' : 'text-short')}
       >
         {isPositive ? '+' : ''}
         {change.toFixed(2)}%
       </span>
       {/* 代币名称 */}
       <span className="text-white font-medium text-sm">{coin}</span>
-      <span className="text-[#848e9c] text-sm">-USDC</span>
+      <span className="text-text-secondary text-sm">-USDC</span>
       {/* 价格 */}
       <span className="text-white font-mono text-sm ml-1">{formatPrice(price, priceDecimals)}</span>
     </button>
@@ -54,9 +51,9 @@ function PriceTicker({ coin, price, change, active, onClick }: PriceTickerProps)
 function PriceTickerSkeleton() {
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 animate-pulse">
-      <div className="w-12 h-4 bg-[#1a1d26] rounded" />
-      <div className="w-16 h-4 bg-[#1a1d26] rounded" />
-      <div className="w-16 h-4 bg-[#1a1d26] rounded" />
+      <div className="w-12 h-4 bg-bg-secondary rounded" />
+      <div className="w-16 h-4 bg-bg-secondary rounded" />
+      <div className="w-16 h-4 bg-bg-secondary rounded" />
     </div>
   );
 }
@@ -101,7 +98,7 @@ interface PriceBarProps {
 }
 
 export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
-  const { t } = useTranslation();
+  const { t } = useT();
   // 使用 HyperliquidContext 管理当前币种
   const { currentCoin, setCoin } = useHyperliquid();
   const coin = symbol?.split('-')[0] || currentCoin || 'BTC';
@@ -143,7 +140,7 @@ export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
     midPrice >= 10000 ? 0 : midPrice >= 1000 ? 1 : midPrice >= 100 ? 2 : midPrice >= 10 ? 3 : 4;
 
   return (
-    <div className="flex flex-col bg-[#0b0e11] border-b border-[#1a1d26]">
+    <div className="flex flex-col bg-bg-primary border-b border-border-color">
       {/* 第一行: 主流代币涨跌幅 */}
       <div className="h-10 flex items-center px-4">
         {/* 主流代币涨跌幅 */}
@@ -170,13 +167,13 @@ export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
       </div>
 
       {/* 第二行: TokenSelector（左） + 当前交易对详情（右） */}
-      <div className="h-12 flex items-center px-4 gap-8 border-t border-[#1a1d26]/50">
+      <div className="h-12 flex items-center px-4 gap-8 border-t border-border-color/50">
         {/* Left: TokenSelector 代币选择器 */}
         <TokenSelector />
 
         {/* Mark Price */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c] text-xs">{t('Mark')}</span>
+          <span className="text-text-secondary text-xs">{t('Mark')}</span>
           <span className="text-white font-mono text-sm">
             {formatPrice(markPrice, priceDecimals)}
           </span>
@@ -184,11 +181,11 @@ export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
 
         {/* 24h Change */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c] text-xs">{t('24h Change')}</span>
+          <span className="text-text-secondary text-xs">{t('24h Change')}</span>
           <span
             className={cn(
               'font-mono text-sm',
-              priceChangePercent >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'
+              priceChangePercent >= 0 ? 'text-long' : 'text-short'
             )}
           >
             {change24h >= 0 ? '+' : ''}
@@ -199,19 +196,19 @@ export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
 
         {/* 24h Volume */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c] text-xs">{t('24h Vol')}</span>
+          <span className="text-text-secondary text-xs">{t('24h Vol')}</span>
           <span className="text-white font-mono text-sm">${formatCompact(dayVolume)}</span>
         </div>
 
         {/* Open Interest */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c] text-xs">{t('Open Interest')}</span>
+          <span className="text-text-secondary text-xs">{t('Open Interest')}</span>
           <span className="text-white font-mono text-sm">${formatCompact(openInterest)}</span>
         </div>
 
         {/* Oracle Price */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c] text-xs">{t('Oracle')}</span>
+          <span className="text-text-secondary text-xs">{t('Oracle')}</span>
           <span className="text-white font-mono text-sm">
             {formatPrice(oraclePrice, priceDecimals)}
           </span>
@@ -219,12 +216,9 @@ export function PriceBar({ symbol, onSymbolChange }: PriceBarProps) {
 
         {/* Funding / Countdown */}
         <div className="flex flex-col">
-          <span className="text-[#848e9c] text-xs">{t('Funding / Countdown')}</span>
+          <span className="text-text-secondary text-xs">{t('Funding / Countdown')}</span>
           <span
-            className={cn(
-              'font-mono text-sm',
-              fundingPercent >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'
-            )}
+            className={cn('font-mono text-sm', fundingPercent >= 0 ? 'text-long' : 'text-short')}
           >
             {fundingPercent >= 0 ? '+' : ''}
             {fundingPercent.toFixed(4)}% / {fundingCountdown}

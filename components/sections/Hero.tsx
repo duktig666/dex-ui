@@ -1,11 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { HermesLogo } from '@/components/ui/HermesLogo';
 
 export function Hero() {
-  const { t } = useTranslation();
+  const { t } = useT();
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">

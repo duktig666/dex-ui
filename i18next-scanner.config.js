@@ -42,30 +42,29 @@ module.exports = {
       jsonIndent: 2,
       lineEnding: '\n',
     },
-    // 分隔符 - 禁用以支持 key 中包含 . 和 : 的情况
-    keySeparator: false,
     nsSeparator: false,
-    // 插值配置
+    keySeparator: false,
     interpolation: {
       prefix: '{{',
       suffix: '}}',
     },
   },
-  // 自定义转换函数 - 使用 CRC32 生成 hash key，原始文本作为 value
+  /**
+   * 自定义转换函数
+   * 将 t('原始文本') 转换为 { 'Kxxxxxxxx': '原始文本' }
+   */
   transform: function customTransform(file, enc, done) {
     'use strict';
     const parser = this.parser;
     const content = fs.readFileSync(file.path, enc);
     let count = 0;
 
-    // 手动解析 t('...') 调用
     parser.parseFuncFromString(content, { list: ['t'] }, (key, options) => {
-      // 使用 CRC32 生成 hash key，格式: K + hex
-      const hashKey = `K${(crc32.str(key) >>> 0).toString(16)}`;
-
-      // 设置所有语言的默认值为原始文本
+      // 使用原始文本作为 defaultValue
       options.defaultValue = key;
-
+      // 生成 CRC32 hash key
+      const hash = crc32.str(key) >>> 0;
+      const hashKey = `K${hash.toString(16)}`;
       parser.set(hashKey, options);
       ++count;
     });

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { HermesLogoIcon } from '@/components/ui/HermesLogo';
 import { IconButton } from '@/components/ui/Button';
 
@@ -55,7 +55,7 @@ const socialLinks = [
 ];
 
 export function Footer() {
-  const { t } = useTranslation();
+  const { t } = useT();
   // Use static year to avoid hydration mismatch
   const currentYear = 2026;
 

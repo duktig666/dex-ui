@@ -2,7 +2,13 @@
 export { ThemeProvider, useTheme } from './provider';
 
 // Token 定义
-export { availableThemes, defaultColors, themeTokens, toKebabCase } from './tokens';
+export {
+  availableThemes,
+  defaultColors,
+  defaultThemeKey,
+  themeTokens,
+  toKebabCase,
+} from './tokens';
 
 // 生成器函数
 export {

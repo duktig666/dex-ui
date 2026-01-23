@@ -36,15 +36,15 @@ function TradePageContent() {
           </div>
 
           {/* Bottom: Account Panel */}
-          <div className="h-[280px] border-t border-[#1a1d26]">
+          <div className="h-[280px] border-t border-border-color">
             <AccountPanel />
           </div>
         </div>
 
         {/* Right: Order Book + Trade Form + Account Sidebar */}
-        <div className="w-[600px] flex border-l border-[#1a1d26]">
+        <div className="w-[600px] flex border-l border-border-color">
           {/* Order Book */}
-          <div className="w-[280px] border-r border-[#1a1d26]">
+          <div className="w-[280px] border-r border-border-color">
             <OrderBook symbol={symbol} />
           </div>
 
@@ -56,7 +56,7 @@ function TradePageContent() {
             </div>
 
             {/* Account Sidebar */}
-            <div className="border-t border-[#1a1d26]">
+            <div className="border-t border-border-color">
               <AccountSidebar />
             </div>
           </div>

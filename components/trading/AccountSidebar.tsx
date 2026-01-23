@@ -1,11 +1,11 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { useAccountState } from '@/hooks/useAccountState';
 export function AccountSidebar() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { marginSummary, accountValue, totalUnrealizedPnl, totalMarginUsed } = useAccountState();
 
   // 计算账户数据
@@ -44,27 +44,27 @@ export function AccountSidebar() {
   }, [marginSummary, accountValue, totalUnrealizedPnl, totalMarginUsed]);
 
   return (
-    <div className="p-4 bg-[#0b0e11]">
+    <div className="p-4 bg-bg-primary">
       {/* Deposit/Withdraw Buttons */}
       <div className="flex gap-2 mb-4">
-        <select className="flex-1 px-2 py-1 text-xs bg-[#1a1d26] text-white rounded outline-none cursor-pointer">
+        <select className="flex-1 px-2 py-1 text-xs bg-bg-secondary text-white rounded outline-none cursor-pointer">
           <option>BTC</option>
           <option>ETH</option>
           <option>USDC</option>
         </select>
-        <select className="w-12 px-2 py-1 text-xs bg-[#1a1d26] text-white rounded outline-none cursor-pointer">
+        <select className="w-12 px-2 py-1 text-xs bg-bg-secondary text-white rounded outline-none cursor-pointer">
           <option>1</option>
         </select>
       </div>
 
       <div className="flex gap-2 mb-4">
-        <button className="flex-1 py-2 text-sm font-medium bg-[#0ecb81] text-white rounded hover:bg-[#0ecb81]/90 transition-colors">
+        <button className="flex-1 py-2 text-sm font-medium bg-long text-white rounded hover:bg-long/90 transition-colors">
           {t('Deposit')}
         </button>
-        <button className="flex-1 py-2 text-sm font-medium bg-[#1a1d26] text-white rounded hover:bg-[#1a1d26]/80 transition-colors">
+        <button className="flex-1 py-2 text-sm font-medium bg-bg-secondary text-white rounded hover:bg-bg-secondary/80 transition-colors">
           {t('Perps (Core) Spot')}
         </button>
-        <button className="flex-1 py-2 text-sm font-medium bg-[#1a1d26] text-white rounded hover:bg-[#1a1d26]/80 transition-colors">
+        <button className="flex-1 py-2 text-sm font-medium bg-bg-secondary text-white rounded hover:bg-bg-secondary/80 transition-colors">
           {t('Withdraw')}
         </button>
       </div>
@@ -74,11 +74,11 @@ export function AccountSidebar() {
         <h3 className="text-sm font-medium text-white mb-2">{t('Account Equity')}</h3>
         <div className="space-y-1 text-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[#848e9c]">{t('Spot')}</span>
+            <span className="text-text-secondary">{t('Spot')}</span>
             <span className="text-white font-mono">${accountData.spotEquity.toFixed(2)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#848e9c]">{t('Perps (Core)')}</span>
+            <span className="text-text-secondary">{t('Perps (Core)')}</span>
             <span className="text-white font-mono">${accountData.perpsEquity.toFixed(2)}</span>
           </div>
         </div>
@@ -89,32 +89,32 @@ export function AccountSidebar() {
         <h3 className="text-sm font-medium text-white mb-2">{t('Perps Overview')}</h3>
         <div className="space-y-1 text-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[#848e9c]">{t('Balance')}</span>
+            <span className="text-text-secondary">{t('Balance')}</span>
             <span className="text-white font-mono">${accountData.balance.toFixed(2)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#848e9c]">{t('Unrealized PNL')}</span>
+            <span className="text-text-secondary">{t('Unrealized PNL')}</span>
             <span
               className={cn(
                 'font-mono',
-                accountData.unrealizedPnl >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'
+                accountData.unrealizedPnl >= 0 ? 'text-long' : 'text-short'
               )}
             >
               {accountData.unrealizedPnl >= 0 ? '+' : ''}${accountData.unrealizedPnl.toFixed(2)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#848e9c]">{t('Cross Margin Ratio')}</span>
+            <span className="text-text-secondary">{t('Cross Margin Ratio')}</span>
             <span className="text-white font-mono">{accountData.crossMarginRatio.toFixed(2)}%</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#848e9c]">{t('Maintenance Margin')}</span>
+            <span className="text-text-secondary">{t('Maintenance Margin')}</span>
             <span className="text-white font-mono">
               ${accountData.maintenanceMargin.toFixed(2)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#848e9c]">{t('Cross Account Leverage')}</span>
+            <span className="text-text-secondary">{t('Cross Account Leverage')}</span>
             <span className="text-white font-mono">
               {accountData.crossAccountLeverage.toFixed(2)}x
             </span>

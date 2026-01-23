@@ -29,27 +29,73 @@ export interface ThemeConfig {
 
 // ============ 主题定义 ============
 export const themeTokens: Record<string, ThemeConfig> = {
-  dark: {
-    name: 'Dark',
+  // Based Orange - 橙色主题
+  basedOrange: {
+    name: 'Based Orange',
     colors: {
-      bgPrimary: '#000000',
-      bgSecondary: '#0a0a0a',
-      bgCard: '#111111',
-      bgHover: '#1a1a1a',
+      bgPrimary: '#0d0d0d',
+      bgSecondary: '#1a1a1a',
+      bgCard: '#141414',
+      bgHover: '#252525',
       textPrimary: '#ffffff',
       textSecondary: '#888888',
       textMuted: '#666666',
-      accentGreen: '#00ff88',
-      accentRed: '#ff4444',
-      accentBlue: '#2962ff',
-      accentYellow: '#f0b90b',
-      borderColor: '#1a1a1a',
-      borderLight: '#2a2a2a',
+      accentGreen: '#0ecb81',
+      accentRed: '#f6465d',
+      accentBlue: '#ff6b35',
+      accentYellow: '#ff6b35',
+      borderColor: '#2a2a2a',
+      borderLight: '#333333',
       long: '#0ecb81',
       short: '#f6465d',
     },
   },
 
+  // Tokyo Night - 东京之夜
+  tokyoNight: {
+    name: 'Tokyo Night',
+    colors: {
+      bgPrimary: '#1a1b26',
+      bgSecondary: '#16161e',
+      bgCard: '#1f2335',
+      bgHover: '#292e42',
+      textPrimary: '#c0caf5',
+      textSecondary: '#9aa5ce',
+      textMuted: '#565f89',
+      accentGreen: '#9ece6a',
+      accentRed: '#f7768e',
+      accentBlue: '#7aa2f7',
+      accentYellow: '#e0af68',
+      borderColor: '#292e42',
+      borderLight: '#3b4261',
+      long: '#9ece6a',
+      short: '#f7768e',
+    },
+  },
+
+  // Dracula - 德古拉
+  dracula: {
+    name: 'Dracula',
+    colors: {
+      bgPrimary: '#282a36',
+      bgSecondary: '#21222c',
+      bgCard: '#2d2f3f',
+      bgHover: '#44475a',
+      textPrimary: '#f8f8f2',
+      textSecondary: '#bd93f9',
+      textMuted: '#6272a4',
+      accentGreen: '#50fa7b',
+      accentRed: '#ff5555',
+      accentBlue: '#8be9fd',
+      accentYellow: '#f1fa8c',
+      borderColor: '#44475a',
+      borderLight: '#6272a4',
+      long: '#50fa7b',
+      short: '#ff5555',
+    },
+  },
+
+  // Light - 浅色主题
   light: {
     name: 'Light',
     colors: {
@@ -57,13 +103,13 @@ export const themeTokens: Record<string, ThemeConfig> = {
       bgSecondary: '#f5f5f5',
       bgCard: '#ffffff',
       bgHover: '#f0f0f0',
-      textPrimary: '#000000',
+      textPrimary: '#1a1a2e',
       textSecondary: '#666666',
       textMuted: '#999999',
-      accentGreen: '#00cc66',
+      accentGreen: '#00a86b',
       accentRed: '#dc3545',
-      accentBlue: '#0066ff',
-      accentYellow: '#ffc107',
+      accentBlue: '#4f6ef7',
+      accentYellow: '#f0b90b',
       borderColor: '#e0e0e0',
       borderLight: '#f0f0f0',
       long: '#00a86b',
@@ -71,66 +117,91 @@ export const themeTokens: Record<string, ThemeConfig> = {
     },
   },
 
-  binance: {
-    name: 'Binance',
+  // Atom One Dark
+  atomOneDark: {
+    name: 'Atom One Dark',
     colors: {
-      bgPrimary: '#0b0e11',
-      bgSecondary: '#1e2329',
-      bgCard: '#181a20',
-      bgHover: '#2b3139',
-      textPrimary: '#eaecef',
-      textSecondary: '#848e9c',
-      textMuted: '#5e6673',
-      accentGreen: '#0ecb81',
-      accentRed: '#f6465d',
-      accentBlue: '#1890ff',
-      accentYellow: '#f0b90b',
-      borderColor: '#2b3139',
-      borderLight: '#363c45',
-      long: '#0ecb81',
-      short: '#f6465d',
+      bgPrimary: '#282c34',
+      bgSecondary: '#21252b',
+      bgCard: '#2c313a',
+      bgHover: '#3e4451',
+      textPrimary: '#abb2bf',
+      textSecondary: '#828997',
+      textMuted: '#5c6370',
+      accentGreen: '#98c379',
+      accentRed: '#e06c75',
+      accentBlue: '#61afef',
+      accentYellow: '#e5c07b',
+      borderColor: '#3e4451',
+      borderLight: '#4b5263',
+      long: '#98c379',
+      short: '#e06c75',
     },
   },
 
-  ocean: {
-    name: 'Ocean',
+  // Monokai Pro
+  monokaiPro: {
+    name: 'Monokai Pro',
     colors: {
-      bgPrimary: '#0a1628',
-      bgSecondary: '#0d1d31',
-      bgCard: '#112240',
-      bgHover: '#1a3a5c',
-      textPrimary: '#ccd6f6',
-      textSecondary: '#8892b0',
-      textMuted: '#495670',
-      accentGreen: '#64ffda',
-      accentRed: '#ff6b6b',
-      accentBlue: '#57cbff',
-      accentYellow: '#ffd93d',
-      borderColor: '#1a3a5c',
-      borderLight: '#233554',
-      long: '#64ffda',
-      short: '#ff6b6b',
+      bgPrimary: '#2d2a2e',
+      bgSecondary: '#221f22',
+      bgCard: '#353236',
+      bgHover: '#403e41',
+      textPrimary: '#fcfcfa',
+      textSecondary: '#c1c0c0',
+      textMuted: '#727072',
+      accentGreen: '#a9dc76',
+      accentRed: '#ff6188',
+      accentBlue: '#78dce8',
+      accentYellow: '#ffd866',
+      borderColor: '#403e41',
+      borderLight: '#5b595c',
+      long: '#a9dc76',
+      short: '#ff6188',
     },
   },
 
-  purple: {
-    name: 'Purple Night',
+  // Monokai Classic
+  monokaiClassic: {
+    name: 'Monokai Classic',
     colors: {
-      bgPrimary: '#13111c',
-      bgSecondary: '#1a1625',
-      bgCard: '#211d2e',
-      bgHover: '#2d2640',
-      textPrimary: '#e8e6f0',
-      textSecondary: '#9d95b8',
-      textMuted: '#6b6085',
-      accentGreen: '#4ade80',
-      accentRed: '#f43f5e',
-      accentBlue: '#a78bfa',
-      accentYellow: '#fbbf24',
-      borderColor: '#2d2640',
-      borderLight: '#3d3455',
-      long: '#4ade80',
-      short: '#f43f5e',
+      bgPrimary: '#272822',
+      bgSecondary: '#1e1f1c',
+      bgCard: '#2f302a',
+      bgHover: '#3e3d32',
+      textPrimary: '#f8f8f2',
+      textSecondary: '#cfcfc2',
+      textMuted: '#75715e',
+      accentGreen: '#a6e22e',
+      accentRed: '#f92672',
+      accentBlue: '#66d9ef',
+      accentYellow: '#e6db74',
+      borderColor: '#3e3d32',
+      borderLight: '#49483e',
+      long: '#a6e22e',
+      short: '#f92672',
+    },
+  },
+
+  // Terminal - 终端绿
+  terminal: {
+    name: 'Terminal',
+    colors: {
+      bgPrimary: '#0c0c0c',
+      bgSecondary: '#1a1a1a',
+      bgCard: '#121212',
+      bgHover: '#252525',
+      textPrimary: '#00ff00',
+      textSecondary: '#00cc00',
+      textMuted: '#009900',
+      accentGreen: '#00ff00',
+      accentRed: '#ff0000',
+      accentBlue: '#00ffff',
+      accentYellow: '#ffff00',
+      borderColor: '#003300',
+      borderLight: '#004400',
+      long: '#00ff00',
+      short: '#ff0000',
     },
   },
 };
@@ -148,8 +219,11 @@ export const availableThemes = Object.entries(themeTokens).map(([key, value]) =>
   name: value.name,
 }));
 
+// 默认主题 Key
+export const defaultThemeKey: ThemeKey = 'basedOrange';
+
 // 获取默认主题的颜色（用于 SSR）
-export const defaultColors = themeTokens.dark.colors;
+export const defaultColors = themeTokens[defaultThemeKey].colors;
 
 // ============ 生成器函数 ============
 
@@ -157,7 +231,7 @@ export const defaultColors = themeTokens.dark.colors;
  * 生成 CSS 变量对象
  * 用于 globals.css 的 :root
  */
-export function generateCSSVariables(themeKey: ThemeKey = 'dark'): Record<string, string> {
+export function generateCSSVariables(themeKey: ThemeKey = defaultThemeKey): Record<string, string> {
   const { colors } = themeTokens[themeKey];
   const vars: Record<string, string> = {};
 
@@ -202,7 +276,7 @@ export function generateStitchesColors(): Record<string, string> {
  * 生成 CSS 变量字符串
  * 用于内联样式或动态注入
  */
-export function generateCSSString(themeKey: ThemeKey = 'dark'): string {
+export function generateCSSString(themeKey: ThemeKey = defaultThemeKey): string {
   const vars = generateCSSVariables(themeKey);
   return Object.entries(vars)
     .map(([key, value]) => `${key}: ${value}`)

@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground shadow hover:bg-primary/90',
-        primary: 'bg-[#0ecb81] text-white shadow hover:bg-[#0ecb81]/90',
+        primary: 'bg-long text-white shadow hover:bg-long/90',
         destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
         outline:
           'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
@@ -18,8 +18,8 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
         // 自定义交易相关变体
-        long: 'bg-[#0ecb81] text-white hover:bg-[#0ecb81]/90',
-        short: 'bg-[#f6465d] text-white hover:bg-[#f6465d]/90',
+        long: 'bg-long text-white hover:bg-long/90',
+        short: 'bg-short text-white hover:bg-short/90',
       },
       size: {
         default: 'h-9 px-4 py-2',

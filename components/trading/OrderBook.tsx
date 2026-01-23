@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { useOrderBook, type OrderBookLevel } from '@/hooks/useOrderBook';
 import { useRecentTrades, type FormattedTrade } from '@/hooks/useRecentTrades';
@@ -27,7 +27,7 @@ function OrderBookRow({
   const bgColor = side === 'bid' ? 'rgba(14, 203, 129, 0.15)' : 'rgba(246, 70, 93, 0.15)';
 
   return (
-    <div className="relative flex items-center text-xs h-6 px-2 hover:bg-[#1a1d26]/50 cursor-pointer">
+    <div className="relative flex items-center text-xs h-6 px-2 hover:bg-bg-secondary/50 cursor-pointer">
       {/* Background bar */}
       <div
         className="absolute inset-0"
@@ -41,15 +41,13 @@ function OrderBookRow({
 
       {/* Content */}
       <div className="relative flex items-center justify-between w-full">
-        <span
-          className={cn('font-mono w-20', side === 'bid' ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-        >
+        <span className={cn('font-mono w-20', side === 'bid' ? 'text-long' : 'text-short')}>
           {formatPrice(level.price, priceDecimals)}
         </span>
-        <span className="font-mono text-[#eaecef] w-24 text-right">
+        <span className="font-mono text-text-primary w-24 text-right">
           {formatSize(level.size, sizeDecimals)}
         </span>
-        <span className="font-mono text-[#848e9c] w-24 text-right">
+        <span className="font-mono text-text-secondary w-24 text-right">
           {formatSize(level.total, sizeDecimals)}
         </span>
       </div>
@@ -67,16 +65,14 @@ function TradeRow({
   sizeDecimals: number;
 }) {
   return (
-    <div className="flex items-center text-xs h-6 px-2 hover:bg-[#1a1d26]/50">
-      <span
-        className={cn('font-mono w-20', trade.side === 'buy' ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-      >
+    <div className="flex items-center text-xs h-6 px-2 hover:bg-bg-secondary/50">
+      <span className={cn('font-mono w-20', trade.side === 'buy' ? 'text-long' : 'text-short')}>
         {formatPrice(trade.price, priceDecimals)}
       </span>
-      <span className="font-mono text-[#eaecef] w-24 text-right">
+      <span className="font-mono text-text-primary w-24 text-right">
         {formatSize(trade.size, sizeDecimals)}
       </span>
-      <span className="font-mono text-[#848e9c] w-24 text-right">{trade.timeStr}</span>
+      <span className="font-mono text-text-secondary w-24 text-right">{trade.timeStr}</span>
     </div>
   );
 }
@@ -85,14 +81,14 @@ function LoadingSkeleton() {
   return (
     <div className="flex flex-col gap-1 p-2">
       {Array.from({ length: 10 }).map((_, i) => (
-        <div key={i} className="h-6 bg-[#1a1d26] rounded animate-pulse" />
+        <div key={i} className="h-6 bg-bg-secondary rounded animate-pulse" />
       ))}
     </div>
   );
 }
 
 export function OrderBook({ symbol }: OrderBookProps) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabType>('orderbook');
 
   // 从 symbol 提取 coin (如 "BTC-USDC" -> "BTC")
@@ -116,16 +112,16 @@ export function OrderBook({ symbol }: OrderBookProps) {
   const sizeDecimals = 4;
 
   return (
-    <div className="flex flex-col h-full bg-[#0b0e11]">
+    <div className="flex flex-col h-full bg-bg-primary">
       {/* Tabs */}
-      <div className="flex items-center border-b border-[#1a1d26]">
+      <div className="flex items-center border-b border-border-color">
         <button
           onClick={() => setActiveTab('orderbook')}
           className={cn(
             'px-4 py-2 text-sm font-medium transition-colors',
             activeTab === 'orderbook'
-              ? 'text-white border-b-2 border-[#2962ff]'
-              : 'text-[#848e9c] hover:text-white'
+              ? 'text-text-primary border-b-2 border-accent-blue'
+              : 'text-text-secondary hover:text-text-primary'
           )}
         >
           {t('Order Book')}
@@ -135,8 +131,8 @@ export function OrderBook({ symbol }: OrderBookProps) {
           className={cn(
             'px-4 py-2 text-sm font-medium transition-colors',
             activeTab === 'trades'
-              ? 'text-white border-b-2 border-[#2962ff]'
-              : 'text-[#848e9c] hover:text-white'
+              ? 'text-text-primary border-b-2 border-accent-blue'
+              : 'text-text-secondary hover:text-text-primary'
           )}
         >
           {t('Trades')}
@@ -146,7 +142,7 @@ export function OrderBook({ symbol }: OrderBookProps) {
       {activeTab === 'orderbook' ? (
         <>
           {/* Header */}
-          <div className="flex items-center text-xs text-[#848e9c] px-2 py-1 border-b border-[#1a1d26]">
+          <div className="flex items-center text-xs text-text-secondary px-2 py-1 border-b border-border-color">
             <span className="w-20">{t('Price')}</span>
             <span className="w-24 text-right">
               {t('Amount')} ({coin})
@@ -174,14 +170,14 @@ export function OrderBook({ symbol }: OrderBookProps) {
               </div>
 
               {/* Spread */}
-              <div className="flex items-center justify-center gap-2 py-2 border-y border-[#1a1d26] bg-[#0b0e11]">
-                <span className="text-white font-mono text-sm">
+              <div className="flex items-center justify-center gap-2 py-2 border-y border-border-color bg-bg-primary">
+                <span className="text-text-primary font-mono text-sm">
                   {orderBookData.bids[0]
                     ? formatPrice(orderBookData.bids[0].price, priceDecimals)
                     : '—'}
                 </span>
-                <span className="text-xs text-[#848e9c]">{t('Spread')}</span>
-                <span className="text-[#848e9c] font-mono text-xs">
+                <span className="text-xs text-text-secondary">{t('Spread')}</span>
+                <span className="text-text-secondary font-mono text-xs">
                   {formatPrice(orderBookData.spread, priceDecimals)} (
                   {orderBookData.spreadPercent.toFixed(3)}%)
                 </span>
@@ -205,7 +201,7 @@ export function OrderBook({ symbol }: OrderBookProps) {
       ) : (
         <>
           {/* Trades Header */}
-          <div className="flex items-center text-xs text-[#848e9c] px-2 py-1 border-b border-[#1a1d26]">
+          <div className="flex items-center text-xs text-text-secondary px-2 py-1 border-b border-border-color">
             <span className="w-20">{t('Price')}</span>
             <span className="w-24 text-right">{t('Amount')}</span>
             <span className="w-24 text-right">{t('Time')}</span>

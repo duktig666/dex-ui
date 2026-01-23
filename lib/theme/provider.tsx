@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { themeTokens, type ThemeKey, availableThemes } from './tokens';
+import { themeTokens, type ThemeKey, availableThemes, defaultThemeKey } from './tokens';
 
 interface ThemeContextValue {
   theme: ThemeKey;
@@ -31,7 +31,7 @@ function applyTheme(themeKey: ThemeKey) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeKey>('dark');
+  const [theme, setThemeState] = useState<ThemeKey>(defaultThemeKey);
   const [mounted, setMounted] = useState(false);
 
   // 初始化：从 localStorage 读取
@@ -41,7 +41,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setThemeState(stored);
       applyTheme(stored);
     } else {
-      applyTheme('dark');
+      applyTheme(defaultThemeKey);
     }
     setMounted(true);
   }, []);

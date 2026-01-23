@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { useAssetList, useAssetPrice } from '@/hooks/useMarketData';
 import { useHyperliquid } from '@/components/providers/HyperliquidProvider';
@@ -105,14 +105,14 @@ function TokenRow({ asset, isActive, onClick }: TokenRowProps) {
       onClick={onClick}
       className={cn(
         'w-full flex items-center text-xs h-9 px-3 transition-colors',
-        'hover:bg-[#1a1d26]',
-        isActive ? 'bg-[#1a1d26]' : ''
+        'hover:bg-bg-secondary',
+        isActive ? 'bg-bg-secondary' : ''
       )}
     >
       {/* Symbol */}
       <div className="w-[140px] flex items-center gap-2">
         <span className="text-white font-medium">{asset.name}-USDC</span>
-        <span className="px-1 py-0.5 text-[10px] bg-[#2962ff]/20 text-[#2962ff] rounded">
+        <span className="px-1 py-0.5 text-[10px] bg-accent-blue/20 text-accent-blue rounded">
           {asset.maxLeverage}X
         </span>
       </div>
@@ -129,7 +129,7 @@ function TokenRow({ asset, isActive, onClick }: TokenRowProps) {
 
       {/* 24H Change */}
       <div className="w-[80px] text-right">
-        <span className={cn('font-mono', isPositive ? 'text-[#0ecb81]' : 'text-[#f6465d]')}>
+        <span className={cn('font-mono', isPositive ? 'text-long' : 'text-short')}>
           {isPositive ? '+' : ''}
           {(asset.priceChange * 100).toFixed(2)}%
         </span>
@@ -137,31 +137,28 @@ function TokenRow({ asset, isActive, onClick }: TokenRowProps) {
 
       {/* Funding Rate */}
       <div className="w-[80px] text-right">
-        <span
-          className={cn(
-            'font-mono',
-            (asset.funding || 0) >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'
-          )}
-        >
+        <span className={cn('font-mono', (asset.funding || 0) >= 0 ? 'text-long' : 'text-short')}>
           {((asset.funding || 0) * 100).toFixed(4)}%
         </span>
       </div>
 
       {/* Volume */}
       <div className="w-[100px] text-right">
-        <span className="text-[#848e9c] font-mono">${formatCompact(asset.volume)}</span>
+        <span className="text-text-secondary font-mono">${formatCompact(asset.volume)}</span>
       </div>
 
       {/* Open Interest */}
       <div className="w-[100px] text-right">
-        <span className="text-[#848e9c] font-mono">${formatCompact(asset.openInterest || 0)}</span>
+        <span className="text-text-secondary font-mono">
+          ${formatCompact(asset.openInterest || 0)}
+        </span>
       </div>
     </button>
   );
 }
 
 export function TokenSelector() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
@@ -278,7 +275,10 @@ export function TokenSelector() {
         </div>
         <span className="text-white font-semibold text-lg">{currentCoin}/USDC</span>
         <svg
-          className={cn('w-4 h-4 text-[#848e9c] transition-transform', isOpen ? 'rotate-180' : '')}
+          className={cn(
+            'w-4 h-4 text-text-secondary transition-transform',
+            isOpen ? 'rotate-180' : ''
+          )}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -289,12 +289,12 @@ export function TokenSelector() {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-[620px] bg-[#0d1017] border border-[#1a1d26] rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute top-full left-0 mt-1 w-[620px] bg-bg-primary border border-border-color rounded-lg shadow-xl z-50 overflow-hidden">
           {/* Search Input */}
-          <div className="p-3 border-b border-[#1a1d26]">
+          <div className="p-3 border-b border-border-color">
             <div className="relative">
               <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#848e9c]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -312,13 +312,13 @@ export function TokenSelector() {
                 placeholder={t('Search markets...')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-[#1a1d26] border border-[#2a2e3e] rounded text-white text-sm placeholder-[#848e9c] focus:outline-none focus:border-[#2962ff]"
+                className="w-full pl-10 pr-4 py-2 bg-bg-secondary border border-border-color rounded text-white text-sm placeholder-text-secondary focus:outline-none focus:border-accent-blue"
               />
             </div>
           </div>
 
           {/* Category Tabs */}
-          <div className="flex items-center gap-1 px-3 py-2 border-b border-[#1a1d26] overflow-x-auto">
+          <div className="flex items-center gap-1 px-3 py-2 border-b border-border-color overflow-x-auto">
             {CATEGORIES.map((category) => (
               <button
                 key={category.id}
@@ -326,8 +326,8 @@ export function TokenSelector() {
                 className={cn(
                   'px-3 py-1 text-xs rounded whitespace-nowrap transition-colors',
                   activeCategory === category.id
-                    ? 'bg-[#2962ff] text-white'
-                    : 'text-[#848e9c] hover:text-white hover:bg-[#1a1d26]'
+                    ? 'bg-accent-blue text-white'
+                    : 'text-text-secondary hover:text-white hover:bg-bg-secondary'
                 )}
               >
                 {category.label}
@@ -336,7 +336,7 @@ export function TokenSelector() {
           </div>
 
           {/* Table Header */}
-          <div className="flex items-center text-xs text-[#848e9c] h-8 px-3 border-b border-[#1a1d26] bg-[#0a0d12]">
+          <div className="flex items-center text-xs text-text-secondary h-8 px-3 border-b border-border-color bg-bg-secondary">
             <div className="w-[140px]">{t('Symbol')}</div>
             <div className="w-[100px] text-right">{t('Last Price')}</div>
             <div className="w-[80px] text-right">{t('24H %')}</div>
@@ -348,7 +348,7 @@ export function TokenSelector() {
           {/* Token List */}
           <div className="max-h-[400px] overflow-y-auto">
             {filteredAssets.length === 0 ? (
-              <div className="flex items-center justify-center h-20 text-[#848e9c] text-sm">
+              <div className="flex items-center justify-center h-20 text-text-secondary text-sm">
                 {t('No markets found')}
               </div>
             ) : (

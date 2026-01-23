@@ -109,7 +109,7 @@ export function NetworkGate({ children, fallback }: NetworkGateProps) {
         <AlertTriangle className="w-12 h-12 text-yellow-500" />
         <div>
           <h3 className="text-lg font-medium text-white mb-1">Wrong Network</h3>
-          <p className="text-[#848e9c] text-sm">
+          <p className="text-text-secondary text-sm">
             Please switch to {expectedNetworkName} to continue
           </p>
         </div>

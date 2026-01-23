@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import Link from 'next/link';
 
 const communityLinks = [
@@ -32,7 +32,7 @@ const communityLinks = [
 ];
 
 export function Community() {
-  const { t } = useTranslation();
+  const { t } = useT();
 
   return (
     <section className="py-32 bg-bg-secondary relative overflow-hidden">

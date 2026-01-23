@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import * as Tabs from '@radix-ui/react-tabs';
 import { useAccountState } from '@/hooks/useAccountState';
@@ -32,16 +32,16 @@ interface UserFundingItem {
 }
 
 function EmptyState({ message }: { message: string }) {
-  const { t } = useTranslation();
+  const { t } = useT();
   return (
-    <div className="flex items-center justify-center h-full text-[#848e9c] text-sm">
+    <div className="flex items-center justify-center h-full text-text-secondary text-sm">
       {t(message)}
     </div>
   );
 }
 
 function BalancesTable() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { marginSummary, availableBalance, accountValue } = useAccountState();
 
   const balances = useMemo(() => {
@@ -62,20 +62,20 @@ function BalancesTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Header Row */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-[#1a1d26] text-xs text-[#848e9c] sticky top-0 bg-[#0b0e11]">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-border-color text-xs text-text-secondary sticky top-0 bg-bg-primary">
         <div className="flex items-center gap-2">
-          <input type="checkbox" className="w-4 h-4 rounded bg-[#1a1d26]" />
+          <input type="checkbox" className="w-4 h-4 rounded bg-bg-secondary" />
           <span>{t('Hide Small Balances')}</span>
         </div>
         <input
           type="text"
           placeholder="Coins..."
-          className="ml-auto px-2 py-1 bg-[#1a1d26] rounded text-white text-xs outline-none w-32"
+          className="ml-auto px-2 py-1 bg-bg-secondary rounded text-text-primary text-xs outline-none w-32"
         />
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-8 gap-4 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26]">
+      <div className="grid grid-cols-8 gap-4 px-4 py-2 text-xs text-text-secondary border-b border-border-color">
         <div>{t('Coin')}</div>
         <div className="text-right">{t('Total Balance')}</div>
         <div className="text-right">{t('Available Balance')}</div>
@@ -90,19 +90,23 @@ function BalancesTable() {
       {balances.map((balance) => (
         <div
           key={balance.coin}
-          className="grid grid-cols-8 gap-4 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+          className="grid grid-cols-8 gap-4 px-4 py-2 text-xs hover:bg-bg-secondary/50"
         >
-          <div className="text-white">{balance.coin}</div>
-          <div className="text-right text-white font-mono">{formatPrice(balance.total, 2)}</div>
-          <div className="text-right text-white font-mono">{formatPrice(balance.available, 2)}</div>
-          <div className="text-right text-white font-mono">
+          <div className="text-text-primary">{balance.coin}</div>
+          <div className="text-right text-text-primary font-mono">
+            {formatPrice(balance.total, 2)}
+          </div>
+          <div className="text-right text-text-primary font-mono">
+            {formatPrice(balance.available, 2)}
+          </div>
+          <div className="text-right text-text-primary font-mono">
             {formatPrice(balance.usdValue, 2)} USD
           </div>
-          <div className="text-right text-[#848e9c]">{balance.entryPrice}</div>
-          <div className="text-right text-[#848e9c]">{balance.pnl}</div>
-          <div className="text-right text-[#848e9c]">-</div>
+          <div className="text-right text-text-secondary">{balance.entryPrice}</div>
+          <div className="text-right text-text-secondary">{balance.pnl}</div>
+          <div className="text-right text-text-secondary">-</div>
           <div className="text-right">
-            <button className="text-[#2962ff] hover:underline">{t('Transfer')}</button>
+            <button className="text-accent-blue hover:underline">{t('Transfer')}</button>
           </div>
         </div>
       ))}
@@ -111,7 +115,7 @@ function BalancesTable() {
 }
 
 function PositionsTable() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { formattedPositions } = useAccountState();
   const { closePosition } = useTrading();
 
@@ -122,7 +126,7 @@ function PositionsTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Table Header */}
-      <div className="grid grid-cols-10 gap-2 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26] sticky top-0 bg-[#0b0e11]">
+      <div className="grid grid-cols-10 gap-2 px-4 py-2 text-xs text-text-secondary border-b border-border-color sticky top-0 bg-bg-primary">
         <div>{t('Symbol')}</div>
         <div className="text-right">{t('Size')}</div>
         <div className="text-right">{t('Notional')}</div>
@@ -145,40 +149,40 @@ function PositionsTable() {
         return (
           <div
             key={pos.coin}
-            className="grid grid-cols-10 gap-2 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+            className="grid grid-cols-10 gap-2 px-4 py-2 text-xs hover:bg-bg-secondary/50"
           >
-            <div className={cn('font-medium', isLong ? 'text-[#0ecb81]' : 'text-[#f6465d]')}>
+            <div className={cn('font-medium', isLong ? 'text-long' : 'text-short')}>
               {pos.coin}-PERP {isLong ? t('Long') : t('Short')}
             </div>
-            <div
-              className={cn('text-right font-mono', isLong ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className={cn('text-right font-mono', isLong ? 'text-long' : 'text-short')}>
               {formatSize(pos.size, 5)}
             </div>
-            <div className="text-right text-white font-mono">
+            <div className="text-right text-text-primary font-mono">
               ${formatPrice(pos.notionalValue, 2)}
             </div>
-            <div className="text-right text-white font-mono">${formatPrice(pos.entryPrice, 2)}</div>
-            <div className="text-right text-white font-mono">${formatPrice(pos.markPrice, 2)}</div>
-            <div className="text-right text-[#f6465d] font-mono">
+            <div className="text-right text-text-primary font-mono">
+              ${formatPrice(pos.entryPrice, 2)}
+            </div>
+            <div className="text-right text-text-primary font-mono">
+              ${formatPrice(pos.markPrice, 2)}
+            </div>
+            <div className="text-right text-short font-mono">
               {pos.liquidationPrice ? `$${formatPrice(pos.liquidationPrice, 2)}` : '-'}
             </div>
-            <div className="text-right text-white font-mono">${formatPrice(pos.marginUsed, 2)}</div>
-            <div
-              className={cn('text-right font-mono', pnl >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className="text-right text-text-primary font-mono">
+              ${formatPrice(pos.marginUsed, 2)}
+            </div>
+            <div className={cn('text-right font-mono', pnl >= 0 ? 'text-long' : 'text-short')}>
               {pnl >= 0 ? '+' : ''}${formatPrice(pnl, 2)}
             </div>
-            <div
-              className={cn('text-right font-mono', roe >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className={cn('text-right font-mono', roe >= 0 ? 'text-long' : 'text-short')}>
               {roe >= 0 ? '+' : ''}
               {formatPrice(roe, 2)}%
             </div>
             <div className="text-right">
               <button
                 onClick={() => closePosition(pos.coin)}
-                className="px-2 py-1 text-[#f6465d] bg-[#f6465d]/10 rounded hover:bg-[#f6465d]/20"
+                className="px-2 py-1 text-short bg-short/10 rounded hover:bg-short/20"
               >
                 {t('Close')}
               </button>
@@ -191,7 +195,7 @@ function PositionsTable() {
 }
 
 function OrdersTable() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { openOrders } = useAccountState();
   const { cancelOrder, cancelAllOrders } = useTrading();
 
@@ -202,17 +206,17 @@ function OrdersTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Header Row */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-[#1a1d26] sticky top-0 bg-[#0b0e11]">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-border-color sticky top-0 bg-bg-primary">
         <button
           onClick={() => cancelAllOrders()}
-          className="px-2 py-1 text-xs text-[#f6465d] bg-[#f6465d]/10 rounded hover:bg-[#f6465d]/20"
+          className="px-2 py-1 text-xs text-short bg-short/10 rounded hover:bg-short/20"
         >
           {t('Cancel All')}
         </button>
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-9 gap-2 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26]">
+      <div className="grid grid-cols-9 gap-2 px-4 py-2 text-xs text-text-secondary border-b border-border-color">
         <div>{t('Symbol')}</div>
         <div className="text-right">{t('Side')}</div>
         <div className="text-right">{t('Type')}</div>
@@ -232,28 +236,30 @@ function OrdersTable() {
         return (
           <div
             key={order.oid}
-            className="grid grid-cols-9 gap-2 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+            className="grid grid-cols-9 gap-2 px-4 py-2 text-xs hover:bg-bg-secondary/50"
           >
-            <div className="text-white font-medium">{order.coin}-PERP</div>
-            <div
-              className={cn('text-right font-medium', isBuy ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className="text-text-primary font-medium">{order.coin}-PERP</div>
+            <div className={cn('text-right font-medium', isBuy ? 'text-long' : 'text-short')}>
               {isBuy ? t('Buy') : t('Sell')}
             </div>
-            <div className="text-right text-white">{order.orderType}</div>
-            <div className="text-right text-white font-mono">{formatSize(order.origSz, 5)}</div>
-            <div className="text-right text-white font-mono">{formatSize(filled, 5)}</div>
-            <div className="text-right text-white font-mono">${formatPrice(order.limitPx, 2)}</div>
-            <div className="text-right text-[#848e9c]">
+            <div className="text-right text-text-primary">{order.orderType}</div>
+            <div className="text-right text-text-primary font-mono">
+              {formatSize(order.origSz, 5)}
+            </div>
+            <div className="text-right text-text-primary font-mono">{formatSize(filled, 5)}</div>
+            <div className="text-right text-text-primary font-mono">
+              ${formatPrice(order.limitPx, 2)}
+            </div>
+            <div className="text-right text-text-secondary">
               {order.triggerPx ? `$${formatPrice(order.triggerPx, 2)}` : '-'}
             </div>
-            <div className="text-right text-[#848e9c]">
+            <div className="text-right text-text-secondary">
               {new Date(order.timestamp).toLocaleTimeString()}
             </div>
             <div className="text-right">
               <button
                 onClick={() => cancelOrder({ coin: order.coin, oid: order.oid })}
-                className="px-2 py-1 text-[#f6465d] bg-[#f6465d]/10 rounded hover:bg-[#f6465d]/20"
+                className="px-2 py-1 text-short bg-short/10 rounded hover:bg-short/20"
               >
                 {t('Cancel')}
               </button>
@@ -266,7 +272,7 @@ function OrdersTable() {
 }
 
 function TradeHistoryTable() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { userFills } = useAccountState();
 
   if (!userFills || userFills.length === 0) {
@@ -276,7 +282,7 @@ function TradeHistoryTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Table Header */}
-      <div className="grid grid-cols-8 gap-2 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26] sticky top-0 bg-[#0b0e11]">
+      <div className="grid grid-cols-8 gap-2 px-4 py-2 text-xs text-text-secondary border-b border-border-color sticky top-0 bg-bg-primary">
         <div>{t('Symbol')}</div>
         <div className="text-right">{t('Side')}</div>
         <div className="text-right">{t('Size')}</div>
@@ -294,29 +300,31 @@ function TradeHistoryTable() {
         return (
           <div
             key={`${fill.oid}-${idx}`}
-            className="grid grid-cols-8 gap-2 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+            className="grid grid-cols-8 gap-2 px-4 py-2 text-xs hover:bg-bg-secondary/50"
           >
-            <div className="text-white font-medium">{fill.coin}-PERP</div>
-            <div
-              className={cn('text-right font-medium', isBuy ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className="text-text-primary font-medium">{fill.coin}-PERP</div>
+            <div className={cn('text-right font-medium', isBuy ? 'text-long' : 'text-short')}>
               {isBuy ? t('Buy') : t('Sell')}
             </div>
-            <div className="text-right text-white font-mono">{formatSize(fill.sz, 5)}</div>
-            <div className="text-right text-white font-mono">${formatPrice(fill.px, 2)}</div>
-            <div className="text-right text-[#848e9c] font-mono">${formatPrice(fill.fee, 4)}</div>
+            <div className="text-right text-text-primary font-mono">{formatSize(fill.sz, 5)}</div>
+            <div className="text-right text-text-primary font-mono">${formatPrice(fill.px, 2)}</div>
+            <div className="text-right text-text-secondary font-mono">
+              ${formatPrice(fill.fee, 4)}
+            </div>
             <div
               className={cn(
                 'text-right font-mono',
-                parseFloat(fill.closedPnl) >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'
+                parseFloat(fill.closedPnl) >= 0 ? 'text-long' : 'text-short'
               )}
             >
               {parseFloat(fill.closedPnl) !== 0
                 ? `${parseFloat(fill.closedPnl) >= 0 ? '+' : ''}$${formatPrice(fill.closedPnl, 2)}`
                 : '-'}
             </div>
-            <div className="text-right text-[#848e9c]">{new Date(fill.time).toLocaleString()}</div>
-            <div className="text-right text-[#848e9c]">
+            <div className="text-right text-text-secondary">
+              {new Date(fill.time).toLocaleString()}
+            </div>
+            <div className="text-right text-text-secondary">
               {fill.liquidation ? t('Liquidation') : fill.crossed ? t('Taker') : t('Maker')}
             </div>
           </div>
@@ -363,7 +371,7 @@ function TwapOrdersTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Table Header */}
-      <div className="grid grid-cols-8 gap-2 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26] sticky top-0 bg-[#0b0e11]">
+      <div className="grid grid-cols-8 gap-2 px-4 py-2 text-xs text-text-secondary border-b border-border-color sticky top-0 bg-bg-primary">
         <div>Symbol</div>
         <div className="text-right">Side</div>
         <div className="text-right">Total Size</div>
@@ -392,38 +400,36 @@ function TwapOrdersTable() {
         return (
           <div
             key={`twap-${order.twapId}-${idx}`}
-            className="grid grid-cols-8 gap-2 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+            className="grid grid-cols-8 gap-2 px-4 py-2 text-xs hover:bg-bg-secondary/50"
           >
-            <div className="text-white font-medium">{order.coin}-PERP</div>
-            <div
-              className={cn('text-right font-medium', isBuy ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className="text-text-primary font-medium">{order.coin}-PERP</div>
+            <div className={cn('text-right font-medium', isBuy ? 'text-long' : 'text-short')}>
               {isBuy ? 'Buy' : 'Sell'}
             </div>
-            <div className="text-right text-white font-mono">{formatSize(totalSz, 5)}</div>
-            <div className="text-right text-white font-mono">{formatSize(filledSz, 5)}</div>
+            <div className="text-right text-text-primary font-mono">{formatSize(totalSz, 5)}</div>
+            <div className="text-right text-text-primary font-mono">{formatSize(filledSz, 5)}</div>
             <div className="text-right">
               <div className="inline-flex items-center gap-1">
-                <div className="w-16 h-1.5 bg-[#1a1d26] rounded-full overflow-hidden">
+                <div className="w-16 h-1.5 bg-bg-secondary rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#2962ff] rounded-full"
+                    className="h-full bg-accent-blue rounded-full"
                     style={{ width: `${Math.min(progress, 100)}%` }}
                   />
                 </div>
-                <span className="text-[#848e9c]">{progress.toFixed(1)}%</span>
+                <span className="text-text-secondary">{progress.toFixed(1)}%</span>
               </div>
             </div>
-            <div className="text-right text-[#848e9c]">
+            <div className="text-right text-text-secondary">
               {durationHours >= 1 ? `${durationHours.toFixed(1)}h` : `${durationMinutes}m`}
             </div>
             <div
               className={cn(
                 'text-right',
                 status === 'running'
-                  ? 'text-[#2962ff]'
+                  ? 'text-accent-blue'
                   : status === 'completed'
-                    ? 'text-[#0ecb81]'
-                    : 'text-[#f6465d]'
+                    ? 'text-long'
+                    : 'text-short'
               )}
               title={terminatedReason}
             >
@@ -435,7 +441,7 @@ function TwapOrdersTable() {
                     ? 'Running'
                     : 'Completed'}
             </div>
-            <div className="text-right text-[#848e9c]">
+            <div className="text-right text-text-secondary">
               {order.startTime ? new Date(order.startTime).toLocaleString() : '-'}
             </div>
           </div>
@@ -457,7 +463,7 @@ function TrailingStopTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Table Header */}
-      <div className="grid grid-cols-9 gap-2 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26] sticky top-0 bg-[#0b0e11]">
+      <div className="grid grid-cols-9 gap-2 px-4 py-2 text-xs text-text-secondary border-b border-border-color sticky top-0 bg-bg-primary">
         <div>Symbol</div>
         <div className="text-right">Side</div>
         <div className="text-right">Size</div>
@@ -476,51 +482,51 @@ function TrailingStopTable() {
         return (
           <div
             key={order.id}
-            className="grid grid-cols-9 gap-2 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+            className="grid grid-cols-9 gap-2 px-4 py-2 text-xs hover:bg-bg-secondary/50"
           >
-            <div className="text-white font-medium">{order.coin}-PERP</div>
-            <div
-              className={cn('text-right font-medium', isBuy ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className="text-text-primary font-medium">{order.coin}-PERP</div>
+            <div className={cn('text-right font-medium', isBuy ? 'text-long' : 'text-short')}>
               {isBuy ? 'Buy' : 'Sell'}
             </div>
-            <div className="text-right text-white font-mono">{formatSize(order.size, 5)}</div>
-            <div className="text-right text-[#848e9c] capitalize">{order.trailType}</div>
-            <div className="text-right text-white font-mono">
+            <div className="text-right text-text-primary font-mono">
+              {formatSize(order.size, 5)}
+            </div>
+            <div className="text-right text-text-secondary capitalize">{order.trailType}</div>
+            <div className="text-right text-text-primary font-mono">
               {order.trailType === 'percent' ? `${order.trailValue}%` : `$${order.trailValue}`}
             </div>
-            <div className="text-right text-white font-mono">
+            <div className="text-right text-text-primary font-mono">
               {order.triggerPrice ? `$${formatPrice(order.triggerPrice, 2)}` : '-'}
             </div>
             <div
               className={cn(
                 'text-right capitalize',
                 order.status === 'active'
-                  ? 'text-[#2962ff]'
+                  ? 'text-accent-blue'
                   : order.status === 'triggered'
-                    ? 'text-[#0ecb81]'
+                    ? 'text-long'
                     : order.status === 'cancelled'
-                      ? 'text-[#f6465d]'
-                      : 'text-[#848e9c]'
+                      ? 'text-short'
+                      : 'text-text-secondary'
               )}
             >
               {order.status}
             </div>
-            <div className="text-right text-[#848e9c]">
+            <div className="text-right text-text-secondary">
               {new Date(order.createdAt).toLocaleString()}
             </div>
             <div className="text-right">
               {order.status === 'active' ? (
                 <button
                   onClick={() => cancelOrder(order.id)}
-                  className="px-2 py-1 text-[#f6465d] bg-[#f6465d]/10 rounded hover:bg-[#f6465d]/20"
+                  className="px-2 py-1 text-short bg-short/10 rounded hover:bg-short/20"
                 >
                   Cancel
                 </button>
               ) : (
                 <button
                   onClick={() => removeOrder(order.id)}
-                  className="px-2 py-1 text-[#848e9c] bg-[#848e9c]/10 rounded hover:bg-[#848e9c]/20"
+                  className="px-2 py-1 text-text-secondary bg-text-secondary/10 rounded hover:bg-text-secondary/20"
                 >
                   Remove
                 </button>
@@ -570,7 +576,7 @@ function FundingHistoryTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Table Header */}
-      <div className="grid grid-cols-5 gap-2 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26] sticky top-0 bg-[#0b0e11]">
+      <div className="grid grid-cols-5 gap-2 px-4 py-2 text-xs text-text-secondary border-b border-border-color sticky top-0 bg-bg-primary">
         <div>Symbol</div>
         <div className="text-right">Position Size</div>
         <div className="text-right">Funding Rate</div>
@@ -586,23 +592,20 @@ function FundingHistoryTable() {
         return (
           <div
             key={`funding-${idx}`}
-            className="grid grid-cols-5 gap-2 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+            className="grid grid-cols-5 gap-2 px-4 py-2 text-xs hover:bg-bg-secondary/50"
           >
-            <div className="text-white font-medium">{item.coin}-PERP</div>
-            <div className="text-right text-white font-mono">{formatSize(item.szi, 5)}</div>
-            <div className="text-right text-[#848e9c] font-mono">
+            <div className="text-text-primary font-medium">{item.coin}-PERP</div>
+            <div className="text-right text-text-primary font-mono">{formatSize(item.szi, 5)}</div>
+            <div className="text-right text-text-secondary font-mono">
               {(parseFloat(item.fundingRate) * 100).toFixed(6)}%
             </div>
-            <div
-              className={cn(
-                'text-right font-mono',
-                isPositive ? 'text-[#0ecb81]' : 'text-[#f6465d]'
-              )}
-            >
+            <div className={cn('text-right font-mono', isPositive ? 'text-long' : 'text-short')}>
               {isPositive ? '+' : ''}
               {formatPrice(payment, 4)} USDC
             </div>
-            <div className="text-right text-[#848e9c]">{new Date(item.time).toLocaleString()}</div>
+            <div className="text-right text-text-secondary">
+              {new Date(item.time).toLocaleString()}
+            </div>
           </div>
         );
       })}
@@ -644,7 +647,7 @@ function OrderHistoryTable() {
   return (
     <div className="h-full overflow-auto">
       {/* Table Header */}
-      <div className="grid grid-cols-8 gap-2 px-4 py-2 text-xs text-[#848e9c] border-b border-[#1a1d26] sticky top-0 bg-[#0b0e11]">
+      <div className="grid grid-cols-8 gap-2 px-4 py-2 text-xs text-text-secondary border-b border-border-color sticky top-0 bg-bg-primary">
         <div>Symbol</div>
         <div className="text-right">Side</div>
         <div className="text-right">Type</div>
@@ -665,12 +668,12 @@ function OrderHistoryTable() {
 
         // 状态显示
         const statusColorMap: Record<string, string> = {
-          filled: 'text-[#0ecb81]',
-          open: 'text-[#2962ff]',
-          canceled: 'text-[#f6465d]',
-          triggered: 'text-[#f0b90b]',
-          rejected: 'text-[#f6465d]',
-          marginCanceled: 'text-[#f6465d]',
+          filled: 'text-long',
+          open: 'text-accent-blue',
+          canceled: 'text-short',
+          triggered: 'text-accent-yellow',
+          rejected: 'text-short',
+          marginCanceled: 'text-short',
         };
         const statusTextMap: Record<string, string> = {
           filled: 'Filled',
@@ -684,22 +687,22 @@ function OrderHistoryTable() {
         return (
           <div
             key={`order-${order.oid}-${idx}`}
-            className="grid grid-cols-8 gap-2 px-4 py-2 text-xs hover:bg-[#1a1d26]/50"
+            className="grid grid-cols-8 gap-2 px-4 py-2 text-xs hover:bg-bg-secondary/50"
           >
-            <div className="text-white font-medium">{order.coin}-PERP</div>
-            <div
-              className={cn('text-right font-medium', isBuy ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-            >
+            <div className="text-text-primary font-medium">{order.coin}-PERP</div>
+            <div className={cn('text-right font-medium', isBuy ? 'text-long' : 'text-short')}>
               {isBuy ? 'Buy' : 'Sell'}
             </div>
-            <div className="text-right text-[#848e9c]">{order.orderType || 'Limit'}</div>
-            <div className="text-right text-white font-mono">{formatSize(origSz, 5)}</div>
-            <div className="text-right text-white font-mono">{formatSize(filled, 5)}</div>
-            <div className="text-right text-white font-mono">${formatPrice(order.limitPx, 2)}</div>
-            <div className={cn('text-right', statusColorMap[item.status] || 'text-[#848e9c]')}>
+            <div className="text-right text-text-secondary">{order.orderType || 'Limit'}</div>
+            <div className="text-right text-text-primary font-mono">{formatSize(origSz, 5)}</div>
+            <div className="text-right text-text-primary font-mono">{formatSize(filled, 5)}</div>
+            <div className="text-right text-text-primary font-mono">
+              ${formatPrice(order.limitPx, 2)}
+            </div>
+            <div className={cn('text-right', statusColorMap[item.status] || 'text-text-secondary')}>
               {statusTextMap[item.status] || item.status}
             </div>
-            <div className="text-right text-[#848e9c]">
+            <div className="text-right text-text-secondary">
               {new Date(item.statusTimestamp).toLocaleString()}
             </div>
           </div>
@@ -710,7 +713,7 @@ function OrderHistoryTable() {
 }
 
 export function AccountPanel() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabType>('balances');
   const { positions, openOrders } = useAccountState();
   const trailingOrders = useTrailingStopStore((state) => state.orders);
@@ -731,18 +734,18 @@ export function AccountPanel() {
     <Tabs.Root
       value={activeTab}
       onValueChange={(value) => setActiveTab(value as TabType)}
-      className="flex flex-col h-full bg-[#0b0e11]"
+      className="flex flex-col h-full bg-bg-primary"
     >
       {/* Tab List */}
-      <Tabs.List className="flex items-center gap-1 px-4 border-b border-[#1a1d26] overflow-x-auto">
+      <Tabs.List className="flex items-center gap-1 px-4 border-b border-border-color overflow-x-auto">
         {tabs.map((tab) => (
           <Tabs.Trigger
             key={tab.value}
             value={tab.value}
             className={cn(
               'px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors',
-              'data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-[#2962ff]',
-              'data-[state=inactive]:text-[#848e9c] data-[state=inactive]:hover:text-white'
+              'data-[state=active]:text-text-primary data-[state=active]:border-b-2 data-[state=active]:border-accent-blue',
+              'data-[state=inactive]:text-text-secondary data-[state=inactive]:hover:text-text-primary'
             )}
           >
             {tab.label}

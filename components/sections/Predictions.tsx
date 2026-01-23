@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -101,7 +101,7 @@ function PriceChart() {
 }
 
 export function Predictions() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [selectedRange, setSelectedRange] = useState('30D');
 
   return (

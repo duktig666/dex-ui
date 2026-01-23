@@ -6,9 +6,11 @@ import { createHyperliquidDatafeed } from '@/lib/tradingview/hyperliquidDatafeed
 import {
   ENABLED_FEATURES,
   DISABLED_FEATURES,
-  CHART_OVERRIDES,
-  STUDIES_OVERRIDES,
+  getChartOverrides,
+  getStudiesOverrides,
+  getLoadingScreenConfig,
 } from '@/lib/tradingview/config';
+import { useTheme, themeTokens } from '@/lib/theme';
 
 declare global {
   interface Window {
@@ -63,13 +65,17 @@ export default function TradingViewChart({
     () => typeof window !== 'undefined' && !!window.TradingView
   );
   const prevSymbolRef = useRef(symbol);
+  const { theme } = useTheme();
+
+  // 获取当前主题颜色
+  const themeColors = themeTokens[theme]?.colors;
 
   useEffect(() => {
-    if (!scriptLoaded || !chartContainerRef.current || !window.TradingView) {
+    if (!scriptLoaded || !chartContainerRef.current || !window.TradingView || !themeColors) {
       return;
     }
 
-    // 如果 symbol 发生变化，显示加载状态
+    // 如果 symbol 或主题发生变化，显示加载状态
     if (prevSymbolRef.current !== symbol) {
       setIsLoading(true);
       prevSymbolRef.current = symbol;
@@ -88,6 +94,11 @@ export default function TradingViewChart({
     // 每次创建新的 datafeed 实例
     const datafeed = createHyperliquidDatafeed();
 
+    // 根据当前主题生成配置
+    const chartOverrides = getChartOverrides(themeColors);
+    const studiesOverrides = getStudiesOverrides(themeColors);
+    const loadingScreen = getLoadingScreenConfig(themeColors);
+
     const widgetConfig: TradingViewWidgetConfig = {
       container: chartContainerRef.current,
       datafeed,
@@ -102,13 +113,10 @@ export default function TradingViewChart({
       debug: false,
       enabled_features: ENABLED_FEATURES,
       disabled_features: DISABLED_FEATURES,
-      overrides: CHART_OVERRIDES,
-      studies_overrides: STUDIES_OVERRIDES,
+      overrides: chartOverrides,
+      studies_overrides: studiesOverrides,
       custom_css_url: '/tradingview-chart.css',
-      loading_screen: {
-        backgroundColor: '#0b0e11',
-        foregroundColor: '#f7a600',
-      },
+      loading_screen: loadingScreen,
     };
 
     try {
@@ -131,10 +139,10 @@ export default function TradingViewChart({
         widgetRef.current = null;
       }
     };
-  }, [scriptLoaded, symbol, interval]);
+  }, [scriptLoaded, symbol, interval, theme, themeColors]);
 
   return (
-    <div className="relative w-full h-full bg-[#0b0e11]">
+    <div className="relative w-full h-full bg-bg-primary">
       <Script
         src="/static/charting_library/charting_library.standalone.js"
         strategy="afterInteractive"
@@ -145,10 +153,10 @@ export default function TradingViewChart({
         }}
       />
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0b0e11] z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-bg-primary z-10">
           <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 border-2 border-[#f7a600] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[#848e9c] text-sm">Loading chart...</span>
+            <div className="w-8 h-8 border-2 border-accent-blue border-t-transparent rounded-full animate-spin" />
+            <span className="text-text-secondary text-sm">Loading chart...</span>
           </div>
         </div>
       )}

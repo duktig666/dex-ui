@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 import {
@@ -31,7 +31,7 @@ type MarginMode = 'cross' | 'isolated';
 type TimeInForce = 'gtc' | 'ioc' | 'alo';
 
 export function TradeForm({ symbol }: TradeFormProps) {
-  const { t } = useTranslation();
+  const { t } = useT();
   const { isConnected } = useAccount();
   const [side, setSide] = useState<OrderSide>('buy');
   const [orderType, setOrderType] = useState<OrderType>('limit');
@@ -208,14 +208,16 @@ export function TradeForm({ symbol }: TradeFormProps) {
   }, [isConnected, isSubmitting, builderFeeApproved, side, t]);
 
   return (
-    <div className="flex flex-col h-full bg-[#0b0e11]">
+    <div className="flex flex-col h-full bg-bg-primary">
       {/* Margin Mode & Leverage - Compact Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1a1d26]">
-        <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border-color">
+        <div className="flex items-center bg-bg-secondary rounded overflow-hidden">
           <button
             className={cn(
               'px-3 py-1.5 text-xs font-medium transition-colors',
-              marginMode === 'cross' ? 'bg-[#2a2d36] text-white' : 'text-[#848e9c] hover:text-white'
+              marginMode === 'cross'
+                ? 'bg-bg-hover text-text-primary'
+                : 'text-text-secondary hover:text-text-primary'
             )}
             onClick={() => setMarginMode('cross')}
           >
@@ -225,8 +227,8 @@ export function TradeForm({ symbol }: TradeFormProps) {
             className={cn(
               'px-3 py-1.5 text-xs font-medium transition-colors',
               marginMode === 'isolated'
-                ? 'bg-[#2a2d36] text-white'
-                : 'text-[#848e9c] hover:text-white'
+                ? 'bg-bg-hover text-text-primary'
+                : 'text-text-secondary hover:text-text-primary'
             )}
             onClick={() => setMarginMode('isolated')}
           >
@@ -235,14 +237,14 @@ export function TradeForm({ symbol }: TradeFormProps) {
         </div>
         <button
           onClick={() => openLeverageModal(coin)}
-          className="px-3 py-1.5 text-xs font-medium bg-[#1a1d26] text-[#f0b90b] rounded hover:bg-[#2a2d36] transition-colors"
+          className="px-3 py-1.5 text-xs font-medium bg-bg-secondary text-accent-yellow rounded hover:bg-bg-hover transition-colors"
         >
           {leverageValue}x
         </button>
         <select
           value={orderType}
           onChange={(e) => setOrderType(e.target.value as OrderType)}
-          className="ml-auto px-2 py-1.5 text-xs bg-[#1a1d26] text-white rounded border-none outline-none cursor-pointer"
+          className="ml-auto px-2 py-1.5 text-xs bg-bg-secondary text-text-primary rounded border-none outline-none cursor-pointer"
         >
           <option value="limit">{t('Limit')}</option>
           <option value="market">{t('Market')}</option>
@@ -259,8 +261,8 @@ export function TradeForm({ symbol }: TradeFormProps) {
             className={cn(
               'flex-1 py-2.5 text-sm font-semibold rounded-l transition-colors',
               side === 'buy'
-                ? 'bg-[#0ecb81] text-white'
-                : 'bg-[#1a1d26] text-[#848e9c] hover:text-white'
+                ? 'bg-long text-text-primary'
+                : 'bg-bg-secondary text-text-secondary hover:text-text-primary'
             )}
           >
             {t('Buy / Long')}
@@ -270,8 +272,8 @@ export function TradeForm({ symbol }: TradeFormProps) {
             className={cn(
               'flex-1 py-2.5 text-sm font-semibold rounded-r transition-colors',
               side === 'sell'
-                ? 'bg-[#f6465d] text-white'
-                : 'bg-[#1a1d26] text-[#848e9c] hover:text-white'
+                ? 'bg-short text-text-primary'
+                : 'bg-bg-secondary text-text-secondary hover:text-text-primary'
             )}
           >
             {t('Sell / Short')}
@@ -281,17 +283,15 @@ export function TradeForm({ symbol }: TradeFormProps) {
         {/* Account Info Row */}
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-3">
-            <span className="text-[#848e9c]">{t('Available')}:</span>
-            <span className="text-white font-mono">
+            <span className="text-text-secondary">{t('Available')}:</span>
+            <span className="text-text-primary font-mono">
               {formatPrice(availableBalance, 2)} {quote}
             </span>
           </div>
           {position && (
             <div className="flex items-center gap-2">
-              <span className="text-[#848e9c]">{t('Position')}:</span>
-              <span
-                className={cn('font-mono', position.size > 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]')}
-              >
+              <span className="text-text-secondary">{t('Position')}:</span>
+              <span className={cn('font-mono', position.size > 0 ? 'text-long' : 'text-short')}>
                 {formatSize(position.size, 4)} {coin}
               </span>
             </div>
@@ -301,62 +301,62 @@ export function TradeForm({ symbol }: TradeFormProps) {
         {/* Price Input */}
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[#848e9c]">{t('Price')}</span>
+            <span className="text-text-secondary">{t('Price')}</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSetBid}
-                className="text-[#848e9c] hover:text-[#0ecb81] transition-colors"
+                className="text-text-secondary hover:text-long transition-colors"
               >
                 Bid
               </button>
-              <span className="text-[#2a2d36]">|</span>
+              <span className="text-bg-hover">|</span>
               <button
                 onClick={handleSetAsk}
-                className="text-[#848e9c] hover:text-[#f6465d] transition-colors"
+                className="text-text-secondary hover:text-short transition-colors"
               >
                 Ask
               </button>
             </div>
           </div>
-          <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
+          <div className="flex items-center bg-bg-secondary rounded overflow-hidden h-10">
             <input
               type="text"
               value={orderType === 'market' ? t('Market Price') : price}
               onChange={(e) => setPrice(e.target.value)}
-              className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono"
+              className="flex-1 px-3 text-sm bg-transparent text-text-primary outline-none font-mono"
               placeholder="0.00"
               disabled={orderType === 'market'}
             />
-            <span className="px-3 text-xs text-[#848e9c] font-medium">{quote}</span>
+            <span className="px-3 text-xs text-text-secondary font-medium">{quote}</span>
           </div>
         </div>
 
         {/* Size Inputs - Side by Side */}
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
-            <span className="text-xs text-[#848e9c]">{t('Amount')}</span>
-            <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
+            <span className="text-xs text-text-secondary">{t('Amount')}</span>
+            <div className="flex items-center bg-bg-secondary rounded overflow-hidden h-10">
               <input
                 type="text"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono min-w-0"
+                className="flex-1 px-3 text-sm bg-transparent text-text-primary outline-none font-mono min-w-0"
                 placeholder="0.00"
               />
-              <span className="px-2 text-xs text-[#848e9c] font-medium">{coin}</span>
+              <span className="px-2 text-xs text-text-secondary font-medium">{coin}</span>
             </div>
           </div>
           <div className="space-y-1">
-            <span className="text-xs text-[#848e9c]">{t('Total')}</span>
-            <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden h-10">
+            <span className="text-xs text-text-secondary">{t('Total')}</span>
+            <div className="flex items-center bg-bg-secondary rounded overflow-hidden h-10">
               <input
                 type="text"
                 value={total}
                 onChange={(e) => setTotal(e.target.value)}
-                className="flex-1 px-3 text-sm bg-transparent text-white outline-none font-mono min-w-0"
+                className="flex-1 px-3 text-sm bg-transparent text-text-primary outline-none font-mono min-w-0"
                 placeholder="0.00"
               />
-              <span className="px-2 text-xs text-[#848e9c] font-medium">{quote}</span>
+              <span className="px-2 text-xs text-text-secondary font-medium">{quote}</span>
             </div>
           </div>
         </div>
@@ -370,11 +370,11 @@ export function TradeForm({ symbol }: TradeFormProps) {
               max="100"
               value={percentage}
               onChange={(e) => handlePercentageClick(Number(e.target.value))}
-              className="w-full h-1.5 bg-[#1a1d26] rounded-full appearance-none cursor-pointer
+              className="w-full h-1.5 bg-bg-secondary rounded-full appearance-none cursor-pointer
                 [&::-webkit-slider-thumb]:appearance-none
                 [&::-webkit-slider-thumb]:w-3
                 [&::-webkit-slider-thumb]:h-3
-                [&::-webkit-slider-thumb]:bg-[#f0b90b]
+                [&::-webkit-slider-thumb]:bg-accent-yellow
                 [&::-webkit-slider-thumb]:rounded-full
                 [&::-webkit-slider-thumb]:cursor-pointer"
             />
@@ -385,7 +385,7 @@ export function TradeForm({ symbol }: TradeFormProps) {
                   key={mark}
                   className={cn(
                     'absolute w-1.5 h-1.5 rounded-full -translate-x-1/2 top-0',
-                    percentage >= mark ? 'bg-[#f0b90b]' : 'bg-[#2a2d36]'
+                    percentage >= mark ? 'bg-accent-yellow' : 'bg-bg-hover'
                   )}
                   style={{ left: `${mark}%` }}
                 />
@@ -399,7 +399,9 @@ export function TradeForm({ symbol }: TradeFormProps) {
                 onClick={() => handlePercentageClick(pct)}
                 className={cn(
                   'text-xs transition-colors',
-                  percentage === pct ? 'text-[#f0b90b]' : 'text-[#848e9c] hover:text-white'
+                  percentage === pct
+                    ? 'text-accent-yellow'
+                    : 'text-text-secondary hover:text-text-primary'
                 )}
               >
                 {pct}%
@@ -416,24 +418,24 @@ export function TradeForm({ symbol }: TradeFormProps) {
                 type="checkbox"
                 checked={reduceOnly}
                 onChange={(e) => setReduceOnly(e.target.checked)}
-                className="w-3.5 h-3.5 rounded accent-[#f0b90b]"
+                className="w-3.5 h-3.5 rounded accent-accent-yellow"
               />
-              <span className="text-xs text-[#848e9c]">{t('Reduce Only')}</span>
+              <span className="text-xs text-text-secondary">{t('Reduce Only')}</span>
             </label>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={tpsl}
                 onChange={(e) => setTpsl(e.target.checked)}
-                className="w-3.5 h-3.5 rounded accent-[#f0b90b]"
+                className="w-3.5 h-3.5 rounded accent-accent-yellow"
               />
-              <span className="text-xs text-[#848e9c]">{t('TP/SL')}</span>
+              <span className="text-xs text-text-secondary">{t('TP/SL')}</span>
             </label>
           </div>
           <select
             value={timeInForce}
             onChange={(e) => setTimeInForce(e.target.value as TimeInForce)}
-            className="px-2 py-1 text-xs bg-[#1a1d26] text-[#848e9c] rounded border-none outline-none cursor-pointer"
+            className="px-2 py-1 text-xs bg-bg-secondary text-text-secondary rounded border-none outline-none cursor-pointer"
           >
             <option value="gtc">{t('GTC')}</option>
             <option value="ioc">{t('IOC')}</option>
@@ -443,20 +445,20 @@ export function TradeForm({ symbol }: TradeFormProps) {
       </div>
 
       {/* Submit Section - Fixed at Bottom */}
-      <div className="px-4 py-3 border-t border-[#1a1d26] space-y-3">
+      <div className="px-4 py-3 border-t border-border-color space-y-3">
         {/* Order Summary */}
         <div className="grid grid-cols-3 gap-2 text-xs">
-          <div className="text-center p-2 bg-[#1a1d26] rounded">
-            <div className="text-[#848e9c] mb-0.5">{t('Order Value')}</div>
-            <div className="text-white font-mono">${formatPrice(orderValue, 2)}</div>
+          <div className="text-center p-2 bg-bg-secondary rounded">
+            <div className="text-text-secondary mb-0.5">{t('Order Value')}</div>
+            <div className="text-text-primary font-mono">${formatPrice(orderValue, 2)}</div>
           </div>
-          <div className="text-center p-2 bg-[#1a1d26] rounded">
-            <div className="text-[#848e9c] mb-0.5">{t('Margin')}</div>
-            <div className="text-white font-mono">${formatPrice(marginRequired, 2)}</div>
+          <div className="text-center p-2 bg-bg-secondary rounded">
+            <div className="text-text-secondary mb-0.5">{t('Margin')}</div>
+            <div className="text-text-primary font-mono">${formatPrice(marginRequired, 2)}</div>
           </div>
-          <div className="text-center p-2 bg-[#1a1d26] rounded">
-            <div className="text-[#848e9c] mb-0.5">{t('Est. Liq')}</div>
-            <div className="text-[#f6465d] font-mono">${formatPrice(estLiqPrice, 2)}</div>
+          <div className="text-center p-2 bg-bg-secondary rounded">
+            <div className="text-text-secondary mb-0.5">{t('Est. Liq')}</div>
+            <div className="text-short font-mono">${formatPrice(estLiqPrice, 2)}</div>
           </div>
         </div>
 
@@ -467,8 +469,8 @@ export function TradeForm({ symbol }: TradeFormProps) {
           className={cn(
             'w-full py-3.5 text-sm font-semibold rounded transition-colors disabled:opacity-50',
             side === 'buy'
-              ? 'bg-[#0ecb81] hover:bg-[#0ecb81]/90 text-white'
-              : 'bg-[#f6465d] hover:bg-[#f6465d]/90 text-white'
+              ? 'bg-long hover:bg-long/90 text-text-primary'
+              : 'bg-short hover:bg-short/90 text-text-primary'
           )}
         >
           {buttonText}
@@ -476,9 +478,7 @@ export function TradeForm({ symbol }: TradeFormProps) {
 
         {/* Error display */}
         {lastError && (
-          <div className="p-2 bg-[#f6465d]/20 text-[#f6465d] text-xs rounded text-center">
-            {lastError}
-          </div>
+          <div className="p-2 bg-short/20 text-short text-xs rounded text-center">{lastError}</div>
         )}
       </div>
 

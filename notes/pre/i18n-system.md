@@ -6,20 +6,21 @@
 
 ## 技术栈
 
-| 依赖                               | 用途               |
-| ---------------------------------- | ------------------ |
-| `i18next`                          | 核心国际化库       |
-| `react-i18next`                    | React 绑定         |
-| `i18next-browser-languagedetector` | 自动检测浏览器语言 |
-| `i18next-http-backend`             | 动态加载翻译文件   |
-| `i18next-scanner`                  | 自动扫描提取文案   |
-| `crc-32`                           | 生成 key 哈希      |
+| 依赖                               | 用途                           |
+| ---------------------------------- | ------------------------------ |
+| `i18next`                          | 核心国际化库                   |
+| `react-i18next`                    | React 绑定                     |
+| `i18next-browser-languagedetector` | 自动检测浏览器语言             |
+| `i18next-http-backend`             | 动态加载翻译文件               |
+| `i18next-scanner`                  | 自动扫描提取文案               |
+| `crc-32`                           | 生成 key 哈希（运行时 + 扫描） |
 
 ## 文件结构
 
 ```
 lib/i18n/
-└── index.ts              # 导出 I18nProvider
+├── index.ts              # 模块导出入口
+└── useT.ts               # 自定义翻译 hook（核心）
 
 components/providers/
 └── I18nProvider.tsx      # i18n 初始化 Provider
@@ -35,48 +36,55 @@ i18next-scanner.config.js # 扫描配置
 
 ## 设计特点
 
-### CRC32 哈希 Key
+### CRC32 哈希 Key 方案
 
 ```
-原始文本: "Connect Wallet"
-哈希 Key: "Kd3a2f1b8"
+代码中使用:     t('Connect Wallet')
+翻译文件 key:   "K79a04487": "Connect Wallet"
+运行时转换:     t('Connect Wallet') → 查找 t('K79a04487')
 ```
+
+**核心原理：**
+
+1. **扫描阶段**：`i18next-scanner` 提取原始文本，计算 CRC32 哈希作为 key
+2. **运行时**：自定义 `useT` hook 在运行时自动将原文转换为 hash key 进行查找
 
 **优点：**
 
-- Key 短小，减少包体积
-- 自动生成，无需手动命名
-- 避免 key 命名冲突
-- 原始文本作为默认值，开发体验好
+- ✅ Key 短小（8 字符），减少包体积
+- ✅ 自动生成，无需手动命名
+- ✅ 避免 key 命名冲突
+- ✅ 代码中仍使用可读的原始文本（`t('Connect Wallet')`）
+- ✅ 原始文本作为默认值，开发体验好
 
 ### 翻译文件格式
 
 ```json
 // public/locales/en/translation.json
 {
-  "Kd3a2f1b8": "Connect Wallet",
-  "K1a2b3c4d": "Trade Now",
-  "K5e6f7a8b": "Your balance: {{amount}}"
+  "K79a04487": "Connect Wallet",
+  "K3289cbfb": "Buy / Long",
+  "K2fdb8409": "Sell / Short"
 }
 
 // public/locales/zh/translation.json
 {
-  "Kd3a2f1b8": "连接钱包",
-  "K1a2b3c4d": "立即交易",
-  "K5e6f7a8b": "您的余额: {{amount}}"
+  "K79a04487": "连接钱包",
+  "K3289cbfb": "买入/做多",
+  "K2fdb8409": "卖出/做空"
 }
 ```
 
 ## 使用方式
 
-### 1. 在组件中使用
+### 1. 在组件中使用（推荐）
 
 ```tsx
 'use client';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 
 function MyComponent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useT();
 
   return (
     <div>
@@ -86,8 +94,8 @@ function MyComponent() {
       {/* 带变量 */}
       <p>{t('Your balance: {{amount}}', { amount: '1,234.56' })}</p>
 
-      {/* 带默认值（文案不存在时显示） */}
-      <span>{t('New Feature', { defaultValue: 'New Feature' })}</span>
+      {/* 当前语言 */}
+      <span>Current: {i18n.language}</span>
     </div>
   );
 }
@@ -97,10 +105,10 @@ function MyComponent() {
 
 ```tsx
 'use client';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 
 function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { i18n } = useT();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -118,11 +126,52 @@ function LanguageSwitcher() {
 ### 3. 获取当前语言
 
 ```tsx
-const { i18n } = useTranslation();
+const { i18n } = useT();
 
 console.log(i18n.language); // 'en' | 'zh'
 console.log(i18n.languages); // ['en', 'zh']
 console.log(i18n.resolvedLanguage); // 实际使用的语言
+```
+
+## 核心实现：useT Hook
+
+### lib/i18n/useT.ts
+
+```typescript
+'use client';
+import { useTranslation } from 'react-i18next';
+import crc32 from 'crc-32';
+
+/**
+ * 将原文转换为 CRC32 hash key
+ * 格式: Kxxxxxxxx (K + 8位16进制)
+ */
+export function textToHashKey(text: string): string {
+  const hash = crc32.str(text) >>> 0; // 转为无符号整数
+  return `K${hash.toString(16)}`;
+}
+
+/**
+ * 自定义翻译 hook
+ * 使用方式与 useTranslation 相同，但会自动将原文转换为 hash key
+ */
+export function useT() {
+  const { t: originalT, i18n, ready } = useTranslation();
+
+  const t = (key: string, options?: TOptions): string => {
+    const hashKey = textToHashKey(key);
+
+    // 优先查找 hash key，找不到则回退到原文
+    if (i18n.exists(hashKey)) {
+      return originalT(hashKey, { ...options, defaultValue: key });
+    }
+
+    // 回退：返回原始 key
+    return key;
+  };
+
+  return { t, i18n, ready };
+}
 ```
 
 ## 添加新文案流程
@@ -130,7 +179,7 @@ console.log(i18n.resolvedLanguage); // 实际使用的语言
 ### Step 1: 在代码中使用 t()
 
 ```tsx
-// 直接写原始文本
+// 直接写原始文本（英文）
 <button>{t('New Button Text')}</button>
 
 // 带变量
@@ -184,8 +233,9 @@ i18next-scanner: count=5, file="components/layout/Navigation.tsx"
 ### i18next-scanner.config.js
 
 ```javascript
+const crc32 = require('crc-32');
+
 module.exports = {
-  // 扫描路径
   input: [
     'app/**/*.{js,jsx,ts,tsx}',
     'components/**/*.{js,jsx,ts,tsx}',
@@ -195,33 +245,28 @@ module.exports = {
   ],
 
   options: {
-    // 支持的语言
     lngs: ['en', 'zh'],
-
-    // 命名空间
     ns: ['translation'],
-
-    // 输出路径
     resource: {
       loadPath: 'public/locales/{{lng}}/{{ns}}.json',
       savePath: 'public/locales/{{lng}}/{{ns}}.json',
     },
-
-    // 禁用 key 分隔符（支持 key 中包含 . 和 :）
     keySeparator: false,
     nsSeparator: false,
-
-    // 移除未使用的 key
     removeUnusedKeys: true,
   },
 
   // 自定义转换：CRC32 哈希 key
   transform: function (file, enc, done) {
+    const parser = this.parser;
+    const content = fs.readFileSync(file.path, enc);
+
     parser.parseFuncFromString(content, { list: ['t'] }, (key, options) => {
       const hashKey = `K${(crc32.str(key) >>> 0).toString(16)}`;
       options.defaultValue = key;
       parser.set(hashKey, options);
     });
+
     done();
   },
 };
@@ -265,7 +310,19 @@ t(variable); // 不要用变量作为 key
 t('trade_button'); // 不要用自定义 key（会失去自动扫描优势）
 ```
 
-### 2. 变量命名
+### 2. 使用 useT 而非 useTranslation
+
+```tsx
+// ✅ 推荐
+import { useT } from '@/lib/i18n';
+const { t } = useT();
+
+// ❌ 不推荐（不会进行 hash key 转换）
+import { useTranslation } from 'react-i18next';
+const { t } = useTranslation();
+```
+
+### 3. 变量命名
 
 ```tsx
 // 使用有意义的变量名
@@ -276,22 +333,22 @@ t('{{count}} item', { count: 1 });
 t('{{count}} items', { count: 5 });
 ```
 
-### 3. 组件使用
+### 4. 组件使用
 
 ```tsx
-// 服务端组件不能使用 useTranslation
+// 服务端组件不能使用 useT
 // 需要用 'use client' 指令
 
 'use client';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 
 function ClientComponent() {
-  const { t } = useTranslation();
+  const { t } = useT();
   return <span>{t('Hello')}</span>;
 }
 ```
 
-### 4. 语言持久化
+### 5. 语言持久化
 
 语言选择会自动保存到 `localStorage`，下次访问时自动恢复。
 
@@ -344,6 +401,10 @@ yarn i18n:scan
 
 A: CRC32 生成的 key 更短（8 个字符），且基于内容生成，相同文本会生成相同 key，便于去重。
 
+### Q: 为什么需要自定义 useT hook？
+
+A: 因为 `i18next-scanner` 在构建时生成 hash key，但代码中使用的是原始文本。`useT` hook 在运行时将原始文本转换为 hash key，实现两者的桥接。
+
 ### Q: 如何处理动态内容？
 
 A: 使用插值变量：
@@ -363,8 +424,17 @@ A: 目前 i18next 主要用于客户端。服务端组件可以：
 1. 将需要国际化的部分抽成客户端组件
 2. 或使用 next-intl 等支持 RSC 的库
 
+### Q: 如何查看某个文本的 hash key？
+
+A: 运行以下命令：
+
+```bash
+node -e "const crc32 = require('crc-32'); console.log('K' + (crc32.str('Your Text') >>> 0).toString(16));"
+```
+
 ## 相关文件
 
+- [useT.ts](../../lib/i18n/useT.ts) - 自定义翻译 hook（核心）
 - [I18nProvider.tsx](../../components/providers/I18nProvider.tsx) - 初始化配置
 - [i18next-scanner.config.js](../../i18next-scanner.config.js) - 扫描配置
 - [public/locales/en/translation.json](../../public/locales/en/translation.json) - 英文翻译

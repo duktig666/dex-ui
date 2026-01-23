@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useT } from '@/lib/i18n';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button, IconButton } from '@/components/ui/Button';
 import { HermesLogoIcon } from '@/components/ui/HermesLogo';
+import { SettingsModal } from '@/components/ui/SettingsModal';
+import { Settings } from 'lucide-react';
 
 const getNavItems = (t: (key: string) => string) => [
   { label: t('Home'), href: '/' },
@@ -96,7 +98,7 @@ function NavDropdown({
 }
 
 export function Navigation() {
-  const { t } = useTranslation();
+  const { t } = useT();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const navItems = getNavItems(t);
@@ -191,6 +193,15 @@ export function Navigation() {
                 </IconButton>
               ))}
             </div>
+
+            {/* Settings Modal */}
+            <SettingsModal
+              trigger={
+                <button className="p-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                  <Settings className="w-5 h-5" />
+                </button>
+              }
+            />
 
             {/* Launch App button */}
             <Button variant="primary" size="md" className="font-semibold">
