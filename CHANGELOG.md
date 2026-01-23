@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026-01-23
+- **fix: 修复 CHANGELOG 无限循环问题** (`64462e7`) - 1 个文件
+
+- **chore: 简化 CHANGELOG 输出格式** (`894182a`) - 2 个文件
 - **chore: 简化 CHANGELOG 输出格式** (`203dd10`) - 2 个文件
 - **chore: 简化 CHANGELOG 输出格式** (`595f2ee`) - 2 个文件
 - **chore: 简化 CHANGELOG 输出格式** (`96b0852`) - 2 个文件
@@ -548,4 +551,3 @@
 - **chore: 简化 CHANGELOG 输出格式** (`09492f4`) - 2 个文件
 
 - **chore: 简化 CHANGELOG 输出格式** (`e8e3228`) - 2 个文件
-

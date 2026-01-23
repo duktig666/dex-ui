@@ -3,6 +3,12 @@
 # 自动生成 CHANGELOG 条目
 # 每次 commit 后自动追加简洁的变更记录
 
+# 防止无限循环：检查是否正在 amend
+if [ "$HUSKY_POST_COMMIT_RUNNING" = "1" ]; then
+  exit 0
+fi
+export HUSKY_POST_COMMIT_RUNNING=1
+
 CHANGELOG_FILE="CHANGELOG.md"
 
 # 获取最新 commit 信息
@@ -10,16 +16,11 @@ COMMIT_HASH=$(git rev-parse --short HEAD)
 COMMIT_MSG=$(git log -1 --pretty=%s)
 COMMIT_DATE=$(date +%Y-%m-%d)
 
-# 获取变更的文件列表
-CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
+# 获取变更的文件列表（排除 CHANGELOG.md）
+CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -v "^CHANGELOG.md$")
 
-# 如果没有变更文件，退出
+# 如果没有变更文件（或只有 CHANGELOG.md），退出
 if [ -z "$CHANGED_FILES" ]; then
-  exit 0
-fi
-
-# 排除 CHANGELOG.md 自身的变更，避免循环
-if [ "$CHANGED_FILES" = "CHANGELOG.md" ]; then
   exit 0
 fi
 
@@ -31,27 +32,30 @@ ENTRY="- **$COMMIT_MSG** (\`$COMMIT_HASH\`) - $FILE_COUNT 个文件"
 
 # 检查 CHANGELOG.md 是否存在
 if [ ! -f "$CHANGELOG_FILE" ]; then
-  echo "# Changelog
+  cat > "$CHANGELOG_FILE" << EOF
+# Changelog
 
 ## $COMMIT_DATE
 
-$ENTRY" > "$CHANGELOG_FILE"
+$ENTRY
+EOF
 else
   # 检查今天的日期是否已存在
   if grep -q "## $COMMIT_DATE" "$CHANGELOG_FILE"; then
-    # 日期已存在，在该日期下追加条目
-    TEMP_FILE=$(mktemp)
-    awk -v date="## $COMMIT_DATE" -v entry="$ENTRY" '
-      $0 == date { print; getline; print entry; print; next }
-      { print }
-    ' "$CHANGELOG_FILE" > "$TEMP_FILE"
-    mv "$TEMP_FILE" "$CHANGELOG_FILE"
+    # 日期已存在，在该日期下追加条目（避免重复）
+    if ! grep -qF "$ENTRY" "$CHANGELOG_FILE"; then
+      TEMP_FILE=$(mktemp)
+      awk -v date="## $COMMIT_DATE" -v entry="$ENTRY" '
+        $0 == date { print; getline; print entry; print; next }
+        { print }
+      ' "$CHANGELOG_FILE" > "$TEMP_FILE"
+      mv "$TEMP_FILE" "$CHANGELOG_FILE"
+    fi
   else
     # 日期不存在，在标题后添加新日期和条目
     TEMP_FILE=$(mktemp)
-    HEAD_LINE=$(head -n 1 "$CHANGELOG_FILE")
     {
-      echo "$HEAD_LINE"
+      head -n 1 "$CHANGELOG_FILE"
       echo ""
       echo "## $COMMIT_DATE"
       echo ""
@@ -63,10 +67,8 @@ else
   fi
 fi
 
-# 将 CHANGELOG.md 添加到暂存区
+# 将 CHANGELOG.md 添加到暂存区并合并到当前 commit
 git add "$CHANGELOG_FILE"
-
-# 合并到当前 commit
 git commit --amend --no-edit --no-verify >/dev/null 2>&1
 
 echo "✅ CHANGELOG: $COMMIT_MSG"
