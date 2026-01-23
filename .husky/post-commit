@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # 自动生成 CHANGELOG 条目
-# 每次 commit 后自动追加变更记录
+# 每次 commit 后自动追加简洁的变更记录
 
 CHANGELOG_FILE="CHANGELOG.md"
 
@@ -9,7 +9,6 @@ CHANGELOG_FILE="CHANGELOG.md"
 COMMIT_HASH=$(git rev-parse --short HEAD)
 COMMIT_MSG=$(git log -1 --pretty=%s)
 COMMIT_DATE=$(date +%Y-%m-%d)
-COMMIT_TIME=$(date +%H:%M:%S)
 
 # 获取变更的文件列表
 CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
@@ -27,56 +26,47 @@ fi
 # 统计变更文件数量
 FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
 
-# 构建变更条目
-ENTRY="### [$COMMIT_DATE $COMMIT_TIME] $COMMIT_MSG
-
-> Commit: \`$COMMIT_HASH\` | Files: $FILE_COUNT
-
-<details>
-<summary>变更文件</summary>
-
-\`\`\`
-$CHANGED_FILES
-\`\`\`
-
-</details>
-
----
-
-"
+# 构建简洁的变更条目
+ENTRY="- **$COMMIT_MSG** (\`$COMMIT_HASH\`) - $FILE_COUNT 个文件"
 
 # 检查 CHANGELOG.md 是否存在
 if [ ! -f "$CHANGELOG_FILE" ]; then
   echo "# Changelog
 
+## $COMMIT_DATE
+
 $ENTRY" > "$CHANGELOG_FILE"
 else
-  # 在 CHANGELOG.md 开头插入新条目（保留标题行）
-  # 找到第一个 ## 或 ### 标记并在其前面插入
-  TEMP_FILE=$(mktemp)
-
-  # 读取第一行（标题）
-  HEAD_LINE=$(head -n 1 "$CHANGELOG_FILE")
-
-  # 跳过标题和空行，获取剩余内容
-  REMAINING=$(tail -n +2 "$CHANGELOG_FILE" | sed '/^$/d' | head -n 1)
-
-  # 重新构建文件
-  {
-    echo "$HEAD_LINE"
-    echo ""
-    echo "$ENTRY"
-    tail -n +3 "$CHANGELOG_FILE"
-  } > "$TEMP_FILE"
-
-  mv "$TEMP_FILE" "$CHANGELOG_FILE"
+  # 检查今天的日期是否已存在
+  if grep -q "## $COMMIT_DATE" "$CHANGELOG_FILE"; then
+    # 日期已存在，在该日期下追加条目
+    TEMP_FILE=$(mktemp)
+    awk -v date="## $COMMIT_DATE" -v entry="$ENTRY" '
+      $0 == date { print; getline; print entry; print; next }
+      { print }
+    ' "$CHANGELOG_FILE" > "$TEMP_FILE"
+    mv "$TEMP_FILE" "$CHANGELOG_FILE"
+  else
+    # 日期不存在，在标题后添加新日期和条目
+    TEMP_FILE=$(mktemp)
+    HEAD_LINE=$(head -n 1 "$CHANGELOG_FILE")
+    {
+      echo "$HEAD_LINE"
+      echo ""
+      echo "## $COMMIT_DATE"
+      echo ""
+      echo "$ENTRY"
+      echo ""
+      tail -n +3 "$CHANGELOG_FILE"
+    } > "$TEMP_FILE"
+    mv "$TEMP_FILE" "$CHANGELOG_FILE"
+  fi
 fi
 
-# 将 CHANGELOG.md 添加到暂存区（amend 当前 commit）
+# 将 CHANGELOG.md 添加到暂存区
 git add "$CHANGELOG_FILE"
 
-# 使用 --amend --no-edit 将 CHANGELOG 变更合并到当前 commit
-# 注意：这会修改 commit hash
+# 合并到当前 commit
 git commit --amend --no-edit --no-verify >/dev/null 2>&1
 
-echo "✅ CHANGELOG updated: $COMMIT_MSG"
+echo "✅ CHANGELOG: $COMMIT_MSG"
