@@ -3,14 +3,22 @@
 @tailwind utilities;
 
 :root {
+  /* 主题颜色变量（由 ThemeProvider 动态更新） */
   --bg-primary: #000000;
   --bg-secondary: #0a0a0a;
   --bg-card: #111111;
+  --bg-hover: #1a1a1a;
   --text-primary: #ffffff;
   --text-secondary: #888888;
+  --text-muted: #666666;
   --accent-green: #00ff88;
   --accent-red: #ff4444;
+  --accent-blue: #2962ff;
+  --accent-yellow: #f0b90b;
   --border-color: #1a1a1a;
+  --border-light: #2a2a2a;
+  --long: #0ecb81;
+  --short: #f6465d;
 }
 
 * {

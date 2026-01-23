@@ -1,5 +1,9 @@
 import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
+import { generateTailwindColors } from './lib/theme/tokens';
+
+// 从 tokens 自动生成主题颜色
+const themeColors = generateTailwindColors();
 
 const config: Config = {
   darkMode: ['class'],
@@ -7,16 +11,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // shadcn/ui 颜色
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        'bg-primary': 'var(--bg-primary)',
-        'bg-secondary': 'var(--bg-secondary)',
-        'bg-card': 'var(--bg-card)',
-        'text-primary': 'var(--text-primary)',
-        'text-secondary': 'var(--text-secondary)',
-        'accent-green': 'var(--accent-green)',
-        'accent-red': 'var(--accent-red)',
-        'border-color': 'var(--border-color)',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -55,6 +52,8 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        // 自动同步的主题颜色（从 tokens.ts 生成）
+        ...themeColors,
       },
       fontFamily: {
         gilroy: ['var(--font-gilroy)', 'sans-serif'],

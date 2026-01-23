@@ -1,40 +1,20 @@
 /**
  * Stitches 主题配置
- * 统一管理设计系统的颜色、字体、间距等
+ * 颜色自动从 theme/tokens.ts 同步
  */
 
 import { createStitches } from '@stitches/react';
+import { generateStitchesColors } from './theme/tokens';
+
+// 从 tokens 自动生成颜色配置
+const themeColors = generateStitchesColors();
 
 export const { styled, css, globalCss, keyframes, getCssText, theme, createTheme, config } =
   createStitches({
     theme: {
       colors: {
-        // 背景色
-        bgPrimary: '#000000',
-        bgSecondary: '#0a0a0a',
-        bgCard: '#111111',
-        bgHover: '#1a1a1a',
-
-        // 文字颜色
-        textPrimary: '#ffffff',
-        textSecondary: '#888888',
-        textMuted: '#666666',
-
-        // 强调色
-        accentGreen: '#00ff88',
-        accentRed: '#ff4444',
-        accentBlue: '#2962ff',
-        accentYellow: '#f0b90b',
-
-        // 边框
-        borderColor: '#1a1a1a',
-        borderLight: '#2a2a2a',
-
-        // 交易相关
-        long: '#0ecb81',
-        short: '#f6465d',
-        buy: '#0ecb81',
-        sell: '#f6465d',
+        // 自动同步的主题颜色
+        ...themeColors,
       },
       fonts: {
         gilroy: 'var(--font-gilroy), sans-serif',
@@ -122,24 +102,6 @@ export const { styled, css, globalCss, keyframes, getCssText, theme, createTheme
       }),
     },
   });
-
-// 暗色主题（默认）
-export const darkTheme = createTheme('dark-theme', {});
-
-// 亮色主题（可选扩展）
-export const lightTheme = createTheme('light-theme', {
-  colors: {
-    bgPrimary: '#ffffff',
-    bgSecondary: '#f5f5f5',
-    bgCard: '#ffffff',
-    bgHover: '#f0f0f0',
-    textPrimary: '#000000',
-    textSecondary: '#666666',
-    textMuted: '#999999',
-    borderColor: '#e0e0e0',
-    borderLight: '#f0f0f0',
-  },
-});
 
 // 全局样式
 export const globalStyles = globalCss({

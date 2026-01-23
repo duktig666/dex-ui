@@ -5,6 +5,7 @@ import { cookieToInitialState } from 'wagmi';
 import { config } from '@/lib/wagmi/config';
 import { Web3Provider } from '@/components/providers/Web3Provider';
 import { I18nProvider } from '@/lib/i18n';
+import { ThemeProvider } from '@/lib/theme';
 import './globals.css';
 
 const inter = Inter({
@@ -46,9 +47,11 @@ export default async function RootLayout({
       className={`${inter.variable} ${sourceCodePro.variable} ${spaceGrotesk.variable}`}
     >
       <body className="antialiased">
-        <I18nProvider>
-          <Web3Provider initialState={initialState}>{children}</Web3Provider>
-        </I18nProvider>
+        <ThemeProvider>
+          <I18nProvider>
+            <Web3Provider initialState={initialState}>{children}</Web3Provider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
