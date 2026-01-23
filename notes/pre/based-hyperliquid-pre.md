@@ -95,3 +95,10 @@ dex-ui项目下已实现对网站 https://testnet.based.one/ 合约交易静态�
 现在打开浏览器 继续分析 https://testnet.based.one/ 基于HyperLiquid的API 结合文档 notes/hyperliquid/based-hyperliquid-api-tech-gpt.md 实现合约交易页面的功能。重点功能包括：K线数据的动态查询、合约币对相关数据的查询、订单簿、交易历史、个人用户持仓和订单信息、下单撤单 等功能的实现。页面上所有功能都要实现。 
 BuildCode的地址是 0xEfc3a654A44FACd6dA111f3114CDd65F16d9a681
 HyperLiquid的API资料可以参看 CLAUDE.md
+
+---
+
+notes/hyperliquid/http/hyperliquid-exchange.http 总结了HyperLiquid Exchange API
+notes/hyperliquid/exchange-api-guide.md 说明了HyperLiquid Exchange API如何使用
+CLAUDE.md 有HyperLiquid API的参考链接
+打开浏览器分析源网站 https://app.based.one/ ，对比在dex-ui下实现各种类型的下单，充值和提现的功能。并进行一定程度的验证。

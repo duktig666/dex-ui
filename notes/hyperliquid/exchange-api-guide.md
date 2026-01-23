@@ -59,6 +59,7 @@ interface Signature {
 | 订单 | 批量修改 | `batchModify` | signL1Action |
 | 账户 | 更新杠杆 | `updateLeverage` | signL1Action |
 | 账户 | 更新逐仓保证金 | `updateIsolatedMargin` | signL1Action |
+| **资金** | **充值到 L2** | *Bridge 合约* | *链上 ERC-20 转账* |
 | 资金 | USDC 转账 | `usdSend` | signUserSignedAction |
 | 资金 | 提现到 L1 | `withdraw3` | signUserSignedAction |
 | 资金 | 现货转账 | `spotSend` | signUserSignedAction |
@@ -515,6 +516,108 @@ async function updateIsolatedMargin(
 ---
 
 ## 5. 资金操作
+
+### 充值 vs 提现 对比
+
+| 操作 | 方式 | 签名 | 到账时间 |
+|------|------|------|----------|
+| **充值** | Arbitrum 链上 USDC 转账到 Bridge 合约 | 无需 HL 签名 | ~1 分钟 |
+| **提现** | `/exchange` API + `withdraw3` | 需要 EIP-712 签名 | 3-4 分钟 |
+
+---
+
+### 5.0 充值到 L2 (Deposit via Bridge)
+
+> **注意**: 充值不是 `/exchange` API，而是 Arbitrum 链上的 ERC-20 转账。
+
+#### Bridge 合约地址
+
+| 网络 | Bridge 地址 | USDC 地址 |
+|------|------------|-----------|
+| 主网 (Arbitrum One) | `0x2df1c51e09aecf9cacb7bc98cb1742757f163df7` | `0xaf88d065e77c8cC2239327C5EDb3A432268e5831` |
+| 测试网 (Arbitrum Sepolia) | `0x08cfc1B6b2dCF36A1480b99353A354AA8AC56f89` | `0x1baAbB04529D43a73232B713C0FE471f7c7334d5` (USDC2) |
+
+#### 充值流程
+
+1. 用户在 Arbitrum 链上调用 `USDC.transfer(bridgeAddress, amount)`
+2. HyperLiquid 验证节点监控 Bridge 合约
+3. 约 **1 分钟内**自动到账 L2
+
+#### 限制条件
+
+- **最低充值**: 5 USDC
+- 低于最低金额的转账将**丢失且无法找回**
+- 无需 HyperLiquid 签名
+
+#### TypeScript 示例
+
+```typescript
+import { parseUnits, type WalletClient } from 'viem';
+
+const USDC_ADDRESS = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
+const BRIDGE_ADDRESS = '0x2df1c51e09aecf9cacb7bc98cb1742757f163df7';
+
+// ERC-20 Transfer ABI
+const erc20Abi = [
+  {
+    name: 'transfer',
+    type: 'function',
+    inputs: [
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ type: 'bool' }],
+  },
+] as const;
+
+/**
+ * 充值 USDC 到 HyperLiquid L2
+ * @param walletClient viem 钱包客户端
+ * @param amount 充值金额 (USDC)
+ */
+async function depositToHyperliquid(
+  walletClient: WalletClient,
+  amount: string
+) {
+  // USDC 使用 6 位小数
+  const amountInUnits = parseUnits(amount, 6);
+
+  // 调用 USDC 合约的 transfer 方法
+  const txHash = await walletClient.writeContract({
+    address: USDC_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'transfer',
+    args: [BRIDGE_ADDRESS, amountInUnits],
+  });
+
+  console.log('充值交易已发送:', txHash);
+  console.log('预计 1 分钟内到账 L2');
+
+  return txHash;
+}
+```
+
+#### 查询充值状态
+
+使用 `/info` API 的 `userNonFundingLedgerUpdates` 查询账本记录：
+
+```typescript
+const response = await fetch('https://api.hyperliquid.xyz/info', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    type: 'userNonFundingLedgerUpdates',
+    user: userAddress,
+  }),
+});
+
+const ledger = await response.json();
+
+// 筛选充值记录
+const deposits = ledger.filter((item: any) => item.delta.type === 'deposit');
+```
+
+---
 
 ### 5.1 USDC 转账 (usdSend)
 

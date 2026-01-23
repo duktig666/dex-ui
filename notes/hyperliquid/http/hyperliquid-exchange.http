@@ -605,6 +605,64 @@ Content-Type: application/json
 ###############################################################################
 
 ### ─────────────────────────────────────────────────────────────────────────────
+### 3.0 充值到 L2 (Deposit) - 通过 Bridge 合约
+### ─────────────────────────────────────────────────────────────────────────────
+#
+# ⚠️ 注意: 充值不是 /exchange API，而是 Arbitrum 链上交易
+#
+# 充值方式: 直接向 Bridge 合约转账 USDC (ERC-20 transfer)
+#
+# Bridge 合约地址:
+#   主网: 0x2df1c51e09aecf9cacb7bc98cb1742757f163df7 (Arbitrum One)
+#   测试网: 0x08cfc1B6b2dCF36A1480b99353A354AA8AC56f89 (Arbitrum Sepolia)
+#
+# USDC 合约地址:
+#   主网: 0xaf88d065e77c8cC2239327C5EDb3A432268e5831 (Arbitrum USDC)
+#   测试网: 0x1baAbB04529D43a73232B713C0FE471f7c7334d5 (USDC2)
+#
+# 充值流程:
+#   1. 用户在 Arbitrum 链上调用 USDC.transfer(bridgeAddress, amount)
+#   2. HyperLiquid 验证节点监控 Bridge 合约
+#   3. 约 1 分钟内自动到账 L2
+#
+# 限制条件:
+#   - 最低充值: 5 USDC
+#   - 低于最低金额的转账将丢失，无法找回
+#   - 无需 HyperLiquid 签名
+#
+# TypeScript 示例 (使用 viem):
+# ```typescript
+# import { parseUnits } from 'viem';
+#
+# const USDC_ADDRESS = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
+# const BRIDGE_ADDRESS = '0x2df1c51e09aecf9cacb7bc98cb1742757f163df7';
+#
+# // ERC-20 transfer ABI
+# const erc20Abi = [{
+#   name: 'transfer',
+#   type: 'function',
+#   inputs: [
+#     { name: 'to', type: 'address' },
+#     { name: 'amount', type: 'uint256' }
+#   ],
+#   outputs: [{ type: 'bool' }]
+# }];
+#
+# // 充值 100 USDC
+# const tx = await walletClient.writeContract({
+#   address: USDC_ADDRESS,
+#   abi: erc20Abi,
+#   functionName: 'transfer',
+#   args: [BRIDGE_ADDRESS, parseUnits('100', 6)]  // USDC 6位小数
+# });
+# ```
+#
+# 查询充值状态:
+#   使用 /info API 的 userNonFundingLedgerUpdates 查询账本记录
+#   delta.type = "deposit" 表示充值记录
+#
+
+### ─────────────────────────────────────────────────────────────────────────────
 ### 3.1 USDC 转账 (usdSend) - L2 内部转账
 ### ─────────────────────────────────────────────────────────────────────────────
 #

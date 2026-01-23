@@ -13,6 +13,7 @@
 | **新人入门** | PRD → 实现计划 → API 技术方案 |
 | **前端开发** | 类型定义 → HTTP 测试 → 页面映射 → 签名格式 |
 | **交易功能开发** | Exchange API 指南 → 交易 HTTP 参考 → exchange.ts 类型 |
+| **预测市场开发** | 预测市场分析 → Polymarket CLOB 文档 |
 | **API 调试** | HTTP 测试文件 → 测试网指南 → 签名格式 |
 | **产品理解** | PRD → Based 调研 → 技术栈分析 |
 
@@ -48,6 +49,12 @@
 | **签名格式** | `hyperliquid/api-signature-format.md` | 签名常见错误和正确格式 |
 | **环境配置** | `hyperliquid/http/http-client.env.json` | API 测试环境变量（含活跃测试地址） |
 
+### 4. 扩展功能
+
+| 文档 | 路径 | 说明 |
+|------|------|------|
+| **预测市场分析** | `hyperliquid/based-prediction-market-analysis.md` | ⭐ Based.one 预测市场技术分析（Polymarket 集成） |
+
 ---
 
 ## 文件结构
@@ -61,6 +68,7 @@ notes/
 │   ├── api-page-mapping.md       # ⭐ 页面-字段映射表
 │   ├── based-hyperliquid-api-tech-claude.md  # ⭐ API 实现方案（详细）
 │   ├── based-hyperliquid-api-tech-gpt.md     # API 实现方案（备用）
+│   ├── based-prediction-market-analysis.md   # ⭐ 预测市场技术分析
 │   ├── technical-spec.md         # 技术规格文档
 │   ├── prd.md                    # 产品需求文档
 │   ├── architecture.md           # 系统架构设计
@@ -170,6 +178,19 @@ src/types/hyperliquid/            # TypeScript 类型定义
    └─ EIP-712 签名实现和常见错误
 ```
 
+### 路线 E: 预测市场开发
+
+```
+1. hyperliquid/based-prediction-market-analysis.md
+   └─ Based.one 预测市场技术分析
+
+2. Polymarket 官方文档
+   └─ https://docs.polymarket.com/developers/CLOB/introduction
+
+3. Polymarket 客户端库
+   └─ @polymarket/clob-client (TypeScript)
+```
+
 ---
 
 ## 关键 API 速查
@@ -197,6 +218,7 @@ src/types/hyperliquid/            # TypeScript 类型定义
 | `modify` | 修改订单 | Guide:3.3, HTTP:1.4, Types:ModifyAction |
 | `updateLeverage` | 更新杠杆 | Guide:4.1, HTTP:2.1, Types:UpdateLeverageAction |
 | `updateIsolatedMargin` | 更新逐仓保证金 | Guide:4.2, HTTP:2.2, Types:UpdateIsolatedMarginAction |
+| *Bridge 合约* | **充值到 L2** | Guide:5.0, HTTP:3.0 |
 | `usdSend` | USDC 转账 | Guide:5.1, HTTP:3.1, Types:UsdSendAction |
 | `withdraw3` | 提现到 L1 | Guide:5.2, HTTP:3.2, Types:Withdraw3Action |
 | `usdClassTransfer` | 永续↔现货互转 | Guide:5.3, HTTP:3.4, Types:UsdClassTransferAction |
@@ -290,12 +312,24 @@ import { getPerpAssetId, getSpotAssetId, isSpotAsset } from '@/types/hyperliquid
 
 每 15 秒发送 `{"method": "ping"}`，详见 `src/types/hyperliquid/websocket.ts` 中的 `DEFAULT_HEARTBEAT` 配置。
 
+### Q: 如何充值 USDC 到 HyperLiquid？
+
+充值不是 API 调用，而是 Arbitrum 链上的 ERC-20 转账：
+
+1. 向 Bridge 合约转账 USDC（最低 5 USDC）
+2. 主网 Bridge: `0x2df1c51e09aecf9cacb7bc98cb1742757f163df7`
+3. 约 1 分钟自动到账 L2
+
+详见 `hyperliquid/exchange-api-guide.md` 的 5.0 节。
+
 ---
 
 ## 更新日志
 
 | 日期 | 更新内容 |
 |------|---------|
+| 2026-01-23 | 新增 Based.one 预测市场技术分析（Polymarket 集成方案） |
+| 2026-01-23 | 补充充值 (Deposit via Bridge) 文档，完善资金操作说明 |
 | 2026-01-22 | 新增 Exchange API 开发指南、交易 API HTTP 参考文件、更新 Withdraw3 类型 |
 | 2026-01-22 | 创建 TypeScript 类型定义、增强 HTTP 测试文件、创建页面映射文档 |
 | - | 初始化项目文档结构 |
