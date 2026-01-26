@@ -25,8 +25,8 @@ export interface ExchangeRequest<A> {
 // 订单相关类型
 // ============================================================
 
-/** 订单类型 */
-export interface OrderType {
+/** 订单类型配置 */
+export interface OrderTypeConfig {
   limit: {
     /** 有效期: "Gtc" | "Ioc" | "Alo" */
     tif: 'Gtc' | 'Ioc' | 'Alo';
@@ -56,7 +56,7 @@ export interface OrderRequest {
   /** 是否仅减仓 */
   r: boolean;
   /** 订单类型 */
-  t: OrderType;
+  t: OrderTypeConfig;
   /** 客户端订单ID (可选, 128位十六进制) */
   c?: string;
 }
@@ -64,7 +64,7 @@ export interface OrderRequest {
 /** 条件订单参数 */
 export interface TriggerOrderRequest extends OrderRequest {
   /** 触发条件 */
-  t: OrderType & { trigger: TriggerType };
+  t: OrderTypeConfig & { trigger: TriggerType };
 }
 
 /** 下单动作 */

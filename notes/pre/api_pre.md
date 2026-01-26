@@ -1,5 +1,7 @@
 # 技术栈
+
 dex-ui前端技术栈：
+
 1. 核心框架使用React
 2. App路由 Next.js Router
 3. 状态管理 Zustand
@@ -33,6 +35,7 @@ POST {{BASE_URL}}/tenant/config/areas/en_US
 Content-Type: application/json
 Cookie: SESSION={{SESSION}}
 ```
+
 上述格式是.http文件写法的示例，可以再ide中发送http请求。
 参看dex-ui/notes/hyperliquid/based-hyperliquid-api-tech-claude.md文件，将查询方法 以http的方式写出调用示例写入到文件 dex-ui/notes/hyperliquid/http/hyperliquid-query.http
 我想要用http调用的方式测试hyperliquid-api以及查看其api结构和响应
@@ -62,13 +65,11 @@ dex-ui/notes/hyperliquid/api-page-mapping.md 做了字段和页面元素的映�
 
 ---
 
-md文档需要梳理，可以再在hyperliquid-exchange.http整理写的接口，签名参数可以保留                                                                                                               
-，并且需要解释参数和返回值，格式参看hyperliquid-query.http。再确认下dex-ui/src/                                                                                                               
+md文档需要梳理，可以再在hyperliquid-exchange.http整理写的接口，签名参数可以保留
+，并且需要解释参数和返回值，格式参看hyperliquid-query.http。再确认下dex-ui/src/
 types/hyperliquid对写接口的类型定义是否完全。
 梳理完成后整理 dex-ui/notes/README.md
 
-
 HyperLiquid API http调用参看notes/hyperliquid/http
-exchange-api-guide.md  交易api的使用
+exchange-api-guide.md 交易api的使用
 prd 参看prd.md
-

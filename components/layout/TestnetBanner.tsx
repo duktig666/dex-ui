@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { CURRENT_NETWORK } from "@/lib/hyperliquid/constants";
+import { CURRENT_NETWORK } from '@/lib/hyperliquid/constants';
 
 /**
  * 测试网提示横幅
@@ -19,7 +19,8 @@ export function TestnetBanner() {
         You&apos;re currently on the <span className="font-semibold">testnet</span>.
         {faucetUrl && (
           <>
-            {" "}Click{" "}
+            {' '}
+            Click{' '}
             <a
               href={faucetUrl}
               target="_blank"
@@ -27,7 +28,7 @@ export function TestnetBanner() {
               className="underline hover:text-[#ffc107] transition-colors"
             >
               here
-            </a>{" "}
+            </a>{' '}
             for mock USDC.
           </>
         )}

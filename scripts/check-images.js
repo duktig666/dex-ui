@@ -1,18 +1,10 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const path = require('path');
 
 const requiredImages = {
-  partners: [
-    'ethena.svg',
-    'spartan.svg',
-    'hashed.svg',
-    'delphi.svg',
-    'newman.svg',
-  ],
-  predictions: [
-    'powell.png',
-    'trump.png',
-  ],
+  partners: ['ethena.svg', 'spartan.svg', 'hashed.svg', 'delphi.svg', 'newman.svg'],
+  predictions: ['powell.png', 'trump.png'],
   cards: [
     'based-card.svg',
     'orange-card.png',
@@ -20,14 +12,8 @@ const requiredImages = {
     'teal-card.svg',
     'hype-blueprint-2.svg',
   ],
-  trading: [
-    'trading-app.png',
-  ],
-  features: [
-    'based-logo-white.svg',
-    'trade-screen.png',
-    'mobile-screen.png',
-  ],
+  trading: ['trading-app.png'],
+  features: ['based-logo-white.svg', 'trade-screen.png', 'mobile-screen.png'],
 };
 
 function checkImages() {
@@ -61,7 +47,7 @@ function checkImages() {
 
   if (missing.length > 0) {
     console.log('\n缺失的文件:');
-    missing.forEach(file => console.log(`  - ${file}`));
+    missing.forEach((file) => console.log(`  - ${file}`));
     console.log('\n请运行下载脚本: ./scripts/download-images.sh');
     process.exit(1);
   } else {
@@ -71,4 +57,3 @@ function checkImages() {
 }
 
 checkImages();
-

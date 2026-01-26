@@ -2,7 +2,13 @@
  * HyperLiquid REST API 客户端
  */
 
-import { API_URL, CURRENT_NETWORK, BUILDER_ADDRESS, BUILDER_FEE_PERP, IS_TESTNET } from './constants';
+import {
+  API_URL,
+  CURRENT_NETWORK,
+  BUILDER_ADDRESS,
+  BUILDER_FEE_PERP,
+  IS_TESTNET,
+} from './constants';
 import type {
   MetaAndAssetCtxs,
   ClearinghouseState,
@@ -35,7 +41,7 @@ import type {
   TwapOrderResponse,
   TwapCancelResponse,
 } from './types';
-import { floatToWire, normalizeAddress, generateNonce } from './utils';
+import { normalizeAddress, generateNonce } from './utils';
 import { signL1Action, signUserSignedAction, parseSignature } from './signing';
 
 /**
@@ -72,7 +78,9 @@ export class HyperliquidInfoClient {
    * 获取所有永续合约元数据和实时数据
    */
   async getMetaAndAssetCtxs(): Promise<MetaAndAssetCtxs> {
-    const result = await this.post<[{ universe: MetaAndAssetCtxs['universe'] }, MetaAndAssetCtxs['assetCtxs']]>({
+    const result = await this.post<
+      [{ universe: MetaAndAssetCtxs['universe'] }, MetaAndAssetCtxs['assetCtxs']]
+    >({
       type: 'metaAndAssetCtxs',
     });
     return {
@@ -226,7 +234,11 @@ export class HyperliquidInfoClient {
   /**
    * 获取资金费率历史
    */
-  async getFundingHistory(coin: string, startTime: number, endTime?: number): Promise<FundingHistory[]> {
+  async getFundingHistory(
+    coin: string,
+    startTime: number,
+    endTime?: number
+  ): Promise<FundingHistory[]> {
     return this.post<FundingHistory[]>({
       type: 'fundingHistory',
       coin,
@@ -350,7 +362,7 @@ export class HyperliquidExchangeClient {
   ): Promise<ExchangeResponse> {
     // 解析签名为 {r, s, v} 格式
     const parsedSig = parseSignature(signature);
-    
+
     const body: Record<string, unknown> = {
       action: action as Record<string, unknown>,
       nonce,
@@ -390,7 +402,7 @@ export class HyperliquidExchangeClient {
     nonce: number
   ): Promise<ExchangeResponse> {
     const parsedSig = parseSignature(signature);
-    
+
     const body = {
       action: action as Record<string, unknown>,
       nonce,

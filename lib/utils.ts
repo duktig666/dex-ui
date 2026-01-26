@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -7,23 +7,22 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatNumber(num: number): string {
   if (num >= 1e9) {
-    return (num / 1e9).toFixed(1) + "B";
+    return (num / 1e9).toFixed(1) + 'B';
   }
   if (num >= 1e6) {
-    return (num / 1e6).toFixed(1) + "M";
+    return (num / 1e6).toFixed(1) + 'M';
   }
   if (num >= 1e3) {
-    return (num / 1e3).toFixed(1) + "K";
+    return (num / 1e3).toFixed(1) + 'K';
   }
   return num.toString();
 }
 
 export function formatCurrency(num: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(num);
 }
-

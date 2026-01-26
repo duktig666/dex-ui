@@ -28,13 +28,12 @@ export const NETWORKS = {
 } as const;
 
 export type NetworkType = keyof typeof NETWORKS;
-export type NetworkConfig = typeof NETWORKS[NetworkType];
+export type NetworkConfig = (typeof NETWORKS)[NetworkType];
 
 // 根据环境变量获取当前网络配置
 const networkEnv = process.env.NEXT_PUBLIC_NETWORK as NetworkType | undefined;
-export const CURRENT_NETWORK: NetworkConfig = networkEnv === 'mainnet' 
-  ? NETWORKS.mainnet 
-  : NETWORKS.testnet;
+export const CURRENT_NETWORK: NetworkConfig =
+  networkEnv === 'mainnet' ? NETWORKS.mainnet : NETWORKS.testnet;
 
 // 向后兼容的导出
 export const IS_TESTNET = CURRENT_NETWORK.isTestnet;
@@ -86,11 +85,11 @@ export const CANDLE_INTERVALS = {
   '360': '6h',
   '480': '8h',
   '720': '12h',
-  'D': '1d',
+  D: '1d',
   '1D': '1d',
-  'W': '1w',
+  W: '1w',
   '1W': '1w',
-  'M': '1M',
+  M: '1M',
   '1M': '1M',
 } as const;
 
@@ -108,11 +107,11 @@ export const TV_TO_HL_INTERVAL: Record<string, string> = {
   '480': '8h',
   '720': '12h',
   '1D': '1d',
-  'D': '1d',
+  D: '1d',
   '1W': '1w',
-  'W': '1w',
+  W: '1w',
   '1M': '1M',
-  'M': '1M',
+  M: '1M',
 };
 
 // HyperLiquid 时间间隔到毫秒的映射

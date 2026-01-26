@@ -1,18 +1,24 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { HermesLogo } from "@/components/ui/HermesLogo";
+import { motion } from 'framer-motion';
+import { useT } from '@/lib/i18n';
+import { HermesLogo } from '@/components/ui/HermesLogo';
 
 export function Hero() {
+  const { t } = useT();
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-bg-primary via-bg-secondary to-bg-primary" />
-      
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-green/5 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: "1s" }} />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse-slow"
+          style={{ animationDelay: '1s' }}
+        />
       </div>
 
       {/* Content */}
@@ -24,7 +30,7 @@ export function Hero() {
           transition={{ duration: 0.6 }}
           className="text-text-secondary text-lg mb-4 tracking-widest uppercase"
         >
-          The Future Is
+          {t('The Future Is')}
         </motion.p>
 
         {/* Main Logo */}
@@ -44,7 +50,7 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="text-xl text-text-secondary max-w-md mx-auto"
         >
-          Trade everything, spend everywhere
+          {t('Trade everything, spend everywhere')}
         </motion.p>
 
         {/* Scroll indicator */}
@@ -66,4 +72,3 @@ export function Hero() {
     </section>
   );
 }
-

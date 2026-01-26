@@ -3,7 +3,7 @@
  * 接入 HyperLiquid API 的真实数据
  */
 
-import { infoClient, hyperliquidWs, TV_TO_HL_INTERVAL, INTERVAL_TO_MS, CURRENT_NETWORK } from '@/lib/hyperliquid';
+import { infoClient, hyperliquidWs, TV_TO_HL_INTERVAL, CURRENT_NETWORK } from '@/lib/hyperliquid';
 import type { Candle, WsCandleData } from '@/lib/hyperliquid/types';
 import type {
   IBasicDataFeed,
@@ -22,7 +22,22 @@ import type {
 
 // 配置
 const configurationData: DatafeedConfiguration = {
-  supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '360', '480', '720', '1D', '1W', '1M'] as ResolutionString[],
+  supported_resolutions: [
+    '1',
+    '3',
+    '5',
+    '15',
+    '30',
+    '60',
+    '120',
+    '240',
+    '360',
+    '480',
+    '720',
+    '1D',
+    '1W',
+    '1M',
+  ] as ResolutionString[],
   exchanges: [
     {
       value: 'HYPERLIQUID',
@@ -311,7 +326,7 @@ export function createHyperliquidDatafeed(): IBasicDataFeed {
         if (!subscription) return;
 
         const bar = candleToBar(data);
-        
+
         // 检查是否是更新还是新 bar
         if (subscription.lastBar && bar.time === subscription.lastBar.time) {
           // 更新当前 bar

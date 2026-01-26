@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, createContext, useContext, type ReactNode } from "react";
-import { useAccount } from "wagmi";
-import { useMarketData } from "@/hooks/useMarketData";
-import { useAccountState } from "@/hooks/useAccountState";
-import { useMarketStore } from "@/stores/marketStore";
-import { useUserStore } from "@/stores/userStore";
+import { useEffect, createContext, useContext, type ReactNode } from 'react';
+import { useAccount } from 'wagmi';
+import { useMarketData } from '@/hooks/useMarketData';
+import { useAccountState } from '@/hooks/useAccountState';
+import { useMarketStore } from '@/stores/marketStore';
+import { useUserStore } from '@/stores/userStore';
 
 interface HyperliquidContextValue {
   isMarketDataLoading: boolean;
@@ -17,7 +17,7 @@ interface HyperliquidContextValue {
 const HyperliquidContext = createContext<HyperliquidContextValue>({
   isMarketDataLoading: true,
   isMarketDataInitialized: false,
-  currentCoin: "BTC",
+  currentCoin: 'BTC',
   setCoin: () => {},
 });
 
@@ -30,15 +30,13 @@ interface HyperliquidProviderProps {
   initialCoin?: string;
 }
 
-export function HyperliquidProvider({ 
-  children, 
-  initialCoin = "BTC" 
-}: HyperliquidProviderProps) {
-  const { address, isConnected } = useAccount();
-  
+export function HyperliquidProvider({ children, initialCoin = 'BTC' }: HyperliquidProviderProps) {
+  const { address, isConnected: _isConnected } = useAccount();
+
   // 初始化市场数据
-  const { isLoading: isMarketDataLoading, isInitialized: isMarketDataInitialized } = useMarketData();
-  
+  const { isLoading: isMarketDataLoading, isInitialized: isMarketDataInitialized } =
+    useMarketData();
+
   // 初始化账户数据（当钱包连接时）
   useAccountState();
 
@@ -67,9 +65,5 @@ export function HyperliquidProvider({
     setCoin: setCurrentCoin,
   };
 
-  return (
-    <HyperliquidContext.Provider value={value}>
-      {children}
-    </HyperliquidContext.Provider>
-  );
+  return <HyperliquidContext.Provider value={value}>{children}</HyperliquidContext.Provider>;
 }

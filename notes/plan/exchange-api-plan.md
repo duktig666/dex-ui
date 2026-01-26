@@ -3,19 +3,21 @@
 ## 背景
 
 **已完成（查询 API）：**
+
 - `hyperliquid-query.http` - Info API 的 HTTP 测试和字段注释
 - `api-page-mapping.md` - 页面-字段映射
 - `src/types/hyperliquid/` - TypeScript 类型定义
 
 **待整理（写操作 API）：**
+
 - Exchange API（/exchange）- 所有交易操作接口
 
 ## 问题分析
 
-| 特性 | Info API | Exchange API |
-|------|----------|--------------|
-| 端点 | POST /info | POST /exchange |
-| 签名 | 不需要 | 需要 EIP-712 签名 |
+| 特性     | Info API            | Exchange API               |
+| -------- | ------------------- | -------------------------- |
+| 端点     | POST /info          | POST /exchange             |
+| 签名     | 不需要              | 需要 EIP-712 签名          |
 | 测试方式 | HTTP 文件可直接执行 | 需要钱包签名，无法直接测试 |
 
 **结论**：Exchange API 不适合用 `.http` 文件，改用 **Markdown 开发指南**。
@@ -25,55 +27,64 @@
 ## 需要覆盖的接口清单（共 16 个）
 
 ### 1. 订单操作（核心 - 5 个）
-| 操作 | type | 说明 |
-|------|------|------|
-| 下单 | `order` | 永续/现货，限价/市价/条件单 |
-| 撤单 | `cancel` | 按订单ID |
-| 按 cloid 撤单 | `cancelByCloid` | 按客户端订单ID |
-| 修改订单 | `modify` | 修改价格/数量 |
-| 批量修改 | `batchModify` | 批量修改 |
+
+| 操作          | type            | 说明                        |
+| ------------- | --------------- | --------------------------- |
+| 下单          | `order`         | 永续/现货，限价/市价/条件单 |
+| 撤单          | `cancel`        | 按订单ID                    |
+| 按 cloid 撤单 | `cancelByCloid` | 按客户端订单ID              |
+| 修改订单      | `modify`        | 修改价格/数量               |
+| 批量修改      | `batchModify`   | 批量修改                    |
 
 ### 2. 账户操作（2 个）
-| 操作 | type | 说明 |
-|------|------|------|
-| 更新杠杆 | `updateLeverage` | 杠杆倍数和模式 |
-| 更新逐仓保证金 | `updateIsolatedMargin` | 增/减保证金 |
+
+| 操作           | type                   | 说明           |
+| -------------- | ---------------------- | -------------- |
+| 更新杠杆       | `updateLeverage`       | 杠杆倍数和模式 |
+| 更新逐仓保证金 | `updateIsolatedMargin` | 增/减保证金    |
 
 ### 3. 资金操作（5 个）
-| 操作 | type | 说明 |
-|------|------|------|
-| USDC 转账 | `usdSend` | L2 内部转账 |
-| 提现到 L1 | `withdraw3` | 提现到 Arbitrum |
-| 现货转账 | `spotSend` | 现货代币转账 |
-| 账户互转 | `usdClassTransfer` | 永续↔现货 |
-| 子账户转账 | `subAccountTransfer` | 主↔子账户 |
+
+| 操作       | type                 | 说明            |
+| ---------- | -------------------- | --------------- |
+| USDC 转账  | `usdSend`            | L2 内部转账     |
+| 提现到 L1  | `withdraw3`          | 提现到 Arbitrum |
+| 现货转账   | `spotSend`           | 现货代币转账    |
+| 账户互转   | `usdClassTransfer`   | 永续↔现货       |
+| 子账户转账 | `subAccountTransfer` | 主↔子账户       |
 
 ### 4. Vault 操作（2 个）
-| 操作 | type | 说明 |
-|------|------|------|
-| 存入 | `vaultDeposit` | 投资 Vault |
+
+| 操作 | type            | 说明          |
+| ---- | --------------- | ------------- |
+| 存入 | `vaultDeposit`  | 投资 Vault    |
 | 取出 | `vaultWithdraw` | 从 Vault 取出 |
 
 ### 5. 授权操作 - BuildCode 核心（2 个）
-| 操作 | type | 说明 |
-|------|------|------|
+
+| 操作              | type                | 说明               |
+| ----------------- | ------------------- | ------------------ |
 | 授权 Builder 费率 | `approveBuilderFee` | **BuildCode 必需** |
-| 授权 API 钱包 | `approveAgent` | API 钱包代签 |
+| 授权 API 钱包     | `approveAgent`      | API 钱包代签       |
 
 ---
 
 ## 输出文件
 
 ### 1. Markdown 开发指南
+
 `notes/hyperliquid/exchange-api-guide.md`
 
 ### 2. HTTP 参考文件（格式同 query.http）
+
 `notes/hyperliquid/http/hyperliquid-exchange.http`
+
 - 整理写接口的请求格式
 - 签名参数保留（标注"需签名，无法直接执行"）
 - 详细解释参数和返回值
 
 ### 3. TypeScript 类型检查
+
 `src/types/hyperliquid/exchange.ts` - **已存在，需补充**
 
 ### 文档结构
@@ -137,28 +148,29 @@
 
 现有 `exchange.ts` 已定义 **18 个动作类型**：
 
-| 类别 | 类型 | 状态 |
-|------|------|------|
-| 订单 | OrderAction | ✓ |
-| 订单 | CancelAction | ✓ |
-| 订单 | CancelByCloidAction | ✓ |
-| 订单 | ModifyAction | ✓ |
-| 订单 | BatchModifyAction | ✓ |
-| 账户 | UpdateLeverageAction | ✓ |
-| 账户 | UpdateIsolatedMarginAction | ✓ |
-| 资金 | UsdSendAction | ✓ |
-| 资金 | Withdraw2Action | ✓ (需改为 withdraw3) |
-| 资金 | SpotSendAction | ✓ |
-| 资金 | UsdClassTransferAction | ✓ |
-| 资金 | SubAccountTransferAction | ✓ |
-| Vault | VaultDepositAction | ✓ |
-| Vault | VaultWithdrawAction | ✓ |
-| 授权 | ApproveBuilderFeeAction | ✓ |
-| 授权 | ApproveAgentAction | ✓ |
-| 推荐 | SetReferrerAction | ✓ |
-| 推荐 | CreateReferralCodeAction | ✓ |
+| 类别  | 类型                       | 状态                 |
+| ----- | -------------------------- | -------------------- |
+| 订单  | OrderAction                | ✓                    |
+| 订单  | CancelAction               | ✓                    |
+| 订单  | CancelByCloidAction        | ✓                    |
+| 订单  | ModifyAction               | ✓                    |
+| 订单  | BatchModifyAction          | ✓                    |
+| 账户  | UpdateLeverageAction       | ✓                    |
+| 账户  | UpdateIsolatedMarginAction | ✓                    |
+| 资金  | UsdSendAction              | ✓                    |
+| 资金  | Withdraw2Action            | ✓ (需改为 withdraw3) |
+| 资金  | SpotSendAction             | ✓                    |
+| 资金  | UsdClassTransferAction     | ✓                    |
+| 资金  | SubAccountTransferAction   | ✓                    |
+| Vault | VaultDepositAction         | ✓                    |
+| Vault | VaultWithdrawAction        | ✓                    |
+| 授权  | ApproveBuilderFeeAction    | ✓                    |
+| 授权  | ApproveAgentAction         | ✓                    |
+| 推荐  | SetReferrerAction          | ✓                    |
+| 推荐  | CreateReferralCodeAction   | ✓                    |
 
 **待补充**：
+
 - `Withdraw2Action` → `Withdraw3Action` (API 已更新)
 - 可选：`scheduleCancel`、`twapOrder` 等高级功能
 

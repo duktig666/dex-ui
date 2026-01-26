@@ -21,41 +21,41 @@
 
 ### 1.1 API 基础信息
 
-| 网络 | REST API | WebSocket |
-|------|----------|-----------|
-| 主网 | `https://api.hyperliquid.xyz` | `wss://api.hyperliquid.xyz/ws` |
+| 网络   | REST API                              | WebSocket                              |
+| ------ | ------------------------------------- | -------------------------------------- |
+| 主网   | `https://api.hyperliquid.xyz`         | `wss://api.hyperliquid.xyz/ws`         |
 | 测试网 | `https://api.hyperliquid-testnet.xyz` | `wss://api.hyperliquid-testnet.xyz/ws` |
 
 ### 1.2 主要端点
 
-| 端点 | 用途 | 方法 |
-|------|------|------|
-| `/info` | 查询数据（元数据、持仓、订单等） | POST |
-| `/exchange` | 交易操作（下单、取消、修改等） | POST |
+| 端点        | 用途                             | 方法 |
+| ----------- | -------------------------------- | ---- |
+| `/info`     | 查询数据（元数据、持仓、订单等） | POST |
+| `/exchange` | 交易操作（下单、取消、修改等）   | POST |
 
 ### 1.3 功能与 API 映射总览
 
-| 页面 | 功能 | API 类型 | 端点/订阅 |
-|------|------|---------|----------|
-| 合约 | 市场元数据 | REST | `meta` / `metaAndAssetCtxs` |
-| 合约 | 价格头部 | WebSocket | `allMids` |
-| 合约 | 订单簿 | WebSocket | `l2Book` |
-| 合约 | K线图表 | WebSocket | `candle` |
-| 合约 | 最近成交 | WebSocket | `trades` |
-| 合约 | 下单 | REST | `/exchange` order |
-| 合约 | 取消订单 | REST | `/exchange` cancel |
-| 合约 | 修改订单 | REST | `/exchange` modify |
-| 合约 | 持仓列表 | REST+WS | `clearinghouseState` |
-| 合约 | 当前挂单 | REST+WS | `openOrders` / `orderUpdates` |
-| 合约 | 设置杠杆 | REST | `/exchange` updateLeverage |
-| 现货 | 市场元数据 | REST | `spotMeta` / `spotMetaAndAssetCtxs` |
-| 现货 | 余额 | REST | `spotClearinghouseState` |
-| 现货 | 下单 | REST | `/exchange` order (assetId=10000+) |
-| Portfolio | 账户总值 | REST | `clearinghouseState` + `spotClearinghouseState` |
-| Portfolio | 订单历史 | REST | `historicalOrders` |
-| Portfolio | 成交记录 | REST | `userFills` |
-| Portfolio | 资金费率 | REST | `userFunding` |
-| 全局 | Builder 授权 | REST | `/exchange` approveBuilderFee |
+| 页面      | 功能         | API 类型  | 端点/订阅                                       |
+| --------- | ------------ | --------- | ----------------------------------------------- |
+| 合约      | 市场元数据   | REST      | `meta` / `metaAndAssetCtxs`                     |
+| 合约      | 价格头部     | WebSocket | `allMids`                                       |
+| 合约      | 订单簿       | WebSocket | `l2Book`                                        |
+| 合约      | K线图表      | WebSocket | `candle`                                        |
+| 合约      | 最近成交     | WebSocket | `trades`                                        |
+| 合约      | 下单         | REST      | `/exchange` order                               |
+| 合约      | 取消订单     | REST      | `/exchange` cancel                              |
+| 合约      | 修改订单     | REST      | `/exchange` modify                              |
+| 合约      | 持仓列表     | REST+WS   | `clearinghouseState`                            |
+| 合约      | 当前挂单     | REST+WS   | `openOrders` / `orderUpdates`                   |
+| 合约      | 设置杠杆     | REST      | `/exchange` updateLeverage                      |
+| 现货      | 市场元数据   | REST      | `spotMeta` / `spotMetaAndAssetCtxs`             |
+| 现货      | 余额         | REST      | `spotClearinghouseState`                        |
+| 现货      | 下单         | REST      | `/exchange` order (assetId=10000+)              |
+| Portfolio | 账户总值     | REST      | `clearinghouseState` + `spotClearinghouseState` |
+| Portfolio | 订单历史     | REST      | `historicalOrders`                              |
+| Portfolio | 成交记录     | REST      | `userFills`                                     |
+| Portfolio | 资金费率     | REST      | `userFunding`                                   |
+| 全局      | Builder 授权 | REST      | `/exchange` approveBuilderFee                   |
 
 ---
 
@@ -66,14 +66,15 @@
 ### 2.1 市场元数据
 
 #### 功能描述
+
 获取所有永续合约的基础信息，包括交易对名称、杠杆限制、精度等。
 
 #### API 对应
 
-| 功能 | API 类型 | 端点 |
-|------|---------|------|
-| 获取所有永续元数据 | REST | `POST /info` type: `meta` |
-| 获取元数据+实时上下文 | REST | `POST /info` type: `metaAndAssetCtxs` |
+| 功能                  | API 类型 | 端点                                  |
+| --------------------- | -------- | ------------------------------------- |
+| 获取所有永续元数据    | REST     | `POST /info` type: `meta`             |
+| 获取元数据+实时上下文 | REST     | `POST /info` type: `metaAndAssetCtxs` |
 
 #### 请求示例
 
@@ -82,7 +83,7 @@
 const response = await fetch('https://api.hyperliquid.xyz/info', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ type: 'meta' })
+  body: JSON.stringify({ type: 'meta' }),
 });
 
 const meta = await response.json();
@@ -134,12 +135,12 @@ const meta = await response.json();
 ```typescript
 // 获取资产 ID (用于下单)
 function getPerpAssetId(symbol: string, meta: Meta): number {
-  return meta.universe.findIndex(u => u.name === symbol);
+  return meta.universe.findIndex((u) => u.name === symbol);
 }
 
 // 获取精度配置
 function getAssetDecimals(symbol: string, meta: Meta): number {
-  const asset = meta.universe.find(u => u.name === symbol);
+  const asset = meta.universe.find((u) => u.name === symbol);
   return asset?.szDecimals ?? 5;
 }
 ```
@@ -149,18 +150,19 @@ function getAssetDecimals(symbol: string, meta: Meta): number {
 ### 2.2 价格头部 (Price Bar)
 
 #### 功能描述
+
 显示当前交易对的价格、24h涨跌幅、24h成交量、资金费率等信息。
 
 #### API 对应
 
-| 数据 | 获取方式 | 说明 |
-|------|---------|------|
-| 当前价格 | WebSocket `allMids` | 实时中间价 |
+| 数据       | 获取方式                | 说明                              |
+| ---------- | ----------------------- | --------------------------------- |
+| 当前价格   | WebSocket `allMids`     | 实时中间价                        |
 | 24h 涨跌幅 | REST `metaAndAssetCtxs` | `(midPx - prevDayPx) / prevDayPx` |
-| 24h 成交量 | REST `metaAndAssetCtxs` | `dayNtlVlm` |
-| 资金费率 | REST `metaAndAssetCtxs` | `funding` |
-| 标记价格 | REST `metaAndAssetCtxs` | `markPx` |
-| 预言机价格 | REST `metaAndAssetCtxs` | `oraclePx` |
+| 24h 成交量 | REST `metaAndAssetCtxs` | `dayNtlVlm`                       |
+| 资金费率   | REST `metaAndAssetCtxs` | `funding`                         |
+| 标记价格   | REST `metaAndAssetCtxs` | `markPx`                          |
+| 预言机价格 | REST `metaAndAssetCtxs` | `oraclePx`                        |
 
 #### WebSocket 订阅 - allMids
 
@@ -199,11 +201,11 @@ export function usePriceData(symbol: string) {
     queryFn: async () => {
       const res = await fetch('/info', {
         method: 'POST',
-        body: JSON.stringify({ type: 'metaAndAssetCtxs' })
+        body: JSON.stringify({ type: 'metaAndAssetCtxs' }),
       });
       return res.json();
     },
-    refetchInterval: 30000 // 30秒刷新一次
+    refetchInterval: 30000, // 30秒刷新一次
   });
 
   // WebSocket: 实时价格
@@ -221,7 +223,7 @@ export function usePriceData(symbol: string) {
     if (!assetCtx || !price) return null;
     const current = parseFloat(price);
     const prev = parseFloat(assetCtx.prevDayPx);
-    return ((current - prev) / prev * 100).toFixed(2);
+    return (((current - prev) / prev) * 100).toFixed(2);
   }, [price, assetCtx]);
 
   return { price, priceChange, volume24h: assetCtx?.dayNtlVlm, funding: assetCtx?.funding };
@@ -233,14 +235,15 @@ export function usePriceData(symbol: string) {
 ### 2.3 订单簿 (Order Book)
 
 #### 功能描述
+
 显示买卖盘深度，实时更新。
 
 #### API 对应
 
-| 功能 | API 类型 | 端点/订阅 |
-|------|---------|----------|
-| 初始快照 | REST | `POST /info` type: `l2Book` |
-| 实时更新 | WebSocket | `l2Book` |
+| 功能     | API 类型  | 端点/订阅                   |
+| -------- | --------- | --------------------------- |
+| 初始快照 | REST      | `POST /info` type: `l2Book` |
+| 实时更新 | WebSocket | `l2Book`                    |
 
 #### REST 请求 - 获取快照
 
@@ -302,17 +305,17 @@ export function useOrderBook(symbol: string) {
       { coin: symbol, nLevels: 20 },
       (data: WsBook) => {
         setOrderBook({
-          bids: data.levels[0].map(level => ({
+          bids: data.levels[0].map((level) => ({
             price: level.px,
             size: level.sz,
-            count: level.n
+            count: level.n,
           })),
-          asks: data.levels[1].map(level => ({
+          asks: data.levels[1].map((level) => ({
             price: level.px,
             size: level.sz,
-            count: level.n
+            count: level.n,
           })),
-          time: data.time
+          time: data.time,
         });
       }
     );
@@ -325,7 +328,7 @@ export function useOrderBook(symbol: string) {
     if (!orderBook?.bids.length || !orderBook?.asks.length) return null;
     const bestBid = parseFloat(orderBook.bids[0].price);
     const bestAsk = parseFloat(orderBook.asks[0].price);
-    return ((bestAsk - bestBid) / bestBid * 100).toFixed(4);
+    return (((bestAsk - bestBid) / bestBid) * 100).toFixed(4);
   }, [orderBook]);
 
   return { orderBook, spread };
@@ -337,22 +340,23 @@ export function useOrderBook(symbol: string) {
 ### 2.4 K线图表 (Trading Chart)
 
 #### 功能描述
+
 TradingView K线图表，支持多种时间周期。
 
 #### API 对应
 
-| 功能 | API 类型 | 端点/订阅 |
-|------|---------|----------|
-| 历史K线 | REST | `POST /info` type: `candleSnapshot` |
-| 实时K线 | WebSocket | `candle` |
+| 功能    | API 类型  | 端点/订阅                           |
+| ------- | --------- | ----------------------------------- |
+| 历史K线 | REST      | `POST /info` type: `candleSnapshot` |
+| 实时K线 | WebSocket | `candle`                            |
 
 #### 支持的时间周期
 
-| 周期代码 | 说明 |
-|---------|------|
-| 1m, 3m, 5m, 15m, 30m | 分钟级 |
-| 1h, 2h, 4h, 8h, 12h | 小时级 |
-| 1d, 3d, 1w, 1M | 日/周/月 |
+| 周期代码             | 说明     |
+| -------------------- | -------- |
+| 1m, 3m, 5m, 15m, 30m | 分钟级   |
+| 1h, 2h, 4h, 8h, 12h  | 小时级   |
+| 1d, 3d, 1w, 1M       | 日/周/月 |
 
 #### REST 请求 - 历史K线
 
@@ -425,17 +429,36 @@ import { wsManager } from '../hyperliquid/websocket';
 
 export const datafeed: IBasicDataFeed = {
   onReady: (callback) => {
-    setTimeout(() => callback({
-      supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '480', '720', '1D', '3D', '1W', '1M'],
-      supports_time: true,
-      supports_marks: false,
-    }), 0);
+    setTimeout(
+      () =>
+        callback({
+          supported_resolutions: [
+            '1',
+            '3',
+            '5',
+            '15',
+            '30',
+            '60',
+            '120',
+            '240',
+            '480',
+            '720',
+            '1D',
+            '3D',
+            '1W',
+            '1M',
+          ],
+          supports_time: true,
+          supports_marks: false,
+        }),
+      0
+    );
   },
 
   resolveSymbol: async (symbolName, onResolve, onError) => {
     // 从 meta 获取资产信息
     const meta = await fetchMeta();
-    const asset = meta.universe.find(u => u.name === symbolName);
+    const asset = meta.universe.find((u) => u.name === symbolName);
 
     if (!asset) {
       onError('Symbol not found');
@@ -454,7 +477,22 @@ export const datafeed: IBasicDataFeed = {
       has_intraday: true,
       has_daily: true,
       has_weekly_and_monthly: true,
-      supported_resolutions: ['1', '3', '5', '15', '30', '60', '120', '240', '480', '720', '1D', '3D', '1W', '1M'],
+      supported_resolutions: [
+        '1',
+        '3',
+        '5',
+        '15',
+        '30',
+        '60',
+        '120',
+        '240',
+        '480',
+        '720',
+        '1D',
+        '3D',
+        '1W',
+        '1M',
+      ],
     });
   },
 
@@ -465,7 +503,7 @@ export const datafeed: IBasicDataFeed = {
     try {
       const candles = await fetchCandles(symbolInfo.name, interval, from * 1000, to * 1000);
 
-      const bars = candles.map(c => ({
+      const bars = candles.map((c) => ({
         time: c.t,
         open: parseFloat(c.o),
         high: parseFloat(c.h),
@@ -497,15 +535,29 @@ export const datafeed: IBasicDataFeed = {
 
   unsubscribeBars: (listenerGuid) => {
     // 取消订阅逻辑
-  }
+  },
 };
 
 // 分辨率转换
 function resolutionToInterval(resolution: string): string {
   const map: Record<string, string> = {
-    '1': '1m', '3': '3m', '5': '5m', '15': '15m', '30': '30m',
-    '60': '1h', '120': '2h', '240': '4h', '480': '8h', '720': '12h',
-    'D': '1d', '1D': '1d', '3D': '3d', 'W': '1w', '1W': '1w', 'M': '1M', '1M': '1M'
+    '1': '1m',
+    '3': '3m',
+    '5': '5m',
+    '15': '15m',
+    '30': '30m',
+    '60': '1h',
+    '120': '2h',
+    '240': '4h',
+    '480': '8h',
+    '720': '12h',
+    D: '1d',
+    '1D': '1d',
+    '3D': '3d',
+    W: '1w',
+    '1W': '1w',
+    M: '1M',
+    '1M': '1M',
   };
   return map[resolution] || '1h';
 }
@@ -516,14 +568,15 @@ function resolutionToInterval(resolution: string): string {
 ### 2.5 最近成交 (Recent Trades)
 
 #### 功能描述
+
 显示最近的成交记录，实时更新。
 
 #### API 对应
 
-| 功能 | API 类型 | 端点/订阅 |
-|------|---------|----------|
-| 历史成交 | REST | `POST /info` type: `recentTrades` |
-| 实时成交 | WebSocket | `trades` |
+| 功能     | API 类型  | 端点/订阅                         |
+| -------- | --------- | --------------------------------- |
+| 历史成交 | REST      | `POST /info` type: `recentTrades` |
+| 实时成交 | WebSocket | `trades`                          |
 
 #### REST 请求
 
@@ -585,13 +638,13 @@ export function useRecentTrades(symbol: string, limit: number = 50) {
 
   useEffect(() => {
     // 获取初始数据
-    fetchRecentTrades(symbol).then(data => {
+    fetchRecentTrades(symbol).then((data) => {
       setTrades(data.slice(0, limit));
     });
 
     // 订阅实时成交
     const unsubscribe = wsManager.subscribe('trades', { coin: symbol }, (newTrades) => {
-      setTrades(prev => {
+      setTrades((prev) => {
         const updated = [...newTrades, ...prev];
         return updated.slice(0, limit);
       });
@@ -609,13 +662,14 @@ export function useRecentTrades(symbol: string, limit: number = 50) {
 ### 2.6 下单功能 (Order Placement)
 
 #### 功能描述
+
 支持市价单、限价单、止损单、止盈单。
 
 #### API 对应
 
-| 功能 | API 端点 | action type |
-|------|---------|-------------|
-| 下单 | POST /exchange | `order` |
+| 功能 | API 端点       | action type |
+| ---- | -------------- | ----------- |
+| 下单 | POST /exchange | `order`     |
 
 #### 请求格式
 
@@ -745,20 +799,22 @@ export function useSubmitOrder() {
     // 2. 构建订单
     const orderAction = {
       type: 'order',
-      orders: [{
-        a: assetId,
-        b: params.side === 'buy',
-        p: floatToWire(params.price),
-        s: floatToWire(params.size),
-        r: params.reduceOnly ?? false,
-        t: buildOrderType(params),
-        c: params.cloid
-      }],
+      orders: [
+        {
+          a: assetId,
+          b: params.side === 'buy',
+          p: floatToWire(params.price),
+          s: floatToWire(params.size),
+          r: params.reduceOnly ?? false,
+          t: buildOrderType(params),
+          c: params.cloid,
+        },
+      ],
       grouping: 'na',
       builder: {
         b: BUILDER_ADDRESS,
-        f: BUILDER_FEE_RATE
-      }
+        f: BUILDER_FEE_RATE,
+      },
     };
 
     // 3. 签名
@@ -772,8 +828,8 @@ export function useSubmitOrder() {
       body: JSON.stringify({
         action: orderAction,
         nonce,
-        signature
-      })
+        signature,
+      }),
     });
 
     const result = await response.json();
@@ -806,8 +862,8 @@ function buildOrderType(params: OrderParams) {
       trigger: {
         isMarket: params.triggerIsMarket ?? true,
         triggerPx: floatToWire(params.triggerPrice!),
-        tpsl: 'sl'
-      }
+        tpsl: 'sl',
+      },
     };
   }
   if (params.orderType === 'takeProfit') {
@@ -815,8 +871,8 @@ function buildOrderType(params: OrderParams) {
       trigger: {
         isMarket: params.triggerIsMarket ?? true,
         triggerPx: floatToWire(params.triggerPrice!),
-        tpsl: 'tp'
-      }
+        tpsl: 'tp',
+      },
     };
   }
 }
@@ -827,13 +883,14 @@ function buildOrderType(params: OrderParams) {
 ### 2.7 取消订单
 
 #### 功能描述
+
 取消未成交的挂单。
 
 #### API 对应
 
-| 功能 | action type | 说明 |
-|------|-------------|------|
-| 按订单ID取消 | `cancel` | 使用 oid |
+| 功能           | action type     | 说明       |
+| -------------- | --------------- | ---------- |
+| 按订单ID取消   | `cancel`        | 使用 oid   |
 | 按客户端ID取消 | `cancelByCloid` | 使用 cloid |
 
 #### 请求格式
@@ -889,6 +946,7 @@ function buildOrderType(params: OrderParams) {
 ### 2.8 修改订单
 
 #### 功能描述
+
 修改未成交订单的价格或数量。
 
 #### 请求格式
@@ -917,6 +975,7 @@ function buildOrderType(params: OrderParams) {
 ### 2.9 设置杠杆
 
 #### 功能描述
+
 为指定资产设置杠杆倍数和保证金模式（全仓/逐仓）。
 
 #### 请求格式
@@ -950,14 +1009,15 @@ function buildOrderType(params: OrderParams) {
 ### 2.10 持仓列表
 
 #### 功能描述
+
 显示当前所有永续合约持仓。
 
 #### API 对应
 
-| 功能 | API 类型 | 端点/订阅 |
-|------|---------|----------|
-| 获取持仓 | REST | `POST /info` type: `clearinghouseState` |
-| 实时更新 | WebSocket | `webData2` |
+| 功能     | API 类型  | 端点/订阅                               |
+| -------- | --------- | --------------------------------------- |
+| 获取持仓 | REST      | `POST /info` type: `clearinghouseState` |
+| 实时更新 | WebSocket | `webData2`                              |
 
 #### REST 请求
 
@@ -1039,14 +1099,15 @@ function buildOrderType(params: OrderParams) {
 ### 2.11 当前挂单
 
 #### 功能描述
+
 显示所有未成交的挂单。
 
 #### API 对应
 
-| 功能 | API 类型 | 端点/订阅 |
-|------|---------|----------|
-| 获取挂单 | REST | `POST /info` type: `openOrders` |
-| 实时更新 | WebSocket | `orderUpdates` |
+| 功能     | API 类型  | 端点/订阅                       |
+| -------- | --------- | ------------------------------- |
+| 获取挂单 | REST      | `POST /info` type: `openOrders` |
+| 实时更新 | WebSocket | `orderUpdates`                  |
 
 #### REST 请求
 
@@ -1111,6 +1172,7 @@ function buildOrderType(params: OrderParams) {
 ### 2.12 账户信息面板
 
 #### 功能描述
+
 显示账户余额、保证金使用情况、可用资金等。
 
 #### 数据来源
@@ -1119,13 +1181,13 @@ function buildOrderType(params: OrderParams) {
 
 #### 字段映射
 
-| 显示项 | 数据字段 | 说明 |
-|-------|---------|------|
-| 账户净值 | `marginSummary.accountValue` | 总账户价值 |
-| 可用余额 | `marginSummary.withdrawable` | 可提取/可用于开仓 |
-| 已用保证金 | `marginSummary.totalMarginUsed` | 持仓占用 |
-| 未实现盈亏 | 所有持仓 `unrealizedPnl` 之和 | 浮盈浮亏 |
-| 持仓价值 | `marginSummary.totalNtlPos` | 总持仓名义价值 |
+| 显示项     | 数据字段                        | 说明              |
+| ---------- | ------------------------------- | ----------------- |
+| 账户净值   | `marginSummary.accountValue`    | 总账户价值        |
+| 可用余额   | `marginSummary.withdrawable`    | 可提取/可用于开仓 |
+| 已用保证金 | `marginSummary.totalMarginUsed` | 持仓占用          |
+| 未实现盈亏 | 所有持仓 `unrealizedPnl` 之和   | 浮盈浮亏          |
+| 持仓价值   | `marginSummary.totalNtlPos`     | 总持仓名义价值    |
 
 ---
 
@@ -1137,10 +1199,10 @@ function buildOrderType(params: OrderParams) {
 
 #### API 对应
 
-| 功能 | API 类型 | 端点 |
-|------|---------|------|
-| 获取现货元数据 | REST | `POST /info` type: `spotMeta` |
-| 获取元数据+上下文 | REST | `POST /info` type: `spotMetaAndAssetCtxs` |
+| 功能              | API 类型 | 端点                                      |
+| ----------------- | -------- | ----------------------------------------- |
+| 获取现货元数据    | REST     | `POST /info` type: `spotMeta`             |
+| 获取元数据+上下文 | REST     | `POST /info` type: `spotMetaAndAssetCtxs` |
 
 #### 请求示例
 
@@ -1185,9 +1247,9 @@ function buildOrderType(params: OrderParams) {
 
 #### API 对应
 
-| 功能 | API 类型 | 端点 |
-|------|---------|------|
-| 获取现货余额 | REST | `POST /info` type: `spotClearinghouseState` |
+| 功能         | API 类型 | 端点                                        |
+| ------------ | -------- | ------------------------------------------- |
+| 获取现货余额 | REST     | `POST /info` type: `spotClearinghouseState` |
 
 #### 请求示例
 
@@ -1226,7 +1288,7 @@ function buildOrderType(params: OrderParams) {
 ```typescript
 // 获取现货资产 ID
 function getSpotAssetId(pairName: string, spotMeta: SpotMeta): number {
-  const index = spotMeta.universe.findIndex(u => u.name === pairName);
+  const index = spotMeta.universe.findIndex((u) => u.name === pairName);
   if (index === -1) throw new Error(`Pair ${pairName} not found`);
   return 10000 + index;
 }
@@ -1240,13 +1302,13 @@ function getSpotAssetId(pairName: string, spotMeta: SpotMeta): number {
 
 #### 与永续下单的区别
 
-| 项目 | 永续合约 | 现货 |
-|------|---------|------|
-| 资产 ID | index | 10000 + index |
-| 杠杆 | 支持 | 不支持 |
-| 做空 | 支持 | 不支持 (只能卖出持有的) |
-| reduceOnly | 适用 | 不适用 |
-| Builder 费率上限 | 0.1% | 1% |
+| 项目             | 永续合约 | 现货                    |
+| ---------------- | -------- | ----------------------- |
+| 资产 ID          | index    | 10000 + index           |
+| 杠杆             | 支持     | 不支持                  |
+| 做空             | 支持     | 不支持 (只能卖出持有的) |
+| reduceOnly       | 适用     | 不适用                  |
+| Builder 费率上限 | 0.1%     | 1%                      |
 
 #### 请求示例
 
@@ -1309,6 +1371,7 @@ function getSpotAssetId(pairName: string, spotMeta: SpotMeta): number {
 ### 4.1 账户总览
 
 #### 功能描述
+
 显示用户的总资产价值，包括永续和现货。
 
 #### API 调用
@@ -1351,7 +1414,7 @@ function calculateTotalAssets(perpState, spotState, prices) {
   return {
     perpValue,
     spotValue,
-    totalValue: perpValue + spotValue
+    totalValue: perpValue + spotValue,
   };
 }
 ```
@@ -1368,9 +1431,9 @@ function calculateTotalAssets(perpState, spotState, prices) {
 
 #### API 对应
 
-| 功能 | API 类型 | 端点 |
-|------|---------|------|
-| 历史订单 | REST | `POST /info` type: `historicalOrders` |
+| 功能     | API 类型 | 端点                                  |
+| -------- | -------- | ------------------------------------- |
+| 历史订单 | REST     | `POST /info` type: `historicalOrders` |
 
 #### 请求示例
 
@@ -1404,10 +1467,10 @@ function calculateTotalAssets(perpState, spotState, prices) {
 
 #### API 对应
 
-| 功能 | API 类型 | 端点 |
-|------|---------|------|
-| 用户成交 | REST | `POST /info` type: `userFills` |
-| 实时成交 | WebSocket | `userFills` |
+| 功能     | API 类型  | 端点                           |
+| -------- | --------- | ------------------------------ |
+| 用户成交 | REST      | `POST /info` type: `userFills` |
+| 实时成交 | WebSocket | `userFills`                    |
 
 #### REST 请求
 
@@ -1556,10 +1619,10 @@ function calculateTotalAssets(perpState, spotState, prices) {
 
 ### 5.3 费率限制
 
-| 交易类型 | 最大费率 | f 值范围 |
-|---------|---------|---------|
-| 永续合约 | 0.1% | 0-100 (100=10bp=0.1%) |
-| 现货 | 1% | 0-1000 (1000=100bp=1%) |
+| 交易类型 | 最大费率 | f 值范围               |
+| -------- | -------- | ---------------------- |
+| 永续合约 | 0.1%     | 0-100 (100=10bp=0.1%)  |
+| 现货     | 1%       | 0-1000 (1000=100bp=1%) |
 
 ### 5.4 完整授权流程实现
 
@@ -1579,13 +1642,13 @@ export function useBuilderApproval() {
         body: JSON.stringify({
           type: 'maxBuilderFee',
           user: address,
-          builder: BUILDER_ADDRESS
-        })
+          builder: BUILDER_ADDRESS,
+        }),
       });
       const data = await res.json();
       return data.maxFeeRate !== null;
     },
-    enabled: !!address
+    enabled: !!address,
   });
 
   // 授权操作
@@ -1600,7 +1663,7 @@ export function useBuilderApproval() {
         signatureChainId: IS_MAINNET ? '0xa4b1' : '0x66eee',
         builder: BUILDER_ADDRESS.toLowerCase(),
         maxFeeRate: MAX_FEE_RATE,
-        nonce
+        nonce,
       };
 
       // 使用 EIP-712 签名
@@ -1612,8 +1675,8 @@ export function useBuilderApproval() {
         body: JSON.stringify({
           action,
           nonce,
-          signature
-        })
+          signature,
+        }),
       });
 
       const result = await res.json();
@@ -1625,7 +1688,7 @@ export function useBuilderApproval() {
     },
     onSuccess: () => {
       refetch();
-    }
+    },
   });
 
   return { isApproved, approve };
@@ -1696,11 +1759,7 @@ class HyperliquidWebSocket {
   }
 
   // 订阅
-  subscribe<T>(
-    type: string,
-    params: Record<string, any>,
-    callback: (data: T) => void
-  ): () => void {
+  subscribe<T>(type: string, params: Record<string, any>, callback: (data: T) => void): () => void {
     const key = this.getSubscriptionKey(type, params);
 
     if (!this.subscriptions.has(key)) {
@@ -1726,14 +1785,14 @@ class HyperliquidWebSocket {
   private sendSubscribe(type: string, params: Record<string, any>) {
     this.send({
       method: 'subscribe',
-      subscription: { type, ...params }
+      subscription: { type, ...params },
     });
   }
 
   private sendUnsubscribe(type: string, params: Record<string, any>) {
     this.send({
       method: 'unsubscribe',
-      subscription: { type, ...params }
+      subscription: { type, ...params },
     });
   }
 
@@ -1757,7 +1816,7 @@ class HyperliquidWebSocket {
     const key = this.getChannelKey(message);
     const callbacks = this.subscriptions.get(key);
     if (callbacks) {
-      callbacks.forEach(cb => cb(message.data));
+      callbacks.forEach((cb) => cb(message.data));
     }
   }
 
@@ -1806,16 +1865,16 @@ export const wsManager = new HyperliquidWebSocket(
 
 ### 6.2 订阅类型汇总
 
-| 订阅类型 | 参数 | 用途 |
-|---------|------|------|
-| `l2Book` | `coin`, `nLevels?` | 订单簿 |
-| `trades` | `coin` | 最近成交 |
-| `candle` | `coin`, `interval` | K线数据 |
-| `allMids` | 无 | 所有中间价 |
-| `bbo` | `coin` | 最优买卖价 |
-| `orderUpdates` | `user` | 用户订单更新 |
-| `userFills` | `user`, `aggregateByTime?` | 用户成交 |
-| `webData2` | `user` | 用户完整数据 |
+| 订阅类型       | 参数                       | 用途         |
+| -------------- | -------------------------- | ------------ |
+| `l2Book`       | `coin`, `nLevels?`         | 订单簿       |
+| `trades`       | `coin`                     | 最近成交     |
+| `candle`       | `coin`, `interval`         | K线数据      |
+| `allMids`      | 无                         | 所有中间价   |
+| `bbo`          | `coin`                     | 最优买卖价   |
+| `orderUpdates` | `user`                     | 用户订单更新 |
+| `userFills`    | `user`, `aggregateByTime?` | 用户成交     |
+| `webData2`     | `user`                     | 用户完整数据 |
 
 ---
 
@@ -1825,9 +1884,9 @@ export const wsManager = new HyperliquidWebSocket(
 
 HyperLiquid 使用两种 EIP-712 签名方式：
 
-| 签名方法 | 用途 | 说明 |
-|---------|------|------|
-| `sign_l1_action` | 交易操作 | 下单、取消、修改等 |
+| 签名方法                  | 用途     | 说明                 |
+| ------------------------- | -------- | -------------------- |
+| `sign_l1_action`          | 交易操作 | 下单、取消、修改等   |
 | `sign_user_signed_action` | 用户授权 | ApproveBuilderFee 等 |
 
 ### 7.2 签名实现代码
@@ -1865,19 +1924,19 @@ export async function signL1Action(
     name: 'Exchange',
     version: '1',
     chainId: isMainnet ? MAINNET_CHAIN_ID : TESTNET_CHAIN_ID,
-    verifyingContract: '0x0000000000000000000000000000000000000000' as `0x${string}`
+    verifyingContract: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   };
 
   const types = {
     Agent: [
       { name: 'source', type: 'string' },
-      { name: 'connectionId', type: 'bytes32' }
-    ]
+      { name: 'connectionId', type: 'bytes32' },
+    ],
   };
 
   const message = {
     source,
-    connectionId
+    connectionId,
   };
 
   const signature = await walletClient.signTypedData({
@@ -1885,7 +1944,7 @@ export async function signL1Action(
     domain,
     types,
     primaryType: 'Agent',
-    message
+    message,
   });
 
   return parseSignature(signature);
@@ -1907,7 +1966,7 @@ export async function signApproveBuilderFee(
     name: 'HyperliquidSignTransaction',
     version: '1',
     chainId: isMainnet ? MAINNET_CHAIN_ID : TESTNET_CHAIN_ID,
-    verifyingContract: '0x0000000000000000000000000000000000000000' as `0x${string}`
+    verifyingContract: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   };
 
   const types = {
@@ -1915,15 +1974,15 @@ export async function signApproveBuilderFee(
       { name: 'hyperliquidChain', type: 'string' },
       { name: 'maxFeeRate', type: 'string' },
       { name: 'builder', type: 'address' },
-      { name: 'nonce', type: 'uint64' }
-    ]
+      { name: 'nonce', type: 'uint64' },
+    ],
   };
 
   const message = {
     hyperliquidChain: action.hyperliquidChain,
     maxFeeRate: action.maxFeeRate,
     builder: action.builder as `0x${string}`,
-    nonce: BigInt(action.nonce)
+    nonce: BigInt(action.nonce),
   };
 
   const signature = await walletClient.signTypedData({
@@ -1931,7 +1990,7 @@ export async function signApproveBuilderFee(
     domain,
     types,
     primaryType: 'HyperliquidTransaction:ApproveBuilderFee',
-    message
+    message,
   });
 
   return parseSignature(signature);
@@ -1954,17 +2013,18 @@ function computeConnectionId(
 ): `0x${string}` {
   if (vaultAddress) {
     return keccak256(
-      encodeAbiParameters(
-        parseAbiParameters('bytes32, address, uint64'),
-        [actionHash as `0x${string}`, vaultAddress as `0x${string}`, BigInt(nonce)]
-      )
+      encodeAbiParameters(parseAbiParameters('bytes32, address, uint64'), [
+        actionHash as `0x${string}`,
+        vaultAddress as `0x${string}`,
+        BigInt(nonce),
+      ])
     );
   }
   return keccak256(
-    encodeAbiParameters(
-      parseAbiParameters('bytes32, uint64'),
-      [actionHash as `0x${string}`, BigInt(nonce)]
-    )
+    encodeAbiParameters(parseAbiParameters('bytes32, uint64'), [
+      actionHash as `0x${string}`,
+      BigInt(nonce),
+    ])
   );
 }
 
@@ -1977,13 +2037,13 @@ export function floatToWire(x: number): string {
 
 ### 7.3 签名注意事项
 
-| 事项 | 要求 |
-|------|------|
-| 地址格式 | 必须小写 |
-| 数字格式 | 使用 `floatToWire` 移除尾随零 |
-| Nonce | 时间戳，范围 (T - 2天, T + 1天) |
-| msgpack 字段顺序 | 必须按特定顺序编码 |
-| Chain ID | 主网 42161，测试网 421614 |
+| 事项             | 要求                            |
+| ---------------- | ------------------------------- |
+| 地址格式         | 必须小写                        |
+| 数字格式         | 使用 `floatToWire` 移除尾随零   |
+| Nonce            | 时间戳，范围 (T - 2天, T + 1天) |
+| msgpack 字段顺序 | 必须按特定顺序编码              |
+| Chain ID         | 主网 42161，测试网 421614       |
 
 ---
 
@@ -1991,16 +2051,16 @@ export function floatToWire(x: number): string {
 
 ### 8.1 常见错误
 
-| 错误信息 | 原因 | 解决方案 |
-|---------|------|---------|
-| `Insufficient margin` | 保证金不足 | 减少数量或增加保证金 |
-| `Invalid signature` | 签名错误 | 检查地址小写、数字格式 |
-| `Order would cross` | 限价单会立即成交 | 使用 IOC 或调整价格 |
-| `Rate limit exceeded` | 超过频率限制 | 降低请求频率 |
-| `Nonce too old/new` | Nonce 不在有效窗口 | 使用当前时间戳 |
-| `User does not exist` | 账户未初始化 | 先存入资金激活账户 |
-| `Builder not eligible` | Builder 资金不足 | Builder 需 100+ USDC |
-| `Not authorized` | 未授权 Builder | 签署 ApproveBuilderFee |
+| 错误信息               | 原因               | 解决方案               |
+| ---------------------- | ------------------ | ---------------------- |
+| `Insufficient margin`  | 保证金不足         | 减少数量或增加保证金   |
+| `Invalid signature`    | 签名错误           | 检查地址小写、数字格式 |
+| `Order would cross`    | 限价单会立即成交   | 使用 IOC 或调整价格    |
+| `Rate limit exceeded`  | 超过频率限制       | 降低请求频率           |
+| `Nonce too old/new`    | Nonce 不在有效窗口 | 使用当前时间戳         |
+| `User does not exist`  | 账户未初始化       | 先存入资金激活账户     |
+| `Builder not eligible` | Builder 资金不足   | Builder 需 100+ USDC   |
+| `Not authorized`       | 未授权 Builder     | 签署 ApproveBuilderFee |
 
 ### 8.2 错误处理实现
 

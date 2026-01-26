@@ -2,7 +2,7 @@
  * HyperLiquid EIP-712 签名工具
  */
 
-import { L1_ACTION_DOMAIN, EIP712_DOMAIN, IS_TESTNET } from './constants';
+import { L1_ACTION_DOMAIN, IS_TESTNET } from './constants';
 
 export interface ParsedSignature {
   r: string;
@@ -17,7 +17,7 @@ export interface ParsedSignature {
 export function parseSignature(signature: string): ParsedSignature {
   // 移除 0x 前缀（如果有）
   const sig = signature.startsWith('0x') ? signature.slice(2) : signature;
-  
+
   const r = '0x' + sig.slice(0, 64);
   const s = '0x' + sig.slice(64, 128);
   const v = parseInt(sig.slice(128, 130), 16);
@@ -37,17 +37,15 @@ type SignTypedDataFn = (params: {
  * 计算 action hash
  * 用于 L1 Action 签名
  */
-function actionHash(
+function _actionHash(
   action: Record<string, unknown>,
   vaultAddress: string | null,
   nonce: number
 ): string {
   // 简化处理：直接将 action 序列化
   const actionStr = JSON.stringify(action);
-  const dataToHash = vaultAddress
-    ? `${actionStr}${vaultAddress}${nonce}`
-    : `${actionStr}${nonce}`;
-  
+  const dataToHash = vaultAddress ? `${actionStr}${vaultAddress}${nonce}` : `${actionStr}${nonce}`;
+
   // 使用 Web Crypto API 计算 hash (在浏览器环境)
   // 这里返回一个占位符，实际签名时会用 EIP-712 structured data
   return dataToHash;
@@ -56,10 +54,7 @@ function actionHash(
 /**
  * 构建 L1 Action 的 EIP-712 类型数据
  */
-function buildL1ActionTypedData(
-  connectionId: string,
-  isTestnet: boolean
-) {
+function buildL1ActionTypedData(connectionId: string, isTestnet: boolean) {
   return {
     domain: {
       ...L1_ACTION_DOMAIN,
@@ -103,7 +98,7 @@ export async function signL1Action(
   const data = encoder.encode(JSON.stringify(actionData));
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const connectionId = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const connectionId = '0x' + hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
   const typedData = buildL1ActionTypedData(connectionId, isTestnet);
 
@@ -122,10 +117,7 @@ export async function signL1Action(
  * 构建 User Signed Action 的 EIP-712 类型数据
  * 用于授权类操作 (ApproveBuilderFee 等)
  */
-function buildUserSignedActionTypedData(
-  action: Record<string, unknown>,
-  isTestnet: boolean
-) {
+function buildUserSignedActionTypedData(action: Record<string, unknown>, isTestnet: boolean) {
   // 根据 action 类型构建不同的类型定义
   const actionType = action.type as string;
 

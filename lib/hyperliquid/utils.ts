@@ -8,7 +8,7 @@ import Decimal from 'decimal.js';
  * 将浮点数转换为 HyperLiquid API 要求的字符串格式
  * - 去除尾部多余的零
  * - 处理精度问题
- * 
+ *
  * @param value - 要转换的数值
  * @param decimals - 小数位数精度
  * @returns 格式化后的字符串
@@ -109,7 +109,7 @@ export function formatUsd(value: number | string, decimals: number = 2): string 
 export function formatCompact(value: number | string): string {
   const num = typeof value === 'string' ? parseFloat(value) : value;
   if (isNaN(num)) return '0';
-  
+
   const absNum = Math.abs(num);
   if (absNum >= 1e9) {
     return `${(num / 1e9).toFixed(2)}B`;
@@ -138,7 +138,12 @@ export function generateNonce(): number {
 export function generateCloid(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
-  return '0x' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  return (
+    '0x' +
+    Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+  );
 }
 
 /**
@@ -157,7 +162,7 @@ export function normalizeAddress(address: string): string {
  * @returns asset index
  */
 export function getAssetIndex(coin: string, universe: { name: string }[]): number {
-  const index = universe.findIndex(meta => meta.name === coin);
+  const index = universe.findIndex((meta) => meta.name === coin);
   if (index === -1) {
     throw new Error(`Asset ${coin} not found in universe`);
   }

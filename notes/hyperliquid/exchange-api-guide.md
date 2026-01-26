@@ -24,9 +24,9 @@
 
 ### 1.1 API 端点
 
-| 环境 | REST API | WebSocket |
-|------|----------|-----------|
-| 主网 | `https://api.hyperliquid.xyz/exchange` | `wss://api.hyperliquid.xyz/ws` |
+| 环境   | REST API                                       | WebSocket                              |
+| ------ | ---------------------------------------------- | -------------------------------------- |
+| 主网   | `https://api.hyperliquid.xyz/exchange`         | `wss://api.hyperliquid.xyz/ws`         |
 | 测试网 | `https://api.hyperliquid-testnet.xyz/exchange` | `wss://api.hyperliquid-testnet.xyz/ws` |
 
 ### 1.2 请求结构
@@ -35,41 +35,41 @@
 
 ```typescript
 interface ExchangeRequest<A> {
-  action: A;                    // 具体操作
-  nonce: number;                // 时间戳（毫秒）
-  signature: Signature;         // EIP-712 签名
-  vaultAddress?: string;        // Vault 地址（可选，代理交易时使用）
+  action: A; // 具体操作
+  nonce: number; // 时间戳（毫秒）
+  signature: Signature; // EIP-712 签名
+  vaultAddress?: string; // Vault 地址（可选，代理交易时使用）
 }
 
 interface Signature {
-  r: string;  // 签名 r 值 (0x...)
-  s: string;  // 签名 s 值 (0x...)
-  v: number;  // 签名 v 值 (27 或 28)
+  r: string; // 签名 r 值 (0x...)
+  s: string; // 签名 s 值 (0x...)
+  v: number; // 签名 v 值 (27 或 28)
 }
 ```
 
 ### 1.3 操作类型概览
 
-| 类别 | 操作 | type 值 | 签名方法 |
-|------|------|---------|----------|
-| 订单 | 下单 | `order` | signL1Action |
-| 订单 | 撤单 | `cancel` | signL1Action |
-| 订单 | 按 cloid 撤单 | `cancelByCloid` | signL1Action |
-| 订单 | 修改订单 | `modify` | signL1Action |
-| 订单 | 批量修改 | `batchModify` | signL1Action |
-| 账户 | 更新杠杆 | `updateLeverage` | signL1Action |
-| 账户 | 更新逐仓保证金 | `updateIsolatedMargin` | signL1Action |
-| 资金 | USDC 转账 | `usdSend` | signUserSignedAction |
-| 资金 | 提现到 L1 | `withdraw3` | signUserSignedAction |
-| 资金 | 现货转账 | `spotSend` | signUserSignedAction |
-| 资金 | 账户互转 | `usdClassTransfer` | signL1Action |
-| 资金 | 子账户转账 | `subAccountTransfer` | signL1Action |
-| Vault | 存入 | `vaultDeposit` | signL1Action |
-| Vault | 取出 | `vaultWithdraw` | signL1Action |
-| 授权 | 授权 Builder 费率 | `approveBuilderFee` | signUserSignedAction |
-| 授权 | 授权 API 钱包 | `approveAgent` | signUserSignedAction |
-| 推荐 | 设置推荐码 | `setReferrer` | signUserSignedAction |
-| 推荐 | 创建推荐码 | `createReferralCode` | signUserSignedAction |
+| 类别  | 操作              | type 值                | 签名方法             |
+| ----- | ----------------- | ---------------------- | -------------------- |
+| 订单  | 下单              | `order`                | signL1Action         |
+| 订单  | 撤单              | `cancel`               | signL1Action         |
+| 订单  | 按 cloid 撤单     | `cancelByCloid`        | signL1Action         |
+| 订单  | 修改订单          | `modify`               | signL1Action         |
+| 订单  | 批量修改          | `batchModify`          | signL1Action         |
+| 账户  | 更新杠杆          | `updateLeverage`       | signL1Action         |
+| 账户  | 更新逐仓保证金    | `updateIsolatedMargin` | signL1Action         |
+| 资金  | USDC 转账         | `usdSend`              | signUserSignedAction |
+| 资金  | 提现到 L1         | `withdraw3`            | signUserSignedAction |
+| 资金  | 现货转账          | `spotSend`             | signUserSignedAction |
+| 资金  | 账户互转          | `usdClassTransfer`     | signL1Action         |
+| 资金  | 子账户转账        | `subAccountTransfer`   | signL1Action         |
+| Vault | 存入              | `vaultDeposit`         | signL1Action         |
+| Vault | 取出              | `vaultWithdraw`        | signL1Action         |
+| 授权  | 授权 Builder 费率 | `approveBuilderFee`    | signUserSignedAction |
+| 授权  | 授权 API 钱包     | `approveAgent`         | signUserSignedAction |
+| 推荐  | 设置推荐码        | `setReferrer`          | signUserSignedAction |
+| 推荐  | 创建推荐码        | `createReferralCode`   | signUserSignedAction |
 
 ---
 
@@ -84,7 +84,7 @@ HyperLiquid 使用 **EIP-712 结构化签名**，有两种签名方法：
 const MAINNET_DOMAIN = {
   name: 'HyperliquidSignTransaction',
   version: '1',
-  chainId: 42161,  // Arbitrum One
+  chainId: 42161, // Arbitrum One
   verifyingContract: '0x0000000000000000000000000000000000000000',
 };
 
@@ -92,7 +92,7 @@ const MAINNET_DOMAIN = {
 const TESTNET_DOMAIN = {
   name: 'HyperliquidSignTransaction',
   version: '1',
-  chainId: 421614,  // Arbitrum Sepolia
+  chainId: 421614, // Arbitrum Sepolia
   verifyingContract: '0x0000000000000000000000000000000000000000',
 };
 ```
@@ -219,12 +219,12 @@ async function signApproveBuilderFee(
 
 ### 2.4 签名常见错误
 
-| 错误 | 原因 | 解决方案 |
-|------|------|----------|
-| `Invalid signature` | 签名格式错误 | 确保使用 `{r, s, v}` 对象格式，不是字符串 |
-| `422 Unprocessable Entity` | 签名内容不匹配 | 检查 action 序列化是否正确 |
-| `Nonce too old` | nonce 过期 | 使用当前时间戳（毫秒） |
-| `Wrong chain` | 签名域 chainId 错误 | 主网用 42161，测试网用 421614 |
+| 错误                       | 原因                | 解决方案                                  |
+| -------------------------- | ------------------- | ----------------------------------------- |
+| `Invalid signature`        | 签名格式错误        | 确保使用 `{r, s, v}` 对象格式，不是字符串 |
+| `422 Unprocessable Entity` | 签名内容不匹配      | 检查 action 序列化是否正确                |
+| `Nonce too old`            | nonce 过期          | 使用当前时间戳（毫秒）                    |
+| `Wrong chain`              | 签名域 chainId 错误 | 主网用 42161，测试网用 421614             |
 
 ---
 
@@ -234,18 +234,18 @@ async function signApproveBuilderFee(
 
 ```typescript
 interface OrderRequest {
-  a: number;      // 资产索引 (永续: index, 现货: 10000+index)
-  b: boolean;     // 方向: true=买入/开多, false=卖出/开空
-  p: string;      // 限价 (移除尾随零)
-  s: string;      // 数量
-  r: boolean;     // 是否仅减仓
-  t: OrderType;   // 订单类型
-  c?: string;     // 客户端订单ID (可选)
+  a: number; // 资产索引 (永续: index, 现货: 10000+index)
+  b: boolean; // 方向: true=买入/开多, false=卖出/开空
+  p: string; // 限价 (移除尾随零)
+  s: string; // 数量
+  r: boolean; // 是否仅减仓
+  t: OrderType; // 订单类型
+  c?: string; // 客户端订单ID (可选)
 }
 
 interface OrderType {
   limit: {
-    tif: 'Gtc' | 'Ioc' | 'Alo';  // 有效期
+    tif: 'Gtc' | 'Ioc' | 'Alo'; // 有效期
   };
   trigger?: {
     triggerPx: string;
@@ -259,8 +259,8 @@ interface OrderAction {
   orders: OrderRequest[];
   grouping: 'na' | 'normalTpsl' | 'positionTpsl';
   builder?: {
-    b: string;  // Builder 地址
-    f: number;  // 费率 (基点)
+    b: string; // Builder 地址
+    f: number; // 费率 (基点)
   };
 }
 ```
@@ -280,14 +280,16 @@ async function placeOrder(
 
   const action: OrderAction = {
     type: 'order',
-    orders: [{
-      a: asset,
-      b: isBuy,
-      p: price,
-      s: size,
-      r: reduceOnly,
-      t: { limit: { tif: 'Gtc' } },
-    }],
+    orders: [
+      {
+        a: asset,
+        b: isBuy,
+        p: price,
+        s: size,
+        r: reduceOnly,
+        t: { limit: { tif: 'Gtc' } },
+      },
+    ],
     grouping: 'na',
   };
 
@@ -343,10 +345,10 @@ async function placeOrderWithTpSl(
       // 止盈订单
       {
         a: asset,
-        b: !isBuy,  // 方向相反
+        b: !isBuy, // 方向相反
         p: tpPrice,
         s: size,
-        r: true,    // 仅减仓
+        r: true, // 仅减仓
         t: {
           limit: { tif: 'Gtc' },
           trigger: {
@@ -373,7 +375,7 @@ async function placeOrderWithTpSl(
         },
       },
     ],
-    grouping: 'normalTpsl',  // 使用 TP/SL 分组
+    grouping: 'normalTpsl', // 使用 TP/SL 分组
   };
 
   const signature = await signL1Action(walletClient, { action, nonce });
@@ -388,16 +390,12 @@ async function placeOrderWithTpSl(
 interface CancelAction {
   type: 'cancel';
   cancels: Array<{
-    a: number;  // 资产索引
-    o: number;  // 订单ID
+    a: number; // 资产索引
+    o: number; // 订单ID
   }>;
 }
 
-async function cancelOrder(
-  walletClient: WalletClient,
-  asset: number,
-  orderId: number
-) {
+async function cancelOrder(walletClient: WalletClient, asset: number, orderId: number) {
   const nonce = Date.now();
 
   const action: CancelAction = {
@@ -416,15 +414,11 @@ async function cancelOrder(
 ```typescript
 interface ModifyAction {
   type: 'modify';
-  oid: number;         // 原订单ID
+  oid: number; // 原订单ID
   order: OrderRequest; // 新的订单参数
 }
 
-async function modifyOrder(
-  walletClient: WalletClient,
-  orderId: number,
-  newOrder: OrderRequest
-) {
+async function modifyOrder(walletClient: WalletClient, orderId: number, newOrder: OrderRequest) {
   const nonce = Date.now();
 
   const action: ModifyAction = {
@@ -448,9 +442,9 @@ async function modifyOrder(
 ```typescript
 interface UpdateLeverageAction {
   type: 'updateLeverage';
-  asset: number;      // 资产索引
-  isCross: boolean;   // true=全仓, false=逐仓
-  leverage: number;   // 杠杆倍数 (1-100)
+  asset: number; // 资产索引
+  isCross: boolean; // true=全仓, false=逐仓
+  leverage: number; // 杠杆倍数 (1-100)
 }
 
 async function updateLeverage(
@@ -486,9 +480,9 @@ await updateLeverage(walletClient, 1, 20, false);
 ```typescript
 interface UpdateIsolatedMarginAction {
   type: 'updateIsolatedMargin';
-  asset: number;   // 资产索引
-  isBuy: boolean;  // true=增加, false=减少
-  ntli: number;    // 保证金变化量 (USD)
+  asset: number; // 资产索引
+  isBuy: boolean; // true=增加, false=减少
+  ntli: number; // 保证金变化量 (USD)
 }
 
 async function updateIsolatedMargin(
@@ -523,16 +517,12 @@ L2 内部转账，即时到账，无 gas 费用。
 ```typescript
 interface UsdSendAction {
   type: 'usdSend';
-  destination: string;  // 接收地址
-  amount: string;       // 转账金额
-  time: number;         // 发送时间 (毫秒)
+  destination: string; // 接收地址
+  amount: string; // 转账金额
+  time: number; // 发送时间 (毫秒)
 }
 
-async function sendUsdc(
-  walletClient: WalletClient,
-  destination: string,
-  amount: string
-) {
+async function sendUsdc(walletClient: WalletClient, destination: string, amount: string) {
   const time = Date.now();
   const nonce = time;
 
@@ -557,16 +547,12 @@ async function sendUsdc(
 ```typescript
 interface Withdraw3Action {
   type: 'withdraw3';
-  destination: string;  // 接收地址
-  amount: string;       // 提现金额
-  time: number;         // 发送时间 (毫秒)
+  destination: string; // 接收地址
+  amount: string; // 提现金额
+  time: number; // 发送时间 (毫秒)
 }
 
-async function withdraw(
-  walletClient: WalletClient,
-  destination: string,
-  amount: string
-) {
+async function withdraw(walletClient: WalletClient, destination: string, amount: string) {
   const time = Date.now();
   const nonce = time;
 
@@ -591,8 +577,8 @@ async function withdraw(
 ```typescript
 interface UsdClassTransferAction {
   type: 'usdClassTransfer';
-  toPerp: boolean;   // true=现货→永续, false=永续→现货
-  amount: string;    // 转账金额
+  toPerp: boolean; // true=现货→永续, false=永续→现货
+  amount: string; // 转账金额
 }
 
 async function transferBetweenAccounts(
@@ -623,15 +609,11 @@ async function transferBetweenAccounts(
 ```typescript
 interface VaultDepositAction {
   type: 'vaultDeposit';
-  vaultAddress: string;  // Vault 地址
-  usd: number;           // 存入金额
+  vaultAddress: string; // Vault 地址
+  usd: number; // 存入金额
 }
 
-async function depositToVault(
-  walletClient: WalletClient,
-  vaultAddress: string,
-  amount: number
-) {
+async function depositToVault(walletClient: WalletClient, vaultAddress: string, amount: number) {
   const nonce = Date.now();
 
   const action: VaultDepositAction = {
@@ -651,15 +633,11 @@ async function depositToVault(
 ```typescript
 interface VaultWithdrawAction {
   type: 'vaultWithdraw';
-  vaultAddress: string;  // Vault 地址
-  usd: number;           // 取出金额
+  vaultAddress: string; // Vault 地址
+  usd: number; // 取出金额
 }
 
-async function withdrawFromVault(
-  walletClient: WalletClient,
-  vaultAddress: string,
-  amount: number
-) {
+async function withdrawFromVault(walletClient: WalletClient, vaultAddress: string, amount: number) {
   const nonce = Date.now();
 
   const action: VaultWithdrawAction = {
@@ -693,14 +671,14 @@ BuildCode 是 HyperLiquid 的第三方平台收费机制，允许 Builder 从用
 ```typescript
 interface ApproveBuilderFeeAction {
   type: 'approveBuilderFee';
-  builder: string;       // Builder 钱包地址
-  maxFeeRate: string;    // 最大费率 (基点字符串)
+  builder: string; // Builder 钱包地址
+  maxFeeRate: string; // 最大费率 (基点字符串)
 }
 
 async function approveBuilderFee(
   walletClient: WalletClient,
   builderAddress: string,
-  maxFeeRate: string = '10'  // 默认 0.1%
+  maxFeeRate: string = '10' // 默认 0.1%
 ) {
   const nonce = Date.now();
 
@@ -711,12 +689,7 @@ async function approveBuilderFee(
   };
 
   // 使用 signUserSignedAction
-  const signature = await signApproveBuilderFee(
-    walletClient,
-    builderAddress,
-    maxFeeRate,
-    nonce
-  );
+  const signature = await signApproveBuilderFee(walletClient, builderAddress, maxFeeRate, nonce);
 
   const response = await fetch('https://api.hyperliquid.xyz/exchange', {
     method: 'POST',
@@ -737,7 +710,7 @@ async function placeOrderWithBuilder(
   walletClient: WalletClient,
   orderParams: OrderRequest,
   builderAddress: string,
-  feeRate: number = 10  // 0.1%
+  feeRate: number = 10 // 0.1%
 ) {
   const nonce = Date.now();
 
@@ -784,9 +757,9 @@ async function placeOrderWithBuilder(
 ```typescript
 interface ApproveAgentAction {
   type: 'approveAgent';
-  agentAddress: string;   // Agent 钱包地址
-  agentName?: string;     // Agent 名称 (可选)
-  nonce?: number;         // 授权到期时间 (可选)
+  agentAddress: string; // Agent 钱包地址
+  agentName?: string; // Agent 名称 (可选)
+  nonce?: number; // 授权到期时间 (可选)
 }
 
 async function approveAgent(
@@ -801,7 +774,7 @@ async function approveAgent(
     type: 'approveAgent',
     agentAddress,
     agentName,
-    nonce: expirationTime,  // action.nonce 是到期时间
+    nonce: expirationTime, // action.nonce 是到期时间
   };
 
   // 使用 signUserSignedAction
@@ -830,7 +803,7 @@ interface SuccessResponse {
 // 错误响应
 interface ErrorResponse {
   status: 'err';
-  response: string;  // 错误信息
+  response: string; // 错误信息
 }
 ```
 
@@ -850,14 +823,14 @@ interface OrderResponse {
 interface OrderStatus {
   status: 'filled' | 'resting' | 'error';
   filled?: {
-    totalSz: string;  // 成交数量
-    avgPx: string;    // 成交均价
-    oid: number;      // 订单ID
+    totalSz: string; // 成交数量
+    avgPx: string; // 成交均价
+    oid: number; // 订单ID
   };
   resting?: {
-    oid: number;      // 订单ID
+    oid: number; // 订单ID
   };
-  error?: string;     // 错误信息
+  error?: string; // 错误信息
 }
 ```
 
@@ -889,15 +862,15 @@ async function handleOrderResponse(response: OrderResponse | ErrorResponse) {
 
 ### 10.1 常见错误码
 
-| 错误信息 | 原因 | 解决方案 |
-|----------|------|----------|
-| `Invalid signature` | 签名格式错误 | 使用 `{r, s, v}` 对象格式 |
-| `Insufficient margin` | 保证金不足 | 增加保证金或减少仓位 |
-| `Order would be immediately liquidated` | 订单会导致立即清算 | 调整价格或仓位大小 |
-| `Position does not exist` | 没有对应持仓 | 检查资产索引和方向 |
-| `Order not found` | 订单不存在 | 检查订单ID |
-| `Nonce too old` | Nonce 过期 | 使用当前时间戳 |
-| `Rate limit exceeded` | 请求过于频繁 | 添加请求间隔 |
+| 错误信息                                | 原因               | 解决方案                  |
+| --------------------------------------- | ------------------ | ------------------------- |
+| `Invalid signature`                     | 签名格式错误       | 使用 `{r, s, v}` 对象格式 |
+| `Insufficient margin`                   | 保证金不足         | 增加保证金或减少仓位      |
+| `Order would be immediately liquidated` | 订单会导致立即清算 | 调整价格或仓位大小        |
+| `Position does not exist`               | 没有对应持仓       | 检查资产索引和方向        |
+| `Order not found`                       | 订单不存在         | 检查订单ID                |
+| `Nonce too old`                         | Nonce 过期         | 使用当前时间戳            |
+| `Rate limit exceeded`                   | 请求过于频繁       | 添加请求间隔              |
 
 ### 10.2 错误处理最佳实践
 
@@ -966,15 +939,15 @@ async function main() {
   const response = await placeOrderWithBuilder(
     walletClient,
     {
-      a: 0,           // BTC
-      b: true,        // 买入/开多
-      p: '95000',     // 限价
-      s: '0.001',     // 数量
-      r: false,       // 非减仓
+      a: 0, // BTC
+      b: true, // 买入/开多
+      p: '95000', // 限价
+      s: '0.001', // 数量
+      r: false, // 非减仓
       t: { limit: { tif: 'Gtc' } },
     },
     BUILDER_ADDRESS,
-    10  // 0.1% 费率
+    10 // 0.1% 费率
   );
 
   console.log('下单结果:', response);
@@ -989,10 +962,10 @@ async function marketBuy(walletClient: WalletClient, asset: number, size: string
   return placeOrder(walletClient, {
     a: asset,
     b: true,
-    p: '9999999',    // 远高于市场价
+    p: '9999999', // 远高于市场价
     s: size,
     r: false,
-    t: { limit: { tif: 'Ioc' } },  // 立即成交否则取消
+    t: { limit: { tif: 'Ioc' } }, // 立即成交否则取消
   });
 }
 
@@ -1001,7 +974,7 @@ async function marketSell(walletClient: WalletClient, asset: number, size: strin
   return placeOrder(walletClient, {
     a: asset,
     b: false,
-    p: '0.01',       // 远低于市场价
+    p: '0.01', // 远低于市场价
     s: size,
     r: false,
     t: { limit: { tif: 'Ioc' } },
@@ -1015,17 +988,17 @@ async function marketSell(walletClient: WalletClient, asset: number, size: strin
 async function closePosition(
   walletClient: WalletClient,
   asset: number,
-  positionSize: string,  // 当前持仓量 (正=多头, 负=空头)
+  positionSize: string // 当前持仓量 (正=多头, 负=空头)
 ) {
   const size = Math.abs(parseFloat(positionSize));
-  const isBuy = parseFloat(positionSize) < 0;  // 空头需要买入平仓
+  const isBuy = parseFloat(positionSize) < 0; // 空头需要买入平仓
 
   return placeOrder(walletClient, {
     a: asset,
     b: isBuy,
-    p: isBuy ? '9999999' : '0.01',  // 市价
+    p: isBuy ? '9999999' : '0.01', // 市价
     s: size.toString(),
-    r: true,  // 仅减仓
+    r: true, // 仅减仓
     t: { limit: { tif: 'Ioc' } },
   });
 }
@@ -1042,4 +1015,4 @@ async function closePosition(
 
 ---
 
-*最后更新: 2026-01-22*
+_最后更新: 2026-01-22_
