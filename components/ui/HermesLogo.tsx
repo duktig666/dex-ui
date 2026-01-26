@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface HermesLogoProps {
   className?: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   animated?: boolean;
 }
 
-export function HermesLogo({ className, size = "md", animated = true }: HermesLogoProps) {
+export function HermesLogo({ className, size = 'md', animated = true }: HermesLogoProps) {
   const sizes = {
-    sm: "text-2xl",
-    md: "text-4xl",
-    lg: "text-6xl",
-    xl: "text-8xl",
+    sm: 'text-2xl',
+    md: 'text-4xl',
+    lg: 'text-6xl',
+    xl: 'text-8xl',
   };
 
-  const letters = "HERMES".split("");
+  const letters = 'HERMES'.split('');
 
   return (
-    <div className={cn("font-gilroy font-extrabold tracking-tight", sizes[size], className)}>
+    <div className={cn('font-gilroy font-extrabold tracking-tight', sizes[size], className)}>
       {animated ? (
         <motion.div className="flex">
           {letters.map((letter, index) => (
@@ -31,7 +31,7 @@ export function HermesLogo({ className, size = "md", animated = true }: HermesLo
               transition={{
                 duration: 0.5,
                 delay: index * 0.1,
-                ease: "easeOut",
+                ease: 'easeOut',
               }}
               className="inline-block bg-gradient-to-b from-white via-white to-gray-400 bg-clip-text text-transparent"
             >
@@ -54,15 +54,19 @@ export function HermesLogoIcon({ className }: { className?: string }) {
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-8 h-8", className)}
+      className={cn('w-8 h-8', className)}
     >
       <rect width="32" height="32" rx="8" fill="url(#logo-gradient)" />
-      <path
-        d="M8 10h4v12H8V10zm6 0h4v4.5h4V10h4v12h-4v-4.5h-4V22h-4V10z"
-        fill="white"
-      />
+      <path d="M8 10h4v12H8V10zm6 0h4v4.5h4V10h4v12h-4v-4.5h-4V22h-4V10z" fill="white" />
       <defs>
-        <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="logo-gradient"
+          x1="0"
+          y1="0"
+          x2="32"
+          y2="32"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#1a1a1a" />
           <stop offset="1" stopColor="#000000" />
         </linearGradient>
@@ -70,4 +74,3 @@ export function HermesLogoIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-

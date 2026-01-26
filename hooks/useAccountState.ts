@@ -5,17 +5,17 @@
 
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { useUserStore } from '@/stores/userStore';
-import { infoClient, hyperliquidWs, BUILDER_ADDRESS, BUILDER_FEE_PERP, BUILDER_FEE_SPOT } from '@/lib/hyperliquid';
+import { infoClient, hyperliquidWs, BUILDER_ADDRESS } from '@/lib/hyperliquid';
 
 /**
  * 账户状态 Hook
  */
 export function useAccountState() {
   const { address, isConnected } = useAccount();
-  
+
   const {
     marginSummary,
     positions,
@@ -26,16 +26,14 @@ export function useAccountState() {
     isLoading,
     isInitialized,
     error,
-    builderFeeMaxRate,
-    builderFeeChecked,
+    builderFeeApproved,
     builderFeeChecking,
     setAddress,
     setConnected,
     updateClearinghouseState,
     updateOpenOrders,
     updateUserFills,
-    setBuilderFeeMaxRate,
-    setBuilderFeeChecked,
+    setBuilderFeeApproved,
     setBuilderFeeChecking,
     setError,
   } = useUserStore();
@@ -74,37 +72,19 @@ export function useAccountState() {
   // 检查 Builder Fee 授权状态
   const checkBuilderFee = useCallback(async () => {
     if (!address) return;
-    
-    // 防止重复检查
-    if (builderFeeChecked) {
-      console.log('[useAccountState] Builder fee already checked, skipping');
-      return;
-    }
 
     setBuilderFeeChecking(true);
     try {
       const maxFee = await infoClient.getMaxBuilderFee(address, BUILDER_ADDRESS);
-      setBuilderFeeMaxRate(maxFee);
-      setBuilderFeeChecked(true);
-      
-      // 检查是否满足永续和现货的费率要求
-      const perpApproved = maxFee >= BUILDER_FEE_PERP;
-      const spotApproved = maxFee >= BUILDER_FEE_SPOT;
-      console.log('[useAccountState] Builder fee check complete:', {
-        maxFee,
-        requiredPerp: BUILDER_FEE_PERP,
-        requiredSpot: BUILDER_FEE_SPOT,
-        perpApproved,
-        spotApproved,
-      });
+      setBuilderFeeApproved(maxFee > 0);
+      console.log('[useAccountState] Builder fee approved:', maxFee > 0, 'maxFee:', maxFee);
     } catch (err) {
       console.error('[useAccountState] Failed to check builder fee:', err);
-      setBuilderFeeMaxRate(0);
-      setBuilderFeeChecked(true); // 即使失败也标记为已检查，避免重复请求
+      setBuilderFeeApproved(false);
     } finally {
       setBuilderFeeChecking(false);
     }
-  }, [address, builderFeeChecked, setBuilderFeeMaxRate, setBuilderFeeChecked, setBuilderFeeChecking]);
+  }, [address, setBuilderFeeApproved, setBuilderFeeChecking]);
 
   // 连接时获取数据
   useEffect(() => {
@@ -147,52 +127,40 @@ export function useAccountState() {
   const totalMarginUsed = marginSummary ? parseFloat(marginSummary.totalMarginUsed) : 0;
   const totalUnrealizedPnl = formattedPositions.reduce((sum, p) => sum + p.unrealizedPnl, 0);
 
-  // 计算 Builder Fee 是否已授权 (基于市场类型)
-  const isBuilderFeeApprovedForPerp = useMemo(() => {
-    return builderFeeMaxRate !== null && builderFeeMaxRate >= BUILDER_FEE_PERP;
-  }, [builderFeeMaxRate]);
-
-  const isBuilderFeeApprovedForSpot = useMemo(() => {
-    return builderFeeMaxRate !== null && builderFeeMaxRate >= BUILDER_FEE_SPOT;
-  }, [builderFeeMaxRate]);
-
   return {
     // 连接状态
     address,
     isConnected,
-    
+
     // 账户数据
     accountValue,
     availableBalance,
     totalMarginUsed,
     totalUnrealizedPnl,
     marginSummary,
-    
+
     // 持仓
     positions,
     formattedPositions,
     positionsCount: positions.length,
-    
+
     // 订单
     openOrders,
     formattedOrders,
     ordersCount: openOrders.length,
-    
+
     // 成交
     userFills,
-    
+
     // Builder Fee
-    builderFeeMaxRate,
-    builderFeeChecked,
+    builderFeeApproved,
     builderFeeChecking,
-    isBuilderFeeApprovedForPerp,
-    isBuilderFeeApprovedForSpot,
-    
+
     // 状态
     isLoading,
     isInitialized,
     error,
-    
+
     // 方法
     refetch: fetchAccountData,
     checkBuilderFee,

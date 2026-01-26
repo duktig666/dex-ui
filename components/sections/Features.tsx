@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Link from "next/link";
-import Image from "next/image";
+import { motion } from 'framer-motion';
+import { useT } from '@/lib/i18n';
+import Link from 'next/link';
+import Image from 'next/image';
 
 // Trading interface mockup
 function TradingMockup() {
@@ -21,12 +22,16 @@ function TradingMockup() {
 // Wallet icons mockup
 function WalletIcons() {
   const tokens = [
-    { symbol: "ETH", color: "bg-purple-500/20", textColor: "text-purple-400" },
-    { symbol: "BTC", color: "bg-orange-500/20", textColor: "text-orange-400" },
-    { symbol: "USDC", color: "bg-blue-500/20", textColor: "text-blue-400" },
-    { symbol: "SOL", color: "bg-gradient-to-br from-purple-500/20 to-cyan-500/20", textColor: "text-cyan-400" },
-    { symbol: "ARB", color: "bg-blue-600/20", textColor: "text-blue-400" },
-    { symbol: "OP", color: "bg-red-500/20", textColor: "text-red-400" },
+    { symbol: 'ETH', color: 'bg-purple-500/20', textColor: 'text-purple-400' },
+    { symbol: 'BTC', color: 'bg-orange-500/20', textColor: 'text-orange-400' },
+    { symbol: 'USDC', color: 'bg-blue-500/20', textColor: 'text-blue-400' },
+    {
+      symbol: 'SOL',
+      color: 'bg-gradient-to-br from-purple-500/20 to-cyan-500/20',
+      textColor: 'text-cyan-400',
+    },
+    { symbol: 'ARB', color: 'bg-blue-600/20', textColor: 'text-blue-400' },
+    { symbol: 'OP', color: 'bg-red-500/20', textColor: 'text-red-400' },
   ];
 
   return (
@@ -48,33 +53,34 @@ function WalletIcons() {
 function DeviceMockup() {
   return (
     <div className="flex items-center justify-center mt-6 h-48 relative">
-       <div className="relative w-full h-full max-w-[300px]">
-         <Image
-           src="/images/features/mobile-screen.png"
-           alt="Mobile App"
-           fill
-           className="object-contain"
-         />
-       </div>
+      <div className="relative w-full h-full max-w-[300px]">
+        <Image
+          src="/images/features/mobile-screen.png"
+          alt="Mobile App"
+          fill
+          className="object-contain"
+        />
+      </div>
     </div>
   );
 }
 
 // HyENA visual
 function HyenaVisual() {
+  const { t } = useT();
   return (
     <div className="bg-bg-secondary rounded-xl h-64 flex items-center justify-center relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-accent-green/10 via-transparent to-purple-500/10" />
-      
+
       {/* Content */}
       <div className="relative z-10 text-center">
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-accent-green/30 to-accent-green/10 border border-accent-green/30 flex items-center justify-center">
           <span className="text-3xl font-gilroy font-bold text-accent-green">H</span>
         </div>
-        <p className="text-text-secondary text-sm">HyENA Trading Engine</p>
+        <p className="text-text-secondary text-sm">{t('HyENA Trading Engine')}</p>
       </div>
-      
+
       {/* Floating particles */}
       <motion.div
         animate={{ y: [-10, 10, -10] }}
@@ -92,36 +98,44 @@ function HyenaVisual() {
 
 const features = [
   {
-    tag: "Built on Hermes",
-    title: "Hermes powers HyENA.trade",
-    titleLink: { text: "HyENA.trade", href: "https://hyena.trade" },
-    description: "A USDe-margined perpetuals DEX built on Hyperliquid's HIP-3 standard. Trade any asset on earth 24/7 with maximum capital efficiency.",
-    secondaryDescription: "HyENA combines Hyperliquid's proven high-performance and user-friendly features with USDe as trading collateral. Expand your trading horizons with premarket perpetuals for assets that don't yet have spot listings.",
+    tag: 'Built on Hermes',
+    title: 'Hermes powers HyENA.trade',
+    titleLink: { text: 'HyENA.trade', href: 'https://hyena.trade' },
+    description:
+      "A USDe-margined perpetuals DEX built on Hyperliquid's HIP-3 standard. Trade any asset on earth 24/7 with maximum capital efficiency.",
+    secondaryDescription:
+      "HyENA combines Hyperliquid's proven high-performance and user-friendly features with USDe as trading collateral. Expand your trading horizons with premarket perpetuals for assets that don't yet have spot listings.",
     visual: <HyenaVisual />,
     fullWidth: true,
   },
   {
-    tag: "Optimize your trading",
-    title: "Perpetual and Spot Trading, Built for Speed, Clarity and Control",
-    description: "Stay on top of your trades, monitor positions and get push notifications when orders are executed. Enjoy one tap position management, automated TP SL execution, charts and more.",
-    secondaryDescription: "Do more on HERMES with advanced order types such as scale, scalp and TWAP. Secure profits with trailing stop loss.",
+    tag: 'Optimize your trading',
+    title: 'Perpetual and Spot Trading, Built for Speed, Clarity and Control',
+    description:
+      'Stay on top of your trades, monitor positions and get push notifications when orders are executed. Enjoy one tap position management, automated TP SL execution, charts and more.',
+    secondaryDescription:
+      'Do more on HERMES with advanced order types such as scale, scalp and TWAP. Secure profits with trailing stop loss.',
     visual: <TradingMockup />,
   },
   {
-    tag: "Self-custodial Wallet",
-    title: "Your Keys, Your Crypto, Your Freedom",
-    description: "Hermes gives you real ownership of your crypto without the usual friction. Your wallet is yours alone. We don't hold your keys, and no one else can access your assets. Log in using your email or Google account through Privy.",
+    tag: 'Self-custodial Wallet',
+    title: 'Your Keys, Your Crypto, Your Freedom',
+    description:
+      "Hermes gives you real ownership of your crypto without the usual friction. Your wallet is yours alone. We don't hold your keys, and no one else can access your assets. Log in using your email or Google account through Privy.",
     visual: <WalletIcons />,
   },
   {
-    tag: "Multi-channel Availability",
-    title: "Stay Based. Wherever You Need It.",
-    description: "Access Hermes across web, desktop app and mobile. Stay connected to your wallet anytime, anywhere.",
+    tag: 'Multi-channel Availability',
+    title: 'Stay Based. Wherever You Need It.',
+    description:
+      'Access Hermes across web, desktop app and mobile. Stay connected to your wallet anytime, anywhere.',
     visual: <DeviceMockup />,
   },
 ];
 
 export function Features() {
+  const { t } = useT();
+
   return (
     <section className="py-32 bg-bg-primary">
       <div className="max-w-content mx-auto px-6">
@@ -133,7 +147,7 @@ export function Features() {
             viewport={{ once: true }}
             className="text-sm text-text-secondary uppercase tracking-widest mb-4"
           >
-            Features
+            {t('Features')}
           </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -142,7 +156,7 @@ export function Features() {
             transition={{ delay: 0.1 }}
             className="text-4xl font-gilroy font-bold text-white"
           >
-            Trusted by thousands of customers worldwide.
+            {t('Trusted by thousands of customers worldwide.')}
           </motion.h2>
         </div>
 
@@ -157,11 +171,11 @@ export function Features() {
               transition={{ delay: index * 0.1 }}
               className={`
                 bg-bg-card border border-border-color rounded-2xl p-8
-                ${feature.fullWidth ? "col-span-2" : ""}
+                ${feature.fullWidth ? 'col-span-2' : ''}
               `}
             >
               {/* Feature content */}
-              <div className={feature.fullWidth ? "grid grid-cols-2 gap-8" : ""}>
+              <div className={feature.fullWidth ? 'grid grid-cols-2 gap-8' : ''}>
                 {/* Visual */}
                 {feature.fullWidth && feature.visual}
 
@@ -173,7 +187,7 @@ export function Features() {
                   <h3 className="text-2xl font-gilroy font-bold text-white mb-4">
                     {feature.titleLink ? (
                       <>
-                        Hermes powers{" "}
+                        Hermes powers{' '}
                         <Link
                           href={feature.titleLink.href}
                           target="_blank"
@@ -181,8 +195,18 @@ export function Features() {
                           className="text-accent-green hover:underline inline-flex items-center gap-1"
                         >
                           {feature.titleLink.text}
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
                           </svg>
                         </Link>
                       </>

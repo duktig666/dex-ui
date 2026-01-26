@@ -15,41 +15,45 @@ import type {
   FormattedPosition,
   FormattedOrder,
 } from '@/lib/hyperliquid/types';
-import { parsePrice, parseSize, sideToOrderSide, getSideFromPosition } from '@/lib/hyperliquid/utils';
+import {
+  parsePrice,
+  parseSize,
+  sideToOrderSide,
+  getSideFromPosition,
+} from '@/lib/hyperliquid/utils';
 
 // 用户 Store 状态
 interface UserState {
   // 钱包地址
   address: string | null;
   isConnected: boolean;
-  
-  // Builder Fee 授权状态 (存储实际授权费率，而非布尔值)
-  builderFeeMaxRate: number | null;  // 链上授权的最大费率 (basis points)
-  builderFeeChecked: boolean;        // 是否已完成初始化检查
-  builderFeeChecking: boolean;       // 是否正在检查中
-  
+
+  // Builder Fee 授权状态
+  builderFeeApproved: boolean;
+  builderFeeChecking: boolean;
+
   // 永续合约账户状态
   clearinghouseState: ClearinghouseState | null;
   marginSummary: MarginSummary | null;
   positions: Position[];
   formattedPositions: FormattedPosition[];
-  
+
   // 现货账户状态
   spotClearinghouseState: SpotClearinghouseState | null;
-  
+
   // 当前挂单
   openOrders: Order[];
   formattedOrders: FormattedOrder[];
-  
+
   // 成交记录
   userFills: UserFill[];
-  
+
   // 历史订单
   orderHistory: Order[];
-  
+
   // 当前杠杆设置 (per asset)
   leverageMap: Map<string, { leverage: number; isCross: boolean }>;
-  
+
   // 加载状态
   isLoading: boolean;
   isInitialized: boolean;
@@ -61,35 +65,34 @@ interface UserActions {
   // 设置钱包地址
   setAddress: (address: string | null) => void;
   setConnected: (connected: boolean) => void;
-  
+
   // Builder Fee
-  setBuilderFeeMaxRate: (rate: number | null) => void;
-  setBuilderFeeChecked: (checked: boolean) => void;
+  setBuilderFeeApproved: (approved: boolean) => void;
   setBuilderFeeChecking: (checking: boolean) => void;
-  
+
   // 更新账户状态
   updateClearinghouseState: (state: ClearinghouseState) => void;
   updateSpotClearinghouseState: (state: SpotClearinghouseState) => void;
-  
+
   // 更新订单
   updateOpenOrders: (orders: Order[]) => void;
   addOrder: (order: Order) => void;
   removeOrder: (oid: number) => void;
   updateOrderStatus: (oid: number, status: string) => void;
-  
+
   // 更新成交记录
   updateUserFills: (fills: UserFill[]) => void;
   addFill: (fill: UserFill) => void;
-  
+
   // 更新历史订单
   updateOrderHistory: (orders: Order[]) => void;
-  
+
   // 更新杠杆
   updateLeverage: (coin: string, leverage: number, isCross: boolean) => void;
-  
+
   // 设置错误
   setError: (error: string | null) => void;
-  
+
   // 重置
   reset: () => void;
 }
@@ -128,13 +131,13 @@ function formatOrder(order: Order): FormattedOrder {
   const size = parseSize(order.sz);
   const origSize = parseSize(order.origSz);
   const filled = origSize - size;
-  
+
   return {
     coin: order.coin,
     oid: order.oid,
     cloid: order.cloid,
     side: sideToOrderSide(order.side),
-    type: order.isTrigger ? (order.orderType || 'trigger') : 'limit',
+    type: order.isTrigger ? order.orderType || 'trigger' : 'limit',
     price,
     size: origSize,
     filled,
@@ -151,8 +154,7 @@ function formatOrder(order: Order): FormattedOrder {
 const initialState: UserState = {
   address: null,
   isConnected: false,
-  builderFeeMaxRate: null,
-  builderFeeChecked: false,
+  builderFeeApproved: false,
   builderFeeChecking: false,
   clearinghouseState: null,
   marginSummary: null,
@@ -175,7 +177,7 @@ export const useUserStore = create<UserState & UserActions>()(
     ...initialState,
 
     setAddress: (address) => {
-      set({ 
+      set({
         address: address?.toLowerCase() || null,
         isConnected: !!address,
       });
@@ -194,19 +196,14 @@ export const useUserStore = create<UserState & UserActions>()(
           openOrders: [],
           formattedOrders: [],
           userFills: [],
-          builderFeeMaxRate: null,
-          builderFeeChecked: false,
+          builderFeeApproved: false,
           isInitialized: false,
         });
       }
     },
 
-    setBuilderFeeMaxRate: (rate) => {
-      set({ builderFeeMaxRate: rate });
-    },
-
-    setBuilderFeeChecked: (checked) => {
-      set({ builderFeeChecked: checked });
+    setBuilderFeeApproved: (approved) => {
+      set({ builderFeeApproved: approved });
     },
 
     setBuilderFeeChecking: (checking) => {
@@ -218,14 +215,14 @@ export const useUserStore = create<UserState & UserActions>()(
       const positions = state.assetPositions
         .map((ap) => ap.position)
         .filter((p) => parseFloat(p.szi) !== 0);
-      
+
       // 格式化持仓
       const formattedPositions = positions.map((p) => formatPosition(p));
-      
+
       // 提取杠杆设置
       const { leverageMap } = get();
       const newLeverageMap = new Map(leverageMap);
-      
+
       state.assetPositions.forEach((ap) => {
         const position = ap.position;
         newLeverageMap.set(position.coin, {
@@ -276,9 +273,7 @@ export const useUserStore = create<UserState & UserActions>()(
 
     updateOrderStatus: (oid, status) => {
       const { formattedOrders } = get();
-      const newOrders = formattedOrders.map((o) =>
-        o.oid === oid ? { ...o, status } : o
-      );
+      const newOrders = formattedOrders.map((o) => (o.oid === oid ? { ...o, status } : o));
       set({ formattedOrders: newOrders });
     },
 

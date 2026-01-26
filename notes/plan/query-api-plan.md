@@ -73,8 +73,8 @@ export type InfoRequest =
   | ClearinghouseStateRequest
   | OpenOrdersRequest
   | SpotMetaRequest
-  | SpotClearinghouseStateRequest
-  // ... 更多
+  | SpotClearinghouseStateRequest;
+// ... 更多
 
 /** 永续元数据请求 */
 export interface MetaRequest {
@@ -130,10 +130,7 @@ export interface AssetCtx {
 }
 
 /** metaAndAssetCtxs 响应 */
-export type MetaAndAssetCtxsResponse = [
-  { universe: PerpAsset[] },
-  AssetCtx[]
-];
+export type MetaAndAssetCtxsResponse = [{ universe: PerpAsset[] }, AssetCtx[]];
 
 /** 账户保证金概要 */
 export interface MarginSummary {
@@ -201,17 +198,18 @@ export interface ClearinghouseStateResponse {
 
 ### 1.1 价格头部
 
-| UI 展示 | 字段路径 | API | 计算/格式化 |
-|---------|---------|-----|------------|
-| 当前价格 | `mids[symbol]` | WS: allMids | 直接显示 |
-| 24h涨跌% | - | metaAndAssetCtxs | `(midPx - prevDayPx) / prevDayPx × 100` |
-| 24h最高 | - | candleSnapshot (1d) | `candle.h` |
-| 24h最低 | - | candleSnapshot (1d) | `candle.l` |
-| 24h成交额 | `assetCtxs[i].dayNtlVlm` | metaAndAssetCtxs | 格式化为 K/M/B |
-| 资金费率 | `assetCtxs[i].funding` | metaAndAssetCtxs | `× 100%` 显示 |
-| 标记价格 | `assetCtxs[i].markPx` | metaAndAssetCtxs | 直接显示 |
+| UI 展示   | 字段路径                 | API                 | 计算/格式化                             |
+| --------- | ------------------------ | ------------------- | --------------------------------------- |
+| 当前价格  | `mids[symbol]`           | WS: allMids         | 直接显示                                |
+| 24h涨跌%  | -                        | metaAndAssetCtxs    | `(midPx - prevDayPx) / prevDayPx × 100` |
+| 24h最高   | -                        | candleSnapshot (1d) | `candle.h`                              |
+| 24h最低   | -                        | candleSnapshot (1d) | `candle.l`                              |
+| 24h成交额 | `assetCtxs[i].dayNtlVlm` | metaAndAssetCtxs    | 格式化为 K/M/B                          |
+| 资金费率  | `assetCtxs[i].funding`   | metaAndAssetCtxs    | `× 100%` 显示                           |
+| 标记价格  | `assetCtxs[i].markPx`    | metaAndAssetCtxs    | 直接显示                                |
 
 ### 1.2 订单簿
+
 ...
 ```
 
@@ -219,13 +217,13 @@ export interface ClearinghouseStateResponse {
 
 ## 关键文件清单
 
-| 文件 | 作用 | 状态 |
-|------|------|------|
+| 文件                                            | 作用                 | 状态   |
+| ----------------------------------------------- | -------------------- | ------ |
 | `notes/hyperliquid/http/hyperliquid-query.http` | HTTP 测试 + 字段注释 | 待增强 |
-| `src/types/hyperliquid/info.ts` | /info API 类型 | 待创建 |
-| `src/types/hyperliquid/exchange.ts` | /exchange API 类型 | 待创建 |
-| `src/types/hyperliquid/websocket.ts` | WebSocket 类型 | 待创建 |
-| `notes/hyperliquid/api-page-mapping.md` | 页面-字段映射表 | 待创建 |
+| `src/types/hyperliquid/info.ts`                 | /info API 类型       | 待创建 |
+| `src/types/hyperliquid/exchange.ts`             | /exchange API 类型   | 待创建 |
+| `src/types/hyperliquid/websocket.ts`            | WebSocket 类型       | 待创建 |
+| `notes/hyperliquid/api-page-mapping.md`         | 页面-字段映射表      | 待创建 |
 
 ---
 

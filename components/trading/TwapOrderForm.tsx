@@ -1,45 +1,47 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useAccount, useSignTypedData } from "wagmi";
-import { cn } from "@/lib/utils";
-import { useAccountState } from "@/hooks/useAccountState";
-import { useAssetPrice, useAssetList } from "@/hooks/useMarketData";
-import { formatPrice, formatSize, calcNotionalValue, calcRequiredMargin } from "@/lib/hyperliquid/utils";
-import { exchangeClient } from "@/lib/hyperliquid/client";
-import { useCanSign } from "@/hooks/useNetworkCheck";
+import { useState, useMemo } from 'react';
+import { useT } from '@/lib/i18n';
+import { useAccount, useSignTypedData } from 'wagmi';
+import { cn } from '@/lib/utils';
+import { useAccountState } from '@/hooks/useAccountState';
+import { useAssetPrice, useAssetList } from '@/hooks/useMarketData';
+import { formatPrice, formatSize, calcNotionalValue } from '@/lib/hyperliquid/utils';
+import { exchangeClient } from '@/lib/hyperliquid/client';
+import { useCanSign } from '@/hooks/useNetworkCheck';
 
 interface TwapOrderFormProps {
   symbol: string;
 }
 
-type OrderSide = "buy" | "sell";
+type OrderSide = 'buy' | 'sell';
 
 // 预设时长选项（分钟）
 const DURATION_PRESETS = [
-  { label: "30m", minutes: 30 },
-  { label: "1h", minutes: 60 },
-  { label: "4h", minutes: 240 },
-  { label: "12h", minutes: 720 },
-  { label: "24h", minutes: 1440 },
+  { label: '30m', minutes: 30 },
+  { label: '1h', minutes: 60 },
+  { label: '4h', minutes: 240 },
+  { label: '12h', minutes: 720 },
+  { label: '24h', minutes: 1440 },
 ];
 
 export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
+  const { t } = useT();
   const { isConnected, address } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
   const assetList = useAssetList();
   const canSign = useCanSign();
 
-  const [side, setSide] = useState<OrderSide>("buy");
-  const [amount, setAmount] = useState("");
+  const [side, setSide] = useState<OrderSide>('buy');
+  const [amount, setAmount] = useState('');
   const [duration, setDuration] = useState(60); // 默认 1 小时
   const [randomize, setRandomize] = useState(true);
   const [reduceOnly, setReduceOnly] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
 
-  const coin = symbol.split("-")[0] || "BTC";
-  const quote = "USDC";
+  const coin = symbol.split('-')[0] || 'BTC';
+  const quote = 'USDC';
 
   // Hooks
   const { availableBalance } = useAccountState();
@@ -76,12 +78,12 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
 
     const amountNum = parseFloat(amount);
     if (!amountNum || amountNum <= 0) {
-      setLastError("Please enter a valid amount");
+      setLastError('Please enter a valid amount');
       return;
     }
 
     if (!assetInfo) {
-      setLastError("Asset not found");
+      setLastError('Asset not found');
       return;
     }
 
@@ -92,7 +94,7 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
       const result = await exchangeClient.placeTwapOrder(
         {
           assetId,
-          isBuy: side === "buy",
+          isBuy: side === 'buy',
           sz: amount,
           reduceOnly,
           minutes: duration,
@@ -114,16 +116,16 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
         }
       );
 
-      if (result.status === "ok") {
+      if (result.status === 'ok') {
         // 清空表单
-        setAmount("");
+        setAmount('');
         setLastError(null);
       } else {
-        setLastError(result.response?.data?.status?.error || "TWAP order failed");
+        setLastError(result.response?.data?.status?.error || 'TWAP order failed');
       }
     } catch (error) {
-      console.error("TWAP order error:", error);
-      setLastError(error instanceof Error ? error.message : "Unknown error");
+      console.error('TWAP order error:', error);
+      setLastError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setIsSubmitting(false);
     }
@@ -131,63 +133,61 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
 
   // 按钮文本
   const buttonText = useMemo(() => {
-    if (!isConnected) return "Connect Wallet";
-    if (!canSign) return "Switch Network";
-    if (isSubmitting) return "Submitting...";
-    return side === "buy" ? "Buy TWAP" : "Sell TWAP";
-  }, [isConnected, canSign, isSubmitting, side]);
+    if (!isConnected) return t('Connect Wallet');
+    if (!canSign) return t('Switch Network');
+    if (isSubmitting) return t('Submitting...');
+    return side === 'buy' ? t('Buy TWAP') : t('Sell TWAP');
+  }, [isConnected, canSign, isSubmitting, side, t]);
 
   return (
-    <div className="flex flex-col h-full p-4 bg-[#0b0e11]">
+    <div className="flex flex-col h-full p-4 bg-bg-primary">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white">TWAP Order</h3>
-        <span className="text-xs text-[#848e9c]">Time-Weighted Average Price</span>
+        <h3 className="text-sm font-semibold text-white">{t('TWAP Order')}</h3>
+        <span className="text-xs text-text-secondary">{t('Time-Weighted Average Price')}</span>
       </div>
 
       {/* Buy/Sell Toggle */}
       <div className="flex gap-2 mb-4">
         <button
-          onClick={() => setSide("buy")}
+          onClick={() => setSide('buy')}
           className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded transition-colors",
-            side === "buy"
-              ? "bg-[#0ecb81] text-white"
-              : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+            'flex-1 py-2 text-sm font-semibold rounded transition-colors',
+            side === 'buy'
+              ? 'bg-long text-white'
+              : 'bg-bg-secondary text-text-secondary hover:text-white'
           )}
         >
-          Buy / Long
+          {t('Buy / Long')}
         </button>
         <button
-          onClick={() => setSide("sell")}
+          onClick={() => setSide('sell')}
           className={cn(
-            "flex-1 py-2 text-sm font-semibold rounded transition-colors",
-            side === "sell"
-              ? "bg-[#f6465d] text-white"
-              : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+            'flex-1 py-2 text-sm font-semibold rounded transition-colors',
+            side === 'sell'
+              ? 'bg-short text-white'
+              : 'bg-bg-secondary text-text-secondary hover:text-white'
           )}
         >
-          Sell / Short
+          {t('Sell / Short')}
         </button>
       </div>
 
       {/* Available Funds */}
       <div className="flex items-center justify-between text-xs mb-4">
-        <span className="text-[#848e9c]">Available Funds</span>
+        <span className="text-text-secondary">{t('Available Funds')}</span>
         <span className="text-white font-mono">
-          {formatPrice(availableBalance, 2)} <span className="text-[#848e9c]">{quote}</span>
+          {formatPrice(availableBalance, 2)} <span className="text-text-secondary">{quote}</span>
         </span>
       </div>
 
       {/* Total Size Input */}
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-[#848e9c]">Total Size</span>
-          <span className="text-[#848e9c]">
-            ≈ ${formatPrice(orderValue, 2)}
-          </span>
+          <span className="text-text-secondary">{t('Total Size')}</span>
+          <span className="text-text-secondary">≈ ${formatPrice(orderValue, 2)}</span>
         </div>
-        <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
+        <div className="flex items-center bg-bg-secondary rounded overflow-hidden">
           <input
             type="text"
             value={amount}
@@ -195,15 +195,17 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
             className="flex-1 px-3 py-2 text-sm bg-transparent text-white outline-none font-mono"
             placeholder="0"
           />
-          <span className="px-3 text-sm text-[#848e9c]">{coin}</span>
+          <span className="px-3 text-sm text-text-secondary">{coin}</span>
         </div>
       </div>
 
       {/* Duration Presets */}
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="text-[#848e9c]">Duration</span>
-          <span className="text-white">{duration >= 60 ? `${duration / 60}h` : `${duration}m`}</span>
+          <span className="text-text-secondary">{t('Duration')}</span>
+          <span className="text-white">
+            {duration >= 60 ? `${duration / 60}h` : `${duration}m`}
+          </span>
         </div>
         <div className="flex gap-2">
           {DURATION_PRESETS.map((preset) => (
@@ -211,10 +213,10 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
               key={preset.minutes}
               onClick={() => setDuration(preset.minutes)}
               className={cn(
-                "flex-1 py-1.5 text-xs font-medium rounded transition-colors",
+                'flex-1 py-1.5 text-xs font-medium rounded transition-colors',
                 duration === preset.minutes
-                  ? "bg-[#f0b90b] text-black"
-                  : "bg-[#1a1d26] text-[#848e9c] hover:text-white"
+                  ? 'bg-accent-yellow text-black'
+                  : 'bg-bg-secondary text-text-secondary hover:text-white'
               )}
             >
               {preset.label}
@@ -225,7 +227,7 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
 
       {/* Custom Duration Input */}
       <div className="mb-3">
-        <div className="flex items-center bg-[#1a1d26] rounded overflow-hidden">
+        <div className="flex items-center bg-bg-secondary rounded overflow-hidden">
           <input
             type="number"
             value={duration}
@@ -234,7 +236,7 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
             min="1"
             max="10080"
           />
-          <span className="px-3 text-sm text-[#848e9c]">minutes</span>
+          <span className="px-3 text-sm text-text-secondary">minutes</span>
         </div>
       </div>
 
@@ -246,9 +248,9 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
             type="checkbox"
             checked={randomize}
             onChange={(e) => setRandomize(e.target.checked)}
-            className="w-4 h-4 accent-[#f0b90b]"
+            className="w-4 h-4 accent-accent-yellow"
           />
-          <span className="text-xs text-[#848e9c]">Randomize intervals</span>
+          <span className="text-xs text-text-secondary">{t('Randomize intervals')}</span>
         </label>
 
         {/* Reduce Only */}
@@ -257,54 +259,54 @@ export function TwapOrderForm({ symbol }: TwapOrderFormProps) {
             type="checkbox"
             checked={reduceOnly}
             onChange={(e) => setReduceOnly(e.target.checked)}
-            className="w-4 h-4 accent-[#f0b90b]"
+            className="w-4 h-4 accent-accent-yellow"
           />
-          <span className="text-xs text-[#848e9c]">Reduce Only</span>
+          <span className="text-xs text-text-secondary">{t('Reduce Only')}</span>
         </label>
       </div>
 
       {/* Order Info */}
-      <div className="mb-4 p-3 bg-[#1a1d26] rounded text-xs space-y-1">
+      <div className="mb-4 p-3 bg-bg-secondary rounded text-xs space-y-1">
         <div className="flex justify-between">
-          <span className="text-[#848e9c]">Estimated Splits</span>
-          <span className="text-white">{estimatedSplits} orders</span>
+          <span className="text-text-secondary">{t('Estimated Splits')}</span>
+          <span className="text-white">
+            {estimatedSplits} {t('orders')}
+          </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[#848e9c]">Size per Split</span>
+          <span className="text-text-secondary">{t('Size per Split')}</span>
           <span className="text-white">
             ≈ {formatSize(orderPerSplit, 5)} {coin}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[#848e9c]">Interval</span>
+          <span className="text-text-secondary">{t('Interval')}</span>
           <span className="text-white">
-            ≈ {randomize ? "2-4" : "3"} minutes
+            ≈ {randomize ? '2-4' : '3'} {t('minutes')}
           </span>
         </div>
       </div>
 
       {/* Error Message */}
-      {lastError && (
-        <div className="mb-3 text-xs text-[#f6465d]">{lastError}</div>
-      )}
+      {lastError && <div className="mb-3 text-xs text-short">{lastError}</div>}
 
       {/* Submit Button */}
       <button
         onClick={handleSubmit}
         disabled={!isConnected || !canSign || isSubmitting || !amount}
         className={cn(
-          "w-full py-3 text-sm font-semibold rounded transition-colors",
-          side === "buy"
-            ? "bg-[#0ecb81] hover:bg-[#0ecb81]/80 text-white"
-            : "bg-[#f6465d] hover:bg-[#f6465d]/80 text-white",
-          (!isConnected || !canSign || isSubmitting || !amount) && "opacity-50 cursor-not-allowed"
+          'w-full py-3 text-sm font-semibold rounded transition-colors',
+          side === 'buy'
+            ? 'bg-long hover:bg-long/80 text-white'
+            : 'bg-short hover:bg-short/80 text-white',
+          (!isConnected || !canSign || isSubmitting || !amount) && 'opacity-50 cursor-not-allowed'
         )}
       >
         {buttonText}
       </button>
 
       {/* TWAP Info */}
-      <div className="mt-4 text-xs text-[#848e9c]">
+      <div className="mt-4 text-xs text-text-secondary">
         <p className="mb-1">• TWAP executes orders over time at market price</p>
         <p className="mb-1">• Orders are split into smaller pieces</p>
         <p>• Minimizes market impact for large orders</p>

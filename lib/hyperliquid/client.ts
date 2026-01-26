@@ -2,7 +2,13 @@
  * HyperLiquid REST API 客户端
  */
 
-import { API_URL, CURRENT_NETWORK, BUILDER_ADDRESS, BUILDER_FEE_PERP, BUILDER_FEE_SPOT, IS_TESTNET } from './constants';
+import {
+  API_URL,
+  CURRENT_NETWORK,
+  BUILDER_ADDRESS,
+  BUILDER_FEE_PERP,
+  IS_TESTNET,
+} from './constants';
 import type {
   MetaAndAssetCtxs,
   ClearinghouseState,
@@ -35,7 +41,7 @@ import type {
   TwapOrderResponse,
   TwapCancelResponse,
 } from './types';
-import { floatToWire, normalizeAddress, generateNonce } from './utils';
+import { normalizeAddress, generateNonce } from './utils';
 import { signL1Action, signUserSignedAction, parseSignature } from './signing';
 
 /**
@@ -72,7 +78,9 @@ export class HyperliquidInfoClient {
    * 获取所有永续合约元数据和实时数据
    */
   async getMetaAndAssetCtxs(): Promise<MetaAndAssetCtxs> {
-    const result = await this.post<[{ universe: MetaAndAssetCtxs['universe'] }, MetaAndAssetCtxs['assetCtxs']]>({
+    const result = await this.post<
+      [{ universe: MetaAndAssetCtxs['universe'] }, MetaAndAssetCtxs['assetCtxs']]
+    >({
       type: 'metaAndAssetCtxs',
     });
     return {
@@ -226,7 +234,11 @@ export class HyperliquidInfoClient {
   /**
    * 获取资金费率历史
    */
-  async getFundingHistory(coin: string, startTime: number, endTime?: number): Promise<FundingHistory[]> {
+  async getFundingHistory(
+    coin: string,
+    startTime: number,
+    endTime?: number
+  ): Promise<FundingHistory[]> {
     return this.post<FundingHistory[]>({
       type: 'fundingHistory',
       coin,
@@ -350,7 +362,7 @@ export class HyperliquidExchangeClient {
   ): Promise<ExchangeResponse> {
     // 解析签名为 {r, s, v} 格式
     const parsedSig = parseSignature(signature);
-    
+
     const body: Record<string, unknown> = {
       action: action as Record<string, unknown>,
       nonce,
@@ -390,7 +402,7 @@ export class HyperliquidExchangeClient {
     nonce: number
   ): Promise<ExchangeResponse> {
     const parsedSig = parseSignature(signature);
-    
+
     const body = {
       action: action as Record<string, unknown>,
       nonce,
@@ -416,10 +428,6 @@ export class HyperliquidExchangeClient {
 
   /**
    * 检查并授权 Builder Fee
-   * @param user 用户地址
-   * @param signTypedData 签名函数
-   * @param marketType 市场类型 ('perp' | 'spot')，决定所需费率
-   * @returns 是否成功
    */
   async checkAndApproveBuilderFee(
     user: string,
@@ -428,31 +436,21 @@ export class HyperliquidExchangeClient {
       types: Record<string, unknown>;
       primaryType: string;
       message: Record<string, unknown>;
-    }) => Promise<string>,
-    marketType: 'perp' | 'spot' = 'perp'
+    }) => Promise<string>
   ): Promise<boolean> {
     const currentFee = await this.infoClient.getMaxBuilderFee(user, BUILDER_ADDRESS);
-    const requiredFee = marketType === 'spot' ? BUILDER_FEE_SPOT : BUILDER_FEE_PERP;
-
-    console.log('[checkAndApproveBuilderFee] Checking:', {
-      currentFee,
-      requiredFee,
-      marketType,
-      needsApproval: currentFee < requiredFee,
-    });
+    const requiredFee = BUILDER_FEE_PERP;
 
     // 如果已授权且费率足够，无需重新授权
     if (currentFee >= requiredFee) {
       return true;
     }
 
-    // 需要授权 - 使用所需费率中的较大值，避免切换市场时重复授权
-    const feeToApprove = Math.max(BUILDER_FEE_PERP, BUILDER_FEE_SPOT);
+    // 需要授权
     const nonce = generateNonce();
-    // BUILDER_FEE_PERP/SPOT 单位是 basis point (bp)，1 bp = 0.01%
+    // BUILDER_FEE_PERP 单位是 basis point (bp)，1 bp = 0.01%
     // 例如: requiredFee = 1 -> maxFeeRate = "0.01%"
-    //       requiredFee = 10 -> maxFeeRate = "0.1%"
-    const feePercent = feeToApprove * 0.01;
+    const feePercent = requiredFee * 0.01;
     const action: ApproveBuilderFeeAction = {
       type: 'approveBuilderFee',
       hyperliquidChain: CURRENT_NETWORK.isTestnet ? 'Testnet' : 'Mainnet',
@@ -462,59 +460,11 @@ export class HyperliquidExchangeClient {
       nonce,
     };
 
-    console.log('[checkAndApproveBuilderFee] Approving with fee:', feePercent, '%');
     const signature = await signUserSignedAction(action, signTypedData, CURRENT_NETWORK.isTestnet);
     // approveBuilderFee 使用 {r, s, v} 格式的签名
     const response = await this.postUserSignedAction(action, signature, nonce);
 
     return response.status === 'ok';
-  }
-
-  /**
-   * 仅授权 Builder Fee（不检查当前状态，直接授权）
-   * 用于需要明确重新授权的场景
-   */
-  async approveBuilderFee(
-    user: string,
-    signTypedData: (params: {
-      domain: Record<string, unknown>;
-      types: Record<string, unknown>;
-      primaryType: string;
-      message: Record<string, unknown>;
-    }) => Promise<string>,
-    feeRate: number = BUILDER_FEE_SPOT // 默认使用现货费率（较高），覆盖永续
-  ): Promise<boolean> {
-    const nonce = generateNonce();
-    const feePercent = feeRate * 0.01;
-    const action: ApproveBuilderFeeAction = {
-      type: 'approveBuilderFee',
-      hyperliquidChain: CURRENT_NETWORK.isTestnet ? 'Testnet' : 'Mainnet',
-      signatureChainId: CURRENT_NETWORK.signatureChainId,
-      maxFeeRate: `${feePercent}%`,
-      builder: BUILDER_ADDRESS.toLowerCase(),
-      nonce,
-    };
-
-    const signature = await signUserSignedAction(action, signTypedData, CURRENT_NETWORK.isTestnet);
-    const response = await this.postUserSignedAction(action, signature, nonce);
-
-    return response.status === 'ok';
-  }
-
-  /**
-   * 获取 Builder Fee 授权状态
-   */
-  async getBuilderFeeStatus(user: string): Promise<{
-    maxFee: number;
-    isApprovedForPerp: boolean;
-    isApprovedForSpot: boolean;
-  }> {
-    const maxFee = await this.infoClient.getMaxBuilderFee(user, BUILDER_ADDRESS);
-    return {
-      maxFee,
-      isApprovedForPerp: maxFee >= BUILDER_FEE_PERP,
-      isApprovedForSpot: maxFee >= BUILDER_FEE_SPOT,
-    };
   }
 
   /**

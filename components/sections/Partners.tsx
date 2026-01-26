@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Link from "next/link";
-import Image from "next/image";
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const partners = [
-  { name: "Ethena", href: "https://ethena.fi/" },
-  { name: "Spartan", href: "https://www.spartangroup.io/" },
-  { name: "Hashed", href: "https://www.hashed.com/" },
-  { name: "Delphi", href: "https://delphiventures.io/" },
-  { name: "Newman", href: "https://newmancapital.com/" },
+  { name: 'Ethena', href: 'https://ethena.fi/' },
+  { name: 'Spartan', href: 'https://www.spartangroup.io/' },
+  { name: 'Hashed', href: 'https://www.hashed.com/' },
+  { name: 'Delphi', href: 'https://delphiventures.io/' },
+  { name: 'Newman', href: 'https://newmancapital.com/' },
 ];
 
 // Partner Logo SVG Components
 function PartnerLogo({ name }: { name: string }) {
   const logos: Record<string, string> = {
-    Ethena: "/images/partners/ethena.svg",
-    Spartan: "/images/partners/spartan.svg",
-    Hashed: "/images/partners/hashed.svg",
-    Delphi: "/images/partners/delphi.svg",
-    Newman: "/images/partners/newman.svg",
+    Ethena: '/images/partners/ethena.svg',
+    Spartan: '/images/partners/spartan.svg',
+    Hashed: '/images/partners/hashed.svg',
+    Delphi: '/images/partners/delphi.svg',
+    Newman: '/images/partners/newman.svg',
   };
 
   const src = logos[name];
@@ -31,7 +31,7 @@ function PartnerLogo({ name }: { name: string }) {
           src={src}
           alt={`${name} logo`}
           height={28}
-          width={120} 
+          width={120}
           className="h-full w-auto object-contain opacity-50 hover:opacity-100 transition-opacity duration-300 invert" // Added invert
         />
       </div>

@@ -1,0 +1,12 @@
+node_modules
+.next
+build
+dist
+out
+public/static
+charting_library
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+*.min.js
+*.min.css

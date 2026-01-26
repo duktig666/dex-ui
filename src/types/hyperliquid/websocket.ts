@@ -2,13 +2,7 @@
 // HyperLiquid WebSocket 类型定义
 // ============================================================
 
-import type {
-  L2BookLevel,
-  Trade,
-  Candle,
-  Fill,
-  OpenOrder,
-} from './info';
+import type { L2BookLevel, Trade, Candle, Fill, OpenOrder } from './info';
 
 // ============================================================
 // 连接配置
@@ -482,7 +476,7 @@ export interface HeartbeatConfig {
 /** 默认心跳配置 */
 export const DEFAULT_HEARTBEAT: HeartbeatConfig = {
   interval: 15000, // 15秒发送一次 ping
-  timeout: 30000,  // 30秒无响应视为断开
+  timeout: 30000, // 30秒无响应视为断开
 };
 
 /** 发送 Ping 消息 */

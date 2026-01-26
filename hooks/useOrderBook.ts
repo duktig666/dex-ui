@@ -30,11 +30,7 @@ export interface OrderBookData {
 /**
  * 将 API 数据转换为 UI 友好格式
  */
-function processLevels(
-  levels: L2BookLevel[],
-  maxTotal: number,
-  isBid: boolean
-): OrderBookLevel[] {
+function processLevels(levels: L2BookLevel[], maxTotal: number, isBid: boolean): OrderBookLevel[] {
   let cumTotal = 0;
   const processed: OrderBookLevel[] = [];
 

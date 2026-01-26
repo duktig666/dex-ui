@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/Button";
-import Image from "next/image";
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/Button';
+import Image from 'next/image';
 
 // Mock trading interface component
 function TradingInterface() {
@@ -33,7 +33,7 @@ export function TradeCrypto() {
       {/* Background decorations */}
       <div className="absolute inset-0">
         {/* Grid pattern */}
-        <div 
+        <div
           className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `
@@ -60,7 +60,7 @@ export function TradeCrypto() {
             >
               Trade Crypto 24/7
             </motion.h2>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

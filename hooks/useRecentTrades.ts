@@ -26,7 +26,7 @@ export interface FormattedTrade {
 function formatTrade(trade: Trade): FormattedTrade {
   const price = parseFloat(trade.px);
   const size = parseFloat(trade.sz);
-  
+
   return {
     id: trade.tid,
     price,
@@ -89,9 +89,7 @@ export function useRecentTrades(coin: string, maxTrades: number = 50) {
 
   // 格式化成交记录
   const formattedTrades = useMemo(() => {
-    return recentTrades
-      .slice(0, maxTrades)
-      .map(formatTrade);
+    return recentTrades.slice(0, maxTrades).map(formatTrade);
   }, [recentTrades, maxTrades]);
 
   // 计算统计数据

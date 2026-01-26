@@ -3,16 +3,16 @@
  * 使用 WebSocket 实时价格更新追踪订单
  */
 
-import { useEffect, useCallback, useRef } from "react";
-import { useAccount, useSignTypedData } from "wagmi";
+import { useEffect, useCallback, useRef } from 'react';
+import { useAccount, useSignTypedData } from 'wagmi';
 import {
   useTrailingStopStore,
   useActiveTrailingStopsByCoin,
   useTrailingStopActions,
-} from "@/stores/trailingStopStore";
-import { useAssetPrice, useAssetList } from "@/hooks/useMarketData";
-import { exchangeClient } from "@/lib/hyperliquid/client";
-import type { TrailingStopOrder } from "@/lib/hyperliquid/types";
+} from '@/stores/trailingStopStore';
+import { useAssetPrice, useAssetList } from '@/hooks/useMarketData';
+import { exchangeClient } from '@/lib/hyperliquid/client';
+import type { TrailingStopOrder } from '@/lib/hyperliquid/types';
 
 interface UseTrailingStopProps {
   coin: string;
@@ -51,14 +51,15 @@ export function useTrailingStopMonitor({ coin, enabled = true }: UseTrailingStop
         // 执行市价单
         const slippage = 0.01; // 1% 滑点
         const priceNum = parseFloat(triggerPrice);
-        const slippagePrice = order.side === "buy" 
-          ? (priceNum * (1 + slippage)).toString()
-          : (priceNum * (1 - slippage)).toString();
+        const slippagePrice =
+          order.side === 'buy'
+            ? (priceNum * (1 + slippage)).toString()
+            : (priceNum * (1 - slippage)).toString();
 
         const result = await exchangeClient.placeMarketOrder(
           order.coin,
           assetId,
-          order.side === "buy",
+          order.side === 'buy',
           order.size,
           slippagePrice,
           order.reduceOnly,
@@ -78,7 +79,7 @@ export function useTrailingStopMonitor({ coin, enabled = true }: UseTrailingStop
           }
         );
 
-        if (result.status === "ok") {
+        if (result.status === 'ok') {
           console.log(`[Trailing Stop] Market order placed successfully`);
           triggerOrder(order.id);
         } else {
@@ -118,7 +119,7 @@ export function useTrailingStopMonitor({ coin, enabled = true }: UseTrailingStop
  */
 export function useGlobalTrailingStopMonitor() {
   const allOrders = useTrailingStopStore((state) => state.orders);
-  const activeOrders = allOrders.filter((o) => o.status === "active");
+  const activeOrders = allOrders.filter((o) => o.status === 'active');
 
   // 获取所有活跃币种
   const activeCoins = [...new Set(activeOrders.map((o) => o.coin))];
@@ -145,10 +146,10 @@ export function useCreateTrailingStop() {
   const createOrder = useCallback(
     (params: {
       coin: string;
-      side: "buy" | "sell";
+      side: 'buy' | 'sell';
       size: string;
       trailValue: string;
-      trailType: "percent" | "price";
+      trailType: 'percent' | 'price';
       reduceOnly?: boolean;
     }) => {
       const id = addOrder({

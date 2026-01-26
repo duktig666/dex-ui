@@ -3,6 +3,7 @@
 ## 1. 系统概述
 
 ### 1.1 架构目标
+
 - **高性能**：实时数据更新，低延迟交易
 - **可维护**：清晰的分层架构，模块化设计
 - **可扩展**：易于添加新功能和新交易对
@@ -10,17 +11,17 @@
 
 ### 1.2 技术栈
 
-| 层级 | 技术选型 | 说明 |
-|------|---------|------|
-| 框架 | Next.js 15 (App Router) | React 服务端渲染 |
-| UI 库 | React 19 | 最新 React 特性 |
-| 状态管理 | Zustand | 轻量级全局状态 |
-| 数据获取 | React Query (TanStack) | 服务端状态缓存 |
-| 钱包 | wagmi v2 + viem | 以太坊钱包连接 |
-| 钱包 UI | @reown/appkit | 钱包选择器 |
-| 图表 | TradingView | 专业交易图表 |
-| 样式 | Tailwind CSS | 原子化 CSS |
-| 组件 | Radix UI | 无障碍基础组件 |
+| 层级     | 技术选型                | 说明             |
+| -------- | ----------------------- | ---------------- |
+| 框架     | Next.js 15 (App Router) | React 服务端渲染 |
+| UI 库    | React 19                | 最新 React 特性  |
+| 状态管理 | Zustand                 | 轻量级全局状态   |
+| 数据获取 | React Query (TanStack)  | 服务端状态缓存   |
+| 钱包     | wagmi v2 + viem         | 以太坊钱包连接   |
+| 钱包 UI  | @reown/appkit           | 钱包选择器       |
+| 图表     | TradingView             | 专业交易图表     |
+| 样式     | Tailwind CSS            | 原子化 CSS       |
+| 组件     | Radix UI                | 无障碍基础组件   |
 
 ---
 
@@ -117,6 +118,7 @@
 ## 3. 目录结构
 
 ### 3.1 现有结构
+
 ```
 dex-ui/
 ├── app/                           # Next.js App Router
@@ -153,6 +155,7 @@ dex-ui/
 ```
 
 ### 3.2 新增结构
+
 ```
 lib/
 ├── hyperliquid/                   # HyperLiquid API 集成
@@ -195,6 +198,7 @@ app/
 ## 4. 数据流设计
 
 ### 4.1 数据流概览
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                         数据流架构                                │
@@ -233,6 +237,7 @@ app/
 ```
 
 ### 4.2 REST API 数据流
+
 ```typescript
 // 使用 React Query 进行数据获取和缓存
 const { data: userState } = useQuery({
@@ -244,6 +249,7 @@ const { data: userState } = useQuery({
 ```
 
 ### 4.3 WebSocket 数据流
+
 ```typescript
 // WebSocket 数据直接更新 Zustand Store
 wsManager.subscribe('l2Book', { coin: 'BTC' }, (data) => {
@@ -252,6 +258,7 @@ wsManager.subscribe('l2Book', { coin: 'BTC' }, (data) => {
 ```
 
 ### 4.4 交易数据流
+
 ```
 用户下单 → TradeForm 组件 → useSubmitOrder Hook
     │
@@ -278,6 +285,7 @@ wsManager.subscribe('l2Book', { coin: 'BTC' }, (data) => {
 ### 5.1 Zustand Stores
 
 #### marketStore.ts
+
 ```typescript
 interface MarketState {
   // 当前选中的市场
@@ -302,6 +310,7 @@ interface MarketState {
 ```
 
 #### userStore.ts
+
 ```typescript
 interface UserState {
   // 连接状态
@@ -323,6 +332,7 @@ interface UserState {
 ```
 
 #### orderStore.ts
+
 ```typescript
 interface OrderState {
   // 当前挂单
@@ -343,12 +353,13 @@ interface OrderState {
 ```
 
 ### 5.2 React Query 配置
+
 ```typescript
 // 用于不频繁变化的数据
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30 * 1000,      // 30秒
+      staleTime: 30 * 1000, // 30秒
       refetchOnWindowFocus: false,
       retry: 3,
     },
@@ -362,19 +373,20 @@ const queryClient = new QueryClient({
 
 ### 6.1 组件职责
 
-| 组件 | 职责 | 数据来源 |
-|------|------|---------|
-| `OrderBook` | 显示买卖盘深度 | `useOrderBook` (WebSocket) |
-| `TradeForm` | 下单表单和操作 | `useSubmitOrder` |
-| `TradingViewChart` | K线图表 | TradingView + `candle` WebSocket |
-| `AccountPanel` | 持仓和订单列表 | `usePositions`, `useOrders` |
-| `PriceBar` | 当前价格和涨跌幅 | `marketStore` |
-| `PositionTable` | 持仓详情表格 | `orderStore.positions` |
-| `OrderTable` | 挂单列表 | `orderStore.openOrders` |
+| 组件               | 职责             | 数据来源                         |
+| ------------------ | ---------------- | -------------------------------- |
+| `OrderBook`        | 显示买卖盘深度   | `useOrderBook` (WebSocket)       |
+| `TradeForm`        | 下单表单和操作   | `useSubmitOrder`                 |
+| `TradingViewChart` | K线图表          | TradingView + `candle` WebSocket |
+| `AccountPanel`     | 持仓和订单列表   | `usePositions`, `useOrders`      |
+| `PriceBar`         | 当前价格和涨跌幅 | `marketStore`                    |
+| `PositionTable`    | 持仓详情表格     | `orderStore.positions`           |
+| `OrderTable`       | 挂单列表         | `orderStore.openOrders`          |
 
 ### 6.2 组件改造计划
 
 #### OrderBook 改造
+
 ```typescript
 // 改造前：使用 mock 数据
 const [orderBook, setOrderBook] = useState(generateMockOrderBook());
@@ -384,6 +396,7 @@ const { bids, asks, spread } = useOrderBook(symbol);
 ```
 
 #### TradeForm 改造
+
 ```typescript
 // 改造前：静态展示
 <button>Connect Wallet</button>
@@ -410,6 +423,7 @@ const handleSubmit = async () => {
 ## 7. WebSocket 管理
 
 ### 7.1 WebSocket 管理器设计
+
 ```typescript
 class HyperliquidWebSocket {
   private ws: WebSocket | null = null;
@@ -427,6 +441,7 @@ class HyperliquidWebSocket {
 ```
 
 ### 7.2 订阅管理
+
 ```typescript
 // 组件挂载时订阅
 useEffect(() => {
@@ -443,16 +458,19 @@ useEffect(() => {
 ## 8. 安全设计
 
 ### 8.1 签名安全
+
 - 所有交易操作需用户在钱包中确认签名
 - 使用 EIP-712 类型化数据签名，用户可清晰看到签名内容
 - 不在前端存储私钥
 
 ### 8.2 Builder 授权
+
 - 首次交易前提示用户授权 Builder 费用
 - 用户可随时在 HyperLiquid 官网撤销授权
 - 费率透明显示
 
 ### 8.3 数据验证
+
 - 前端验证用户输入（价格、数量范围）
 - 显示清晰的错误信息
 - 确认弹窗显示交易详情
@@ -462,16 +480,19 @@ useEffect(() => {
 ## 9. 性能优化
 
 ### 9.1 数据更新优化
+
 - 订单簿使用增量更新而非全量更新
 - 使用 `useMemo` 和 `useCallback` 避免不必要的重渲染
 - WebSocket 消息批量处理
 
 ### 9.2 渲染优化
+
 - 虚拟列表渲染大量订单/成交记录
 - 图表组件懒加载
 - 代码分割减少初始加载大小
 
 ### 9.3 网络优化
+
 - WebSocket 断线自动重连
 - REST API 请求去重和缓存
 - 错误重试机制

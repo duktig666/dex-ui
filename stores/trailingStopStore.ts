@@ -3,10 +3,9 @@
  * 使用 Zustand + persist 实现本地存储
  */
 
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { useShallow } from "zustand/react/shallow";
-import type { TrailingStopOrder, OrderSide } from "@/lib/hyperliquid/types";
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import type { TrailingStopOrder, OrderSide } from '@/lib/hyperliquid/types';
 
 // 生成唯一 ID
 function generateId(): string {
@@ -17,11 +16,19 @@ interface TrailingStopState {
   orders: TrailingStopOrder[];
 
   // Actions
-  addOrder: (order: Omit<TrailingStopOrder, "id" | "createdAt" | "status" | "triggerPrice" | "highestPrice" | "lowestPrice">) => string;
+  addOrder: (
+    order: Omit<
+      TrailingStopOrder,
+      'id' | 'createdAt' | 'status' | 'triggerPrice' | 'highestPrice' | 'lowestPrice'
+    >
+  ) => string;
   removeOrder: (id: string) => void;
   cancelOrder: (id: string) => void;
   triggerOrder: (id: string) => void;
-  updatePriceTracking: (id: string, currentPrice: string) => { triggered: boolean; triggerPrice: string | null };
+  updatePriceTracking: (
+    id: string,
+    currentPrice: string
+  ) => { triggered: boolean; triggerPrice: string | null };
   getActiveOrders: () => TrailingStopOrder[];
   getActiveOrdersByCoin: (coin: string) => TrailingStopOrder[];
   clearAllOrders: () => void;
@@ -38,10 +45,10 @@ export const useTrailingStopStore = create<TrailingStopState>()(
           ...orderData,
           id,
           createdAt: Date.now(),
-          status: "active",
+          status: 'active',
           triggerPrice: null,
-          highestPrice: orderData.side === "sell" ? null : null,
-          lowestPrice: orderData.side === "buy" ? null : null,
+          highestPrice: orderData.side === 'sell' ? null : null,
+          lowestPrice: orderData.side === 'buy' ? null : null,
         };
 
         set((state) => ({
@@ -60,7 +67,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
       cancelOrder: (id) => {
         set((state) => ({
           orders: state.orders.map((o) =>
-            o.id === id ? { ...o, status: "cancelled" as const } : o
+            o.id === id ? { ...o, status: 'cancelled' as const } : o
           ),
         }));
       },
@@ -68,7 +75,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
       triggerOrder: (id) => {
         set((state) => ({
           orders: state.orders.map((o) =>
-            o.id === id ? { ...o, status: "triggered" as const } : o
+            o.id === id ? { ...o, status: 'triggered' as const } : o
           ),
         }));
       },
@@ -79,7 +86,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
        */
       updatePriceTracking: (id, currentPrice) => {
         const order = get().orders.find((o) => o.id === id);
-        if (!order || order.status !== "active") {
+        if (!order || order.status !== 'active') {
           return { triggered: false, triggerPrice: null };
         }
 
@@ -89,7 +96,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
         let newTriggerPrice: number | null = null;
         let triggered = false;
 
-        if (order.side === "sell") {
+        if (order.side === 'sell') {
           // Trailing Stop Sell: 追踪最高价，价格回落触发
           // 用于多头止盈或空头止损
           if (newHighest === null || price > newHighest) {
@@ -97,7 +104,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
           }
 
           // 计算触发价
-          if (order.trailType === "percent") {
+          if (order.trailType === 'percent') {
             const trailPercent = parseFloat(order.trailValue) / 100;
             newTriggerPrice = newHighest * (1 - trailPercent);
           } else {
@@ -116,7 +123,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
           }
 
           // 计算触发价
-          if (order.trailType === "percent") {
+          if (order.trailType === 'percent') {
             const trailPercent = parseFloat(order.trailValue) / 100;
             newTriggerPrice = newLowest * (1 + trailPercent);
           } else {
@@ -138,7 +145,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
                   highestPrice: newHighest?.toString() || null,
                   lowestPrice: newLowest?.toString() || null,
                   triggerPrice: newTriggerPrice?.toString() || null,
-                  status: triggered ? ("triggered" as const) : o.status,
+                  status: triggered ? ('triggered' as const) : o.status,
                 }
               : o
           ),
@@ -151,11 +158,11 @@ export const useTrailingStopStore = create<TrailingStopState>()(
       },
 
       getActiveOrders: () => {
-        return get().orders.filter((o) => o.status === "active");
+        return get().orders.filter((o) => o.status === 'active');
       },
 
       getActiveOrdersByCoin: (coin) => {
-        return get().orders.filter((o) => o.status === "active" && o.coin === coin);
+        return get().orders.filter((o) => o.status === 'active' && o.coin === coin);
       },
 
       clearAllOrders: () => {
@@ -163,7 +170,7 @@ export const useTrailingStopStore = create<TrailingStopState>()(
       },
     }),
     {
-      name: "trailing-stop-orders",
+      name: 'trailing-stop-orders',
       storage: createJSONStorage(() => localStorage),
       // 只持久化必要的字段
       partialize: (state) => ({
@@ -173,21 +180,19 @@ export const useTrailingStopStore = create<TrailingStopState>()(
   )
 );
 
-// 选择器 hooks - 使用 useShallow 避免无限渲染
+// 选择器 hooks
 export const useActiveTrailingStops = () =>
-  useTrailingStopStore(useShallow((state) => state.orders.filter((o) => o.status === "active")));
+  useTrailingStopStore((state) => state.getActiveOrders());
 
 export const useActiveTrailingStopsByCoin = (coin: string) =>
-  useTrailingStopStore(useShallow((state) => state.orders.filter((o) => o.status === "active" && o.coin === coin)));
+  useTrailingStopStore((state) => state.getActiveOrdersByCoin(coin));
 
 export const useTrailingStopActions = () =>
-  useTrailingStopStore(
-    useShallow((state) => ({
-      addOrder: state.addOrder,
-      removeOrder: state.removeOrder,
-      cancelOrder: state.cancelOrder,
-      triggerOrder: state.triggerOrder,
-      updatePriceTracking: state.updatePriceTracking,
-      clearAllOrders: state.clearAllOrders,
-    }))
-  );
+  useTrailingStopStore((state) => ({
+    addOrder: state.addOrder,
+    removeOrder: state.removeOrder,
+    cancelOrder: state.cancelOrder,
+    triggerOrder: state.triggerOrder,
+    updatePriceTracking: state.updatePriceTracking,
+    clearAllOrders: state.clearAllOrders,
+  }));
