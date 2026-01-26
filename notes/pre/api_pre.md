@@ -72,3 +72,20 @@ HyperLiquid API http调用参看notes/hyperliquid/http
 exchange-api-guide.md  交易api的使用
 prd 参看prd.md
 
+# HyperLiquid API Test
+notes/hyperliquid/http 放了HyperLiquid API的请求示例
+notes/hyperliquid 是对HyperLiquid API使用的一些介绍，也可以参看notes/README.md阅读顺序
+
+需求：example/hyperliquid-api-test 是新建的一个空的ts项目，使用ts test的方式来通过测试的方式测试HyperLiquid API的使用。
+根据提供的资料实现hyperliquid的合约和现货 的各种类型的下单、撤单、充值、提现、转账、订单余额历史记录等各种查询 的测试用例。对于功能可以参看hyperliquid或者based是如何实现的。
+
+备注：
+1. example/hyperliquid-api-test是一个，空的ts项目，先环境搭建主要用test
+2. 所有api调用使用hyperliquid的测试网进行测试
+3. 如果需要发送交易，可以直接通过私钥签名的方式，私钥从环境变量读取
+3. hyperliquid的合约和现货的测试分开进行，每个测试文件尽量关注单一功能，可以分多个测试文件
+
+---
+
+单独在 exchange 下写一个 OP 的合约交易测试文件，包括关键信息的查询，例如：代币信息，用户账户余额等信息，杠杆设置信息等信息要输出到控制台。
+然后下单，查看仓位，余额变更，盈利等按照交易流程进行然后输出到控制台。 

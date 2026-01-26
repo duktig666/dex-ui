@@ -79,3 +79,4 @@ lcov.info
 
 .sparse
 docs/content/documentation.json
+**/.env

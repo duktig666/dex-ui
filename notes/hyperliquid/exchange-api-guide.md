@@ -63,7 +63,7 @@ interface Signature {
 | 资金 | USDC 转账 | `usdSend` | signUserSignedAction |
 | 资金 | 提现到 L1 | `withdraw3` | signUserSignedAction |
 | 资金 | 现货转账 | `spotSend` | signUserSignedAction |
-| 资金 | 账户互转 | `usdClassTransfer` | signL1Action |
+| 资金 | 账户互转 | `usdClassTransfer` | signUserSignedAction |
 | 资金 | 子账户转账 | `subAccountTransfer` | signL1Action |
 | Vault | 存入 | `vaultDeposit` | signL1Action |
 | Vault | 取出 | `vaultWithdraw` | signL1Action |
@@ -98,82 +98,156 @@ const TESTNET_DOMAIN = {
 };
 ```
 
-### 2.2 signL1Action - 交易操作签名
+### 2.2 signL1Action - 交易操作签名 (Phantom Agent 模式)
 
-用于：`order`, `cancel`, `modify`, `updateLeverage` 等交易相关操作
+用于：`order`, `cancel`, `modify`, `updateLeverage`, `vaultDeposit`, `vaultWithdraw` 等交易相关操作
+
+**重要**: L1Action 使用 **Phantom Agent** 签名模式，不是直接签名 action 内容。
 
 ```typescript
-import { hashTypedData, Hex } from 'viem';
+import { encode } from '@msgpack/msgpack';
+import { keccak256, hexToBytes, type Hex } from 'viem';
 
-// EIP-712 类型定义
+// ============================================================
+// L1Action 专用签名域 (与 Python SDK 一致)
+// 注意: chainId 固定为 1337，不是实际链 ID!
+// ============================================================
+const L1_ACTION_DOMAIN = {
+  name: 'Exchange',      // 不是 'HyperliquidSignTransaction'
+  version: '1',
+  chainId: 1337,         // 固定值
+  verifyingContract: '0x0000000000000000000000000000000000000000',
+};
+
+// L1Action 使用 Agent 类型 (Phantom Agent)
 const L1_ACTION_TYPES = {
-  HyperliquidTransaction: [
-    { name: 'action', type: 'bytes32' },
-    { name: 'nonce', type: 'uint64' },
-    { name: 'vaultAddress', type: 'address' },
+  Agent: [
+    { name: 'source', type: 'string' },      // 'a' = mainnet, 'b' = testnet
+    { name: 'connectionId', type: 'bytes32' }, // action hash
   ],
 };
 
-interface SignL1ActionParams {
-  action: object;
-  nonce: number;
-  vaultAddress?: string;
-  isTestnet?: boolean;
+// ============================================================
+// Action Hash 计算
+// data = msgpack(action) + nonce(8字节大端) + vault_flag[+address]
+// ============================================================
+function computeActionHash(
+  action: object,
+  nonce: number,
+  vaultAddress: string | null = null
+): Hex {
+  // 1. msgpack 编码 (重要: 不排序 keys，保持原始顺序!)
+  const actionData = encode(action);
+
+  // 2. nonce 转 8 字节大端序
+  const nonceBytes = new Uint8Array(8);
+  const view = new DataView(nonceBytes.buffer);
+  view.setBigUint64(0, BigInt(nonce), false);  // big-endian
+
+  // 3. vault 标志 (0 = 无 vault, 1 = 有 vault + 20字节地址)
+  let vaultData: Uint8Array;
+  if (!vaultAddress || vaultAddress === '0x0000000000000000000000000000000000000000') {
+    vaultData = new Uint8Array([0]);
+  } else {
+    const addrHex = vaultAddress.startsWith('0x') ? vaultAddress.slice(2) : vaultAddress;
+    const addrBytes = hexToBytes(`0x${addrHex}`);
+    vaultData = new Uint8Array(21);
+    vaultData[0] = 1;
+    vaultData.set(addrBytes, 1);
+  }
+
+  // 4. 拼接所有数据
+  const combined = new Uint8Array(actionData.length + 8 + vaultData.length);
+  combined.set(actionData, 0);
+  combined.set(nonceBytes, actionData.length);
+  combined.set(vaultData, actionData.length + 8);
+
+  // 5. keccak256 哈希
+  return keccak256(combined);
 }
 
+// ============================================================
+// Phantom Agent 构造
+// ============================================================
+function constructPhantomAgent(hash: Hex, isMainnet: boolean) {
+  return {
+    source: isMainnet ? 'a' : 'b',  // 'a' = mainnet, 'b' = testnet
+    connectionId: hash,
+  };
+}
+
+// ============================================================
+// L1Action 签名函数
+// ============================================================
 async function signL1Action(
   walletClient: WalletClient,
-  params: SignL1ActionParams
+  action: object,
+  nonce: number,
+  vaultAddress: string | null = null,
+  isMainnet: boolean = false
 ): Promise<Signature> {
-  const { action, nonce, vaultAddress, isTestnet = false } = params;
+  // 1. 计算 action hash
+  const actionHash = computeActionHash(action, nonce, vaultAddress);
 
-  // 1. 序列化 action 为 msgpack 并计算 keccak256 哈希
-  const actionBytes = msgpack.encode(action);
-  const actionHash = keccak256(actionBytes);
+  // 2. 构造 phantom agent
+  const phantomAgent = constructPhantomAgent(actionHash, isMainnet);
 
-  // 2. 构造签名消息
-  const message = {
-    action: actionHash,
-    nonce: BigInt(nonce),
-    vaultAddress: vaultAddress || '0x0000000000000000000000000000000000000000',
-  };
-
-  // 3. 使用 EIP-712 签名
+  // 3. EIP-712 签名 phantom agent (不是 action!)
   const signature = await walletClient.signTypedData({
-    domain: isTestnet ? TESTNET_DOMAIN : MAINNET_DOMAIN,
+    domain: L1_ACTION_DOMAIN,
     types: L1_ACTION_TYPES,
-    primaryType: 'HyperliquidTransaction',
-    message,
+    primaryType: 'Agent',
+    message: phantomAgent,
   });
 
-  // 4. 解析签名为 { r, s, v } 格式
+  // 4. 解析签名
   return parseSignature(signature);
 }
 
-// 解析签名字符串为对象格式
+// 解析签名字符串为 {r, s, v} 对象格式
 function parseSignature(signature: Hex): Signature {
-  const r = `0x${signature.slice(2, 66)}`;
-  const s = `0x${signature.slice(66, 130)}`;
-  const v = parseInt(signature.slice(130, 132), 16);
-  return { r, s, v };
+  const sig = signature.startsWith('0x') ? signature.slice(2) : signature;
+  return {
+    r: '0x' + sig.slice(0, 64),
+    s: '0x' + sig.slice(64, 128),
+    v: parseInt(sig.slice(128, 130), 16),
+  };
 }
 ```
 
+> **注意**: action 对象的字段顺序必须与 Python SDK 一致，msgpack 不会对 keys 排序!
+
 ### 2.3 signUserSignedAction - 用户授权签名
 
-用于：`approveBuilderFee`, `approveAgent`, `usdSend`, `withdraw3` 等授权和资金操作
+用于：`approveBuilderFee`, `approveAgent`, `usdSend`, `withdraw3`, `usdClassTransfer` 等授权和资金操作
 
 ```typescript
-// EIP-712 类型定义 - 每种操作有不同的类型
+// ============================================================
+// EIP-712 类型定义
+// 重要: 字段顺序必须与 Python SDK 完全一致!
+// ============================================================
+
+// approveBuilderFee 类型 (注意 primaryType 格式!)
 const APPROVE_BUILDER_FEE_TYPES = {
-  HyperliquidTransaction: [
+  'HyperliquidTransaction:ApproveBuilderFee': [
     { name: 'hyperliquidChain', type: 'string' },
+    { name: 'maxFeeRate', type: 'string' },   // 顺序: maxFeeRate 在 builder 前!
     { name: 'builder', type: 'address' },
-    { name: 'maxFeeRate', type: 'string' },
     { name: 'nonce', type: 'uint64' },
   ],
 };
 
+// usdClassTransfer 类型 (永续/现货互转)
+const USD_CLASS_TRANSFER_TYPES = {
+  'HyperliquidTransaction:UsdClassTransfer': [
+    { name: 'hyperliquidChain', type: 'string' },
+    { name: 'amount', type: 'string' },
+    { name: 'toPerp', type: 'bool' },
+    { name: 'nonce', type: 'uint64' },
+  ],
+};
+
+// usdSend / withdraw3 / spotSend 类型
 const USD_SEND_TYPES = {
   HyperliquidTransaction: [
     { name: 'hyperliquidChain', type: 'string' },
@@ -183,34 +257,64 @@ const USD_SEND_TYPES = {
   ],
 };
 
-const WITHDRAW_TYPES = {
-  HyperliquidTransaction: [
-    { name: 'hyperliquidChain', type: 'string' },
-    { name: 'destination', type: 'string' },
-    { name: 'amount', type: 'string' },
-    { name: 'time', type: 'uint64' },
-  ],
-};
+// ============================================================
+// maxFeeRate 格式说明
+// ============================================================
+// approveBuilderFee 的 maxFeeRate 必须是带 % 后缀的百分比字符串!
+//
+// | 基点 (bps) | 正确格式 |
+// |-----------|----------|
+// | 10 bps    | "0.1%"   |
+// | 100 bps   | "1%"     |
+//
+// 转换函数:
+// const feeRatePercent = `${bps / 100}%`;  // 10 -> "0.1%"
+// ============================================================
 
 // 签名授权 Builder 费率
 async function signApproveBuilderFee(
   walletClient: WalletClient,
   builder: string,
-  maxFeeRate: string,
+  maxFeeRate: string,  // 必须是 "0.1%" 格式!
   nonce: number,
   isTestnet = false
 ): Promise<Signature> {
   const message = {
     hyperliquidChain: isTestnet ? 'Testnet' : 'Mainnet',
-    builder,
-    maxFeeRate,
+    maxFeeRate,                          // 顺序与 types 一致
+    builder: builder.toLowerCase(),       // 小写地址
     nonce: BigInt(nonce),
   };
 
   const signature = await walletClient.signTypedData({
     domain: isTestnet ? TESTNET_DOMAIN : MAINNET_DOMAIN,
     types: APPROVE_BUILDER_FEE_TYPES,
-    primaryType: 'HyperliquidTransaction',
+    primaryType: 'HyperliquidTransaction:ApproveBuilderFee',  // 注意格式!
+    message,
+  });
+
+  return parseSignature(signature);
+}
+
+// 签名账户互转 (永续 <-> 现货)
+async function signUsdClassTransfer(
+  walletClient: WalletClient,
+  amount: string,
+  toPerp: boolean,
+  nonce: number,
+  isTestnet = false
+): Promise<Signature> {
+  const message = {
+    hyperliquidChain: isTestnet ? 'Testnet' : 'Mainnet',
+    amount,
+    toPerp,
+    nonce: BigInt(nonce),
+  };
+
+  const signature = await walletClient.signTypedData({
+    domain: isTestnet ? TESTNET_DOMAIN : MAINNET_DOMAIN,
+    types: USD_CLASS_TRANSFER_TYPES,
+    primaryType: 'HyperliquidTransaction:UsdClassTransfer',
     message,
   });
 
@@ -223,9 +327,13 @@ async function signApproveBuilderFee(
 | 错误 | 原因 | 解决方案 |
 |------|------|----------|
 | `Invalid signature` | 签名格式错误 | 确保使用 `{r, s, v}` 对象格式，不是字符串 |
-| `422 Unprocessable Entity` | 签名内容不匹配 | 检查 action 序列化是否正确 |
+| `Must deposit before performing actions` | 签名恢复地址错误 | 检查 EIP-712 types 字段顺序、primaryType 格式 |
+| `Percentage is invalid` | maxFeeRate 格式错误 | 使用带 % 后缀的格式，如 `"0.1%"` |
+| `422 Unprocessable Entity` | 签名内容或 action 格式不匹配 | 检查 action 字段是否完整（如 hyperliquidChain, signatureChainId） |
 | `Nonce too old` | nonce 过期 | 使用当前时间戳（毫秒） |
-| `Wrong chain` | 签名域 chainId 错误 | 主网用 42161，测试网用 421614 |
+| `Wrong chain` | 签名域 chainId 错误 | UserSignedAction: 主网 42161，测试网 421614；L1Action: 固定 1337 |
+
+> **详细故障排查**: 参见 [EIP-712 签名故障排查指南](./eip712-signing-troubleshooting.md)
 
 ---
 

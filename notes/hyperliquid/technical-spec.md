@@ -750,23 +750,32 @@ import { WalletClient } from 'viem';
 const MAINNET_CHAIN_ID = 42161;  // Arbitrum
 const TESTNET_CHAIN_ID = 421614; // Arbitrum Sepolia
 
-// EIP-712 Domain
-const getDomain = (isMainnet: boolean) => ({
+// EIP-712 Domain - L1Action 专用 (固定 chainId: 1337!)
+const L1_ACTION_DOMAIN = {
   name: 'Exchange',
+  version: '1',
+  chainId: 1337,  // 固定值，不是实际链 ID!
+  verifyingContract: '0x0000000000000000000000000000000000000000'
+};
+
+// EIP-712 Domain - UserSignedAction 专用
+const getUserSignedDomain = (isMainnet: boolean) => ({
+  name: 'HyperliquidSignTransaction',
   version: '1',
   chainId: isMainnet ? MAINNET_CHAIN_ID : TESTNET_CHAIN_ID,
   verifyingContract: '0x0000000000000000000000000000000000000000'
 });
 
-// 签名 L1 Action (交易操作)
+// 签名 L1 Action (交易操作) - 使用 Phantom Agent 模式
 export async function signL1Action(
   walletClient: WalletClient,
   action: any,
   nonce: number,
-  isMainnet: boolean
+  isMainnet: boolean,
+  vaultAddress: string | null = null
 ) {
-  // 重要：地址必须小写
-  const actionHash = hashAction(action);
+  // 重要：action hash = keccak256(msgpack(action) + nonce(8字节大端) + vault_flag)
+  const actionHash = computeActionHash(action, nonce, vaultAddress);
 
   const types = {
     Agent: [
@@ -776,12 +785,13 @@ export async function signL1Action(
   };
 
   const message = {
-    source: isMainnet ? 'a' : 'b',
+    source: isMainnet ? 'a' : 'b',  // 'a' = mainnet, 'b' = testnet
     connectionId: actionHash
   };
 
+  // 注意: 使用 L1_ACTION_DOMAIN (固定 chainId: 1337)
   const signature = await walletClient.signTypedData({
-    domain: getDomain(isMainnet),
+    domain: L1_ACTION_DOMAIN,
     types,
     primaryType: 'Agent',
     message
@@ -793,50 +803,56 @@ export async function signL1Action(
 // 签名用户授权操作
 export async function signUserSignedAction(
   walletClient: WalletClient,
-  action: any,
-  payloadTypes: any[],
+  message: any,
+  types: any,
+  primaryType: string,
   isMainnet: boolean
 ) {
-  const types = {
-    [action.type]: payloadTypes
-  };
-
+  // 注意: 使用 getUserSignedDomain (实际链 ID)
   const signature = await walletClient.signTypedData({
-    domain: getDomain(isMainnet),
+    domain: getUserSignedDomain(isMainnet),
     types,
-    primaryType: action.type,
-    message: action
+    primaryType,
+    message
   });
 
   return parseSignature(signature);
 }
 
 // ApproveBuilderFee 签名
+// 重要: maxFeeRate 必须是带 % 后缀的百分比字符串! 如 "0.1%"
 export async function signApproveBuilderFee(
   walletClient: WalletClient,
   builder: string,
-  maxFeeRate: string,
+  maxFeeRate: string,  // 格式: "0.1%" (不是 "10" 或 "0.001")
   nonce: number,
   isMainnet: boolean
 ) {
-  const action = {
-    type: 'approveBuilderFee',
+  // EIP-712 签名消息 - 字段顺序严格!
+  const message = {
     hyperliquidChain: isMainnet ? 'Mainnet' : 'Testnet',
-    signatureChainId: '0x66eee',
-    builder: builder.toLowerCase(),  // 重要：小写
-    maxFeeRate,
-    nonce
+    maxFeeRate,                          // 顺序: maxFeeRate 在 builder 前!
+    builder: builder.toLowerCase(),
+    nonce: BigInt(nonce),
   };
 
-  const types = [
-    { name: 'hyperliquidChain', type: 'string' },
-    { name: 'signatureChainId', type: 'string' },
-    { name: 'builder', type: 'address' },
-    { name: 'maxFeeRate', type: 'string' },
-    { name: 'nonce', type: 'uint64' }
-  ];
+  // Types - 字段顺序必须与 message 一致
+  const types = {
+    'HyperliquidTransaction:ApproveBuilderFee': [
+      { name: 'hyperliquidChain', type: 'string' },
+      { name: 'maxFeeRate', type: 'string' },
+      { name: 'builder', type: 'address' },
+      { name: 'nonce', type: 'uint64' }
+    ]
+  };
 
-  return signUserSignedAction(walletClient, action, types, isMainnet);
+  return signUserSignedAction(
+    walletClient,
+    message,
+    types,
+    'HyperliquidTransaction:ApproveBuilderFee',  // 注意 primaryType 格式!
+    isMainnet
+  );
 }
 
 // 解析签名
@@ -862,7 +878,11 @@ export function floatToWire(x: number): string {
 | 地址格式 | 必须小写 |
 | 数字格式 | 移除尾随零（使用 `floatToWire`）|
 | Nonce | 时间戳，必须在 (T - 2天, T + 1天) 窗口内 |
-| Chain ID | 主网 42161，测试网 421614 |
+| Chain ID (L1Action) | **固定 1337**，不是实际链 ID |
+| Chain ID (UserSignedAction) | 主网 42161，测试网 421614 |
+| maxFeeRate 格式 | 必须带 % 后缀，如 `"0.1%"` (10 bps) |
+
+> 详细故障排查请参考 [EIP-712 签名故障排查指南](./eip712-signing-troubleshooting.md)
 
 ---
 
@@ -874,8 +894,9 @@ export function floatToWire(x: number): string {
 // lib/hyperliquid/constants.ts
 export const BUILDER_CONFIG = {
   address: process.env.NEXT_PUBLIC_BUILDER_ADDRESS!,
-  feeRate: 10,           // 10 = 1 基点 (0.01%)
-  maxFeeRatePerps: 100,  // 100 = 10 基点 (0.1%)
+  feeRate: 10,           // 10 = 10 基点 (0.1%) - 下单时使用的费率
+  maxFeeRatePerps: 10,   // 永续合约最大允许 10 bps (0.1%)
+  maxFeeRateSpot: 100,   // 现货最大允许 100 bps (1%)
   maxFeeRateSpot: 1000   // 1000 = 100 基点 (1%)
 };
 ```

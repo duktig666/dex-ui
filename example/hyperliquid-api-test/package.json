@@ -1,0 +1,23 @@
+{
+  "name": "hyperliquid-api-test",
+  "version": "1.0.0",
+  "description": "HyperLiquid API test suite for testnet",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:info": "vitest run tests/info",
+    "test:exchange": "vitest run tests/exchange",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "dotenv": "^16.4.5"
+  },
+  "dependencies": {
+    "viem": "^2.44.4",
+    "@msgpack/msgpack": "^3.1.3"
+  }
+}
